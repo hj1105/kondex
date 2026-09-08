@@ -1,6 +1,7 @@
-// @ts-nocheck -- mechanically split from OrcaRuntimeService; behavior is covered by AST equivalence and characterization tests.
 import { OrcaRuntimeWithApplyTrackedPtyTitle } from './orca-runtime-apply-tracked-pty-title'
-import type { RuntimePtyWorktreeRecord } from './runtime-terminal-state-records'
+import type { RuntimeLeafRecord, RuntimePtyWorktreeRecord } from './runtime-terminal-state-records'
+import type { RuntimeSyncedLeaf } from '../../shared/runtime-types'
+import type { AgentStatus } from '../../shared/agent-detection'
 import { extractLastOsc7Uri, extractOscScanTail } from '../daemon/osc7-uri-extraction'
 import { parseFileUriPathParts } from '../daemon/osc7-file-uri'
 import { splitWorktreeIdForFilesystem } from '../../shared/worktree/id'
@@ -10,6 +11,19 @@ import { mapExplicitAgentStateToRuntimeTerminalStatus } from './runtime-worktree
 import type { ParsedAgentStatusPayload } from '../../shared/agent-status-types'
 
 export class OrcaRuntimeWithObserveTerminalMetadata extends OrcaRuntimeWithApplyTrackedPtyTitle {
+  // Why: these land further down the same linear runtime chain, which TypeScript
+  // cannot express as a forward reference. Declaring them (erased at runtime) keeps
+  // this file type-checked instead of suppressed, and tsc still verifies the
+  // signatures against the subclasses that define them.
+  declare protected getLeavesForPty: (ptyId: string) => RuntimeLeafRecord[]
+  declare protected makeRuntimePaneKey: (
+    leaf: Pick<RuntimeSyncedLeaf, 'tabId' | 'leafId' | 'paneRuntimeId'>
+  ) => string
+  declare protected recordAgentPromptLifecycleState: (
+    ptyId: string,
+    status: AgentStatus | null
+  ) => void
+
   protected extractLastOsc7CwdForPty(
     ptyId: string,
     data: string

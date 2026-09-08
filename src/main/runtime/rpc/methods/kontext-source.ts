@@ -3,11 +3,9 @@ import {
   kontextMarkdownSourceResultSchema,
   kontextSourceIdentitySchema,
   kontextSourceInspectionSchema,
-  kontextSourceSharingRequestSchema
-} from '../../../../shared/kontext-source-contract'
-import {
   kontextSourceInventoryRequestSchema,
-  kontextSourceInventorySchema
+  kontextSourceInventorySchema,
+  kontextSourceSharingRequestSchema
 } from '../../../../shared/kontext-source-contract'
 import { getKontextSidecarService } from '../../../kontext/kontext-sidecar-runtime'
 import { defineMethod } from '../core'

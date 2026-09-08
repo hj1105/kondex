@@ -245,7 +245,8 @@
       "integrationNotice": "Integration results are evidence, not a final Task completion decision.",
       "ownerMissing": "The selected runtime pairing is unavailable. Reconnect it before loading tasks.",
       "noLogic": "No sidecar-planned work was returned.",
-      "busy": "Processing…"
+      "busy": "Processing…",
+      "journalUnreadable": "Saved requests could not be read. Execution is disabled to preserve recovery information."
     },
     "productName": "Kondex",
     "thisDevice": "This device",

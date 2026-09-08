@@ -77,15 +77,19 @@ export function createRegisteredScheduleFixture({
         }
       }
       let job = jobs.get(args.jobId)
-      if (!job) throw new Error('Fixture registered job mismatch')
+      if (!job) {
+        throw new Error('Fixture registered job mismatch')
+      }
       const identity = digest([taskId, job.jobId])
       let command
       if (params.name !== 'kontext_inspect_registered_schedule') {
-        if (args.expectedJobIdentityDigest !== identity)
+        if (args.expectedJobIdentityDigest !== identity) {
           throw new Error('Fixture reviewed identity mismatch')
+        }
         if (params.name === 'kontext_resume_registered_schedule') {
-          if (args.allowSubscriptionExecution !== true)
+          if (args.allowSubscriptionExecution !== true) {
             throw new Error('Fixture explicit consent required')
+          }
           command = { action: 'resume', resumeBlocked: true }
         } else {
           job = { ...job, cancellationRequestedAt: '2026-09-07T00:00:00.000Z' }

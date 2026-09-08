@@ -226,7 +226,8 @@
       "integrationNotice": "Los resultados de integración son evidencia, no una decisión final de completar la tarea.",
       "ownerMissing": "La vinculación del entorno seleccionado no está disponible. Reconéctalo antes de cargar tareas.",
       "noLogic": "No se devolvió trabajo planificado por Kontext.",
-      "busy": "Procesando…"
+      "busy": "Procesando…",
+      "journalUnreadable": "No se pudieron leer las solicitudes guardadas. La ejecución está deshabilitada para conservar la información de recuperación."
     },
     "source": {
       "title": "Fuentes Markdown",

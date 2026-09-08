@@ -173,6 +173,7 @@
     "**/dist",
     "**/out",
     "cloud/**",
+    "vendor/**",
     ".github/actions/cloud-sql-rollout-lease/**",
     "tests/e2e/.cross-version-checkouts"
   ]

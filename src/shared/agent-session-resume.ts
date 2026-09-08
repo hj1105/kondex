@@ -172,9 +172,9 @@ export function extractAgentProviderSession(
       const id = readSessionId(payload, ['session_id'])
       return id ? withTranscriptPath({ key: 'session_id', id }, payload) : null
     }
-    default:
-      return null
   }
+  // Kept outside the switch so a new source is a type error here, not a silent null.
+  return null
 }
 
 export function getAgentResumeArgv(
@@ -187,7 +187,7 @@ export function getAgentResumeArgv(
       return providerSession.key === 'session_id' ? ['claude', '--resume', id] : null
     case 'codex':
       return providerSession.key === 'session_id' ? ['codex', 'resume', id] : null
-    default:
-      return null
   }
+  // Kept outside the switch so a new agent is a type error here, not a silent null.
+  return null
 }

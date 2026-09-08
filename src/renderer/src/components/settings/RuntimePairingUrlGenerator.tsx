@@ -31,7 +31,9 @@ export function RuntimePairingUrlGenerator({
     }
     window.clearTimeout(copiedTargetResetTimerRef.current)
     copiedTargetResetTimerRef.current = null
-  }, [])
+    // The refs and setters come from useRuntimePairingGeneratorState, so the linter
+    // cannot see that they are stable; listing them is free and keeps the rule honest.
+  }, [copiedTargetResetTimerRef])
 
   const setContainerNode = useCallback(
     (node: HTMLDivElement | null): void => {
@@ -77,7 +79,7 @@ export function RuntimePairingUrlGenerator({
         }
       }
     },
-    [mountedRef]
+    [mountedRef, accessGrantLoadIdRef, setIsLoadingAccessGrants, setRuntimeAccessGrants]
   )
 
   const loadNetworkInterfaces = useCallback(
@@ -111,7 +113,7 @@ export function RuntimePairingUrlGenerator({
         }
       }
     },
-    [mountedRef]
+    [mountedRef, networkInterfaceLoadIdRef, setRefreshingNetworkInterfaces, setNetworkInterfaces]
   )
 
   useEffect(() => {
@@ -119,7 +121,7 @@ export function RuntimePairingUrlGenerator({
     return () => {
       networkInterfaceLoadIdRef.current += 1
     }
-  }, [loadNetworkInterfaces])
+  }, [loadNetworkInterfaces, networkInterfaceLoadIdRef])
 
   useEffect(() => {
     if (intent !== 'another' || networkInterfaces.length === 0) {
@@ -133,14 +135,14 @@ export function RuntimePairingUrlGenerator({
       runtimePairingLinkCache.selectedAddress = nextAddress
       setSelectedAddress(nextAddress)
     }
-  }, [intent, networkInterfaces, selectedAddress])
+  }, [intent, networkInterfaces, selectedAddress, setSelectedAddress])
 
   useEffect(() => {
     void loadRuntimeAccessGrants()
     return () => {
       accessGrantLoadIdRef.current += 1
     }
-  }, [loadRuntimeAccessGrants])
+  }, [loadRuntimeAccessGrants, accessGrantLoadIdRef])
 
   const clearGeneratedUrls = (): void => {
     clearGeneratedRuntimePairingLink()

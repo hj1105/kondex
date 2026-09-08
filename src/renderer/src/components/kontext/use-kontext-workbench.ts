@@ -16,6 +16,7 @@ import {
   type KontextRequestEntry,
   type KontextRequestOwner
 } from './kontext-request-journal'
+import { translate } from '@/i18n/i18n'
 
 export function useKontextWorkbench(owner: KontextRequestOwner) {
   const [initial] = useState(() => {
@@ -24,8 +25,10 @@ export function useKontextWorkbench(owner: KontextRequestOwner) {
     } catch {
       return {
         entries: [],
-        error:
+        error: translate(
+          'kondex.task.journalUnreadable',
           'Saved requests could not be read. Execution is disabled to preserve recovery information.'
+        )
       }
     }
   })

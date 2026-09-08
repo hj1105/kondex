@@ -226,7 +226,8 @@
       "integrationNotice": "Les résultats d’intégration sont des preuves, pas une décision finale d’achèvement de la tâche.",
       "ownerMissing": "L’appairage sélectionné est indisponible. Reconnectez-le avant de charger des tâches.",
       "noLogic": "Aucun travail planifié par Kontext n’a été renvoyé.",
-      "busy": "Traitement…"
+      "busy": "Traitement…",
+      "journalUnreadable": "Les requêtes enregistrées n’ont pas pu être lues. L’exécution est désactivée pour préserver les informations de récupération."
     },
     "source": {
       "title": "Sources Markdown",

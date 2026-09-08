@@ -65,10 +65,8 @@ function isTaskStackEntry(entry: WorktreeNavHistoryEntry): boolean {
 }
 
 function getHistoryEntryKey(entry: WorktreeNavHistoryEntry): string {
-  if (typeof entry === 'string') {
-    return isSimpleViewEntry(entry) ? `view:${entry}` : `worktree:${entry}`
-  }
-  return `view:${entry}`
+  // Every entry is a string: view sentinels are string literals, everything else is a worktree id.
+  return isSimpleViewEntry(entry) ? `view:${entry}` : `worktree:${entry}`
 }
 
 function isLiveEntry(entry: WorktreeNavHistoryEntry, state: AppState): boolean {

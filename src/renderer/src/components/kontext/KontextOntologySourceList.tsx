@@ -1,5 +1,7 @@
-import type { KontextOntologyCheckResult } from '../../../../shared/kontext-ontology-contract'
-import type { KontextOntologySource } from '../../../../shared/kontext-ontology-contract'
+import type {
+  KontextOntologyCheckResult,
+  KontextOntologySource
+} from '../../../../shared/kontext-ontology-contract'
 import { getKontextOntologyCopy } from './kontext-ontology-copy'
 
 /**

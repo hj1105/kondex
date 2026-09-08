@@ -226,7 +226,8 @@
       "integrationNotice": "集成结果是依据，而非任务完成的最终决定。",
       "ownerMissing": "所选运行环境的配对不可用。请重新连接后加载任务。",
       "noLogic": "未返回 Kontext 规划的工作。",
-      "busy": "处理中…"
+      "busy": "处理中…",
+      "journalUnreadable": "无法读取已保存的请求。为保留恢复信息，已停用执行。"
     },
     "source": {
       "title": "Markdown 依据",

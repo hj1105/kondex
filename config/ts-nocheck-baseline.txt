@@ -5,7 +5,6 @@
 # Regenerate/prune: pnpm check:ts-nocheck-ratchet --prune   (removes stale entries only)
 src/main/runtime/orca-runtime-activate-managed-worktree.ts
 src/main/runtime/orca-runtime-adopt-terminal-orphans-from-inventory.ts
-src/main/runtime/orca-runtime-agent-teams-launch-plan.ts
 src/main/runtime/orca-runtime-apply-layout.ts
 src/main/runtime/orca-runtime-apply-mobile-display-mode.ts
 src/main/runtime/orca-runtime-apply-mobile-session-tab-navigation.ts
@@ -30,7 +29,6 @@ src/main/runtime/orca-runtime-create-mobile-session-terminal.ts
 src/main/runtime/orca-runtime-create-pty-headless-terminal-state.ts
 src/main/runtime/orca-runtime-create-runtime-owned-mobile-session-terminal.ts
 src/main/runtime/orca-runtime-create-terminal-desktop.ts
-src/main/runtime/orca-runtime-create-terminal-side-effect-command-code-detector.ts
 src/main/runtime/orca-runtime-create-terminal.ts
 src/main/runtime/orca-runtime-deliver-pending-messages.ts
 src/main/runtime/orca-runtime-emit-daemon-pty-transient-fact.ts

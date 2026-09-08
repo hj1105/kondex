@@ -60,27 +60,34 @@ const registeredIntegration =
   registeredSchedule && process.env.KONDEX_E2E_REGISTERED_INTEGRATION_FIXTURE === '1'
     ? createRegisteredIntegrationFixture(registeredSchedule)
     : null
-if (registeredSchedule) job = registeredSchedule.job
+if (registeredSchedule) {
+  job = registeredSchedule.job
+}
 server.setRequestHandler(CallToolRequestSchema, async ({ params }) => {
   const args = params.arguments ?? {}
   let result
   switch (params.name) {
     case 'kontext_inspect_registered_integration':
     case 'kontext_integrate_registered_schedule':
-      if (!registeredIntegration) throw new Error('Registered integration fixture is not enabled')
+      if (!registeredIntegration) {
+        throw new Error('Registered integration fixture is not enabled')
+      }
       result = registeredIntegration.call(params)
       break
     case 'kontext_inspect_registered_schedule':
     case 'kontext_list_registered_schedules':
     case 'kontext_resume_registered_schedule':
     case 'kontext_cancel_registered_schedule':
-      if (!registeredSchedule) throw new Error('Registered schedule fixture is not enabled')
+      if (!registeredSchedule) {
+        throw new Error('Registered schedule fixture is not enabled')
+      }
       result = registeredSchedule.call(params)
       job = registeredSchedule.job
       break
     case 'kontext_list_tasks': {
-      if (!hostToken || args.hostToken !== hostToken)
+      if (!hostToken || args.hostToken !== hostToken) {
         throw new Error('Fixture inventory authority mismatch')
+      }
       const record = finalization?.call(
         { name: 'kontext_inspect_finalization', arguments: { taskId, hostToken } },
         job

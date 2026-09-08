@@ -3,6 +3,7 @@ import { copyFileSync, existsSync, mkdirSync, mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { findMissingKontextTools, readRequiredKontextTools } from './kontext-sidecar-tool-check.mjs'
+import { selectVerifiedKontextSidecar } from './kontext-sidecar-selection.mjs'
 import {
   KONTEXT_SIDECAR_ENV,
   KONTEXT_SIDECAR_SUBMODULE_DIR,
@@ -59,43 +60,29 @@ if (explicit.source !== 'environment') {
   }
 }
 
-const candidates =
-  explicit.source === 'environment'
-    ? [{ source: 'environment', path: explicit.path }]
-    : listKontextSidecarCandidates(repoRoot)
 const requiredTools = readRequiredKontextTools(repoRoot)
 const checkDataDirectory = mkdtempSync(path.join(tmpdir(), 'kondex-sidecar-check-'))
-let chosen = null
-
-for (const candidate of candidates) {
-  if (!existsSync(candidate.path)) {
-    continue
-  }
-  let missing
-  try {
-    missing = await findMissingKontextTools(candidate.path, requiredTools, checkDataDirectory)
-  } catch (error) {
-    rejected.push(`${candidate.path}: did not start (${error})`)
-    continue
-  }
-  if (missing.length > 0) {
-    rejected.push(`${candidate.path}: does not serve ${missing.join(', ')}`)
-    continue
-  }
-  chosen = candidate
-  break
-}
+const { chosen, rejected: allRejected } = await selectVerifiedKontextSidecar({
+  candidates:
+    explicit.source === 'environment'
+      ? [{ source: 'environment', path: explicit.path }]
+      : listKontextSidecarCandidates(repoRoot),
+  exists: existsSync,
+  findMissingTools: (candidatePath) =>
+    findMissingKontextTools(candidatePath, requiredTools, checkDataDirectory),
+  priorRejections: rejected
+})
 
 if (!chosen) {
   throw new Error(
-    `No Kontext sidecar can serve the tools Kondex calls. Rejected — ${rejected.join('; ')}. Set ${KONTEXT_SIDECAR_ENV} to a bundle built from a revision that has them.`
+    `No Kontext sidecar can serve the tools Kondex calls. Rejected — ${allRejected.join('; ')}. Set ${KONTEXT_SIDECAR_ENV} to a bundle built from a revision that has them.`
   )
 }
 
 if (chosen.source !== 'submodule' && chosen.source !== 'environment') {
   // Never let a package quietly carry a working tree instead of the pinned revision.
   console.warn(
-    `[kondex] WARNING: packaging the ${chosen.source} sidecar at ${chosen.path}, not the pinned submodule — ${rejected.join('; ')}`
+    `[kondex] WARNING: packaging the ${chosen.source} sidecar at ${chosen.path}, not the pinned submodule — ${allRejected.join('; ')}`
   )
 }
 

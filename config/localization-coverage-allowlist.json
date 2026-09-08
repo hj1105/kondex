@@ -1,36 +1,113 @@
 [
   {
-    "filePath": "src/renderer/src/components/sidebar/worktree-card-meta-row.tsx",
-    "kind": "jsx-attribute:label",
-    "text": "sidebar",
+    "filePath": "src/renderer/src/components/kontext/KontextOntologyAddSource.tsx",
+    "kind": "jsx-text",
+    "text": "local",
     "dynamic": false,
     "count": 1
   },
   {
-    "filePath": "src/renderer/src/components/settings/appearance-search.ts",
-    "kind": "object-property:keywords",
-    "text": "语言",
+    "filePath": "src/renderer/src/components/kontext/KontextOntologyAddSource.tsx",
+    "kind": "jsx-text",
+    "text": "sse",
     "dynamic": false,
     "count": 1
   },
   {
-    "filePath": "src/renderer/src/components/settings/appearance-search.ts",
-    "kind": "object-property:keywords",
-    "text": "語言",
+    "filePath": "src/renderer/src/components/kontext/KontextOntologyAddSource.tsx",
+    "kind": "jsx-text",
+    "text": "stdio",
     "dynamic": false,
     "count": 1
   },
   {
-    "filePath": "src/renderer/src/components/settings/appearance-search.ts",
-    "kind": "object-property:keywords",
-    "text": "언어",
+    "filePath": "src/renderer/src/components/kontext/KontextOntologyAddSource.tsx",
+    "kind": "object-property:label",
+    "text": "GitHub",
     "dynamic": false,
     "count": 1
   },
   {
-    "filePath": "src/renderer/src/components/settings/appearance-search.ts",
-    "kind": "object-property:keywords",
-    "text": "言語",
+    "filePath": "src/renderer/src/components/kontext/KontextOntologyAddSource.tsx",
+    "kind": "object-property:label",
+    "text": "Jira",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/components/kontext/KontextOntologyAddSource.tsx",
+    "kind": "object-property:label",
+    "text": "Markdown",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/components/kontext/KontextOntologyAddSource.tsx",
+    "kind": "object-property:label",
+    "text": "Notion",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/components/kontext/KontextOntologyAddSource.tsx",
+    "kind": "object-property:label",
+    "text": "Slack",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/components/kontext/KontextSessionSourceRegistration.tsx",
+    "kind": "jsx-text",
+    "text": "· r",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/components/kontext/KontextSourceRegistration.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "docs/decisions.md",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/components/kontext/KontextSourceSharing.tsx",
+    "kind": "jsx-expression",
+    "text": "Claude",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/components/kontext/KontextSourceSharing.tsx",
+    "kind": "jsx-expression",
+    "text": "Codex",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/components/kontext/KontextTaskPlanner.tsx",
+    "kind": "jsx-text",
+    "text": "Claude",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/components/kontext/KontextTaskPlanner.tsx",
+    "kind": "jsx-text",
+    "text": "Codex",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/components/kontext/KontextTaskWorkbench.tsx",
+    "kind": "jsx-text",
+    "text": "Claude",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/components/kontext/KontextTaskWorkbench.tsx",
+    "kind": "jsx-text",
+    "text": "Codex",
     "dynamic": false,
     "count": 1
   },
@@ -49,6 +126,34 @@
     "count": 1
   },
   {
+    "filePath": "src/renderer/src/components/settings/appearance-search.ts",
+    "kind": "object-property:keywords",
+    "text": "言語",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/components/settings/appearance-search.ts",
+    "kind": "object-property:keywords",
+    "text": "語言",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/components/settings/appearance-search.ts",
+    "kind": "object-property:keywords",
+    "text": "语言",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/components/settings/appearance-search.ts",
+    "kind": "object-property:keywords",
+    "text": "언어",
+    "dynamic": false,
+    "count": 1
+  },
+  {
     "filePath": "src/renderer/src/components/settings/terminal-advanced-platform-search.ts",
     "kind": "object-property:keywords",
     "text": "Ghostty",
@@ -73,6 +178,13 @@
     "filePath": "src/renderer/src/components/settings/terminal-pane-appearance-search.ts",
     "kind": "object-property:keywords",
     "text": "ghostty",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/components/sidebar/worktree-card-meta-row.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "sidebar",
     "dynamic": false,
     "count": 1
   }
