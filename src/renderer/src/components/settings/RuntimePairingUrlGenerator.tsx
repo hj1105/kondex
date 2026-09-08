@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
-import { useMountedRef } from '@/hooks/useMountedRef'
 import type { RuntimeAccessGrant } from '../../../../shared/runtime-access-grants'
 import { Label } from '../ui/label'
 import { RuntimeAccessGrantList } from './RuntimeAccessGrantList'
 import { translate } from '@/i18n/i18n'
 import { RuntimePairingGeneratorForm } from './RuntimePairingGeneratorForm'
+import { useRuntimePairingGeneratorState } from './use-runtime-pairing-generator-state'
 import {
   RUNTIME_PAIRING_LOOPBACK_ADDRESS,
   cacheGeneratedRuntimePairingLink,
@@ -22,33 +22,8 @@ export function RuntimePairingUrlGenerator({
   showHeader = true,
   showGeneratorForm = true
 }: RuntimePairingUrlGeneratorProps): React.JSX.Element {
-  const [networkInterfaces, setNetworkInterfaces] = useState<{ name: string; address: string }[]>(
-    []
-  )
-  const [selectedAddress, setSelectedAddress] = useState(runtimePairingLinkCache.selectedAddress)
-  const [intent, setIntent] = useState<RuntimePairingIntent>(runtimePairingLinkCache.intent)
-  const [generatedAddress, setGeneratedAddress] = useState<string | null>(
-    runtimePairingLinkCache.generatedAddress
-  )
-  const [runtimePairingUrl, setRuntimePairingUrl] = useState<string | null>(
-    runtimePairingLinkCache.runtimePairingUrl
-  )
-  const [webClientUrl, setWebClientUrl] = useState<string | null>(
-    runtimePairingLinkCache.webClientUrl
-  )
-  const [runtimePairingDeviceId, setRuntimePairingDeviceId] = useState<string | null>(
-    runtimePairingLinkCache.runtimePairingDeviceId
-  )
-  const [runtimeAccessGrants, setRuntimeAccessGrants] = useState<RuntimeAccessGrant[]>([])
-  const [isLoadingAccessGrants, setIsLoadingAccessGrants] = useState(false)
-  const [refreshingNetworkInterfaces, setRefreshingNetworkInterfaces] = useState(false)
-  const [revokingGrantId, setRevokingGrantId] = useState<string | null>(null)
-  const [copiedTarget, setCopiedTarget] = useState<'web' | 'pairing' | null>(null)
-  const [isGeneratingPairing, setIsGeneratingPairing] = useState(false)
-  const networkInterfaceLoadIdRef = useRef(0)
-  const accessGrantLoadIdRef = useRef(0)
-  const copiedTargetResetTimerRef = useRef<number | null>(null)
-  const mountedRef = useMountedRef()
+  // prettier-ignore
+  const { networkInterfaces, setNetworkInterfaces, selectedAddress, setSelectedAddress, intent, setIntent, generatedAddress, setGeneratedAddress, runtimePairingUrl, setRuntimePairingUrl, webClientUrl, setWebClientUrl, runtimePairingDeviceId, setRuntimePairingDeviceId, runtimeAccessGrants, setRuntimeAccessGrants, isLoadingAccessGrants, setIsLoadingAccessGrants, refreshingNetworkInterfaces, setRefreshingNetworkInterfaces, revokingGrantId, setRevokingGrantId, copiedTarget, setCopiedTarget, isGeneratingPairing, setIsGeneratingPairing, networkInterfaceLoadIdRef, accessGrantLoadIdRef, copiedTargetResetTimerRef, mountedRef } = useRuntimePairingGeneratorState()
 
   const clearCopiedTargetResetTimer = useCallback((): void => {
     if (copiedTargetResetTimerRef.current === null) {
