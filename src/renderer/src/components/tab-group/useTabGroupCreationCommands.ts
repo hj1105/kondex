@@ -1,6 +1,5 @@
 import { useCallback } from 'react'
 import { toast } from 'sonner'
-import type { TerminalTab } from '../../../../shared/terminal-tab-types'
 import { useAppStore } from '../../store'
 import { focusTerminalTabSurface } from '../../lib/focus-terminal-tab-surface'
 import {
@@ -16,12 +15,6 @@ import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner
 import { browserWorkspaceHasRemoteOwner } from '@/runtime/remote-browser-tab-ownership'
 import { getClientCreationActionPolicy } from '@/lib/client-creation-action-policy'
 import type { TabGroupWorktreeSnapshot } from './useTabGroupItemProjections'
-
-export function recordTerminalTabGroupSplit(createdTerminal: TerminalTab | null | undefined): void {
-  if (!createdTerminal) {
-    return
-  }
-}
 
 export function useTabGroupCreationCommands({
   groupId,
@@ -57,7 +50,6 @@ export function useTabGroupCreationCommands({
       }
       // Why: this Split entry point always seeds a fresh terminal (tab-drag can open other directions).
       const terminal = createTab(worktreeId, newGroupId)
-      recordTerminalTabGroupSplit(terminal)
       setActiveTab(terminal.id)
       setActiveTabType('terminal')
     },

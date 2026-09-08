@@ -45,7 +45,9 @@ export function useSmartWorkspaceNameFieldFoundation(
     [selectedRepo, store.settings]
   )
   const githubSourceContext = useMemo(() => {
-    if (override?.provider === 'github') return override
+    if (override?.provider === 'github') {
+      return override
+    }
     return selectedRepo
       ? buildTaskSourceContextFromRepo({
           provider: 'github',

@@ -15,8 +15,8 @@ export async function discoverAiVaultSessionSources(args: {
   const { options, limitPerAgent, issues } = args
   const wslHomeDirs = normalizedWslHomeDirs(options.wslHomeDirs)
 
-  return Promise.all([
-    ...Object.entries(AI_VAULT_AGENT_SOURCES).flatMap(([agent, source]) =>
+  return Promise.all(
+    Object.entries(AI_VAULT_AGENT_SOURCES).flatMap(([agent, source]) =>
       source
         ? agentDiscoveries(
             agent as AiVaultAgent,
@@ -28,7 +28,7 @@ export async function discoverAiVaultSessionSources(args: {
           )
         : []
     )
-  ])
+  )
 }
 
 function agentDiscoveries(

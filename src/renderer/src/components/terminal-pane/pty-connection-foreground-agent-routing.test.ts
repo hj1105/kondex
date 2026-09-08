@@ -11,7 +11,7 @@ import {
   type ConnectCallbacks,
   type MockTransport
 } from './pty-connection-test-pane-fixtures'
-import { type StoreState } from './pty-connection-test-store-state'
+import type { StoreState } from './pty-connection-test-store-state'
 import { buildPaneConnectionDeps } from './pty-connection-test-deps'
 import { createInitialStoreState } from './pty-connection-test-store-fixtures'
 import {

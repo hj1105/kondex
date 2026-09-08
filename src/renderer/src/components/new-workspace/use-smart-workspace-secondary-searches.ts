@@ -77,7 +77,9 @@ export function useSmartWorkspaceSecondarySearches({
         }
       })
       .finally(() => {
-        if (!stale) setBranchesLoading(false)
+        if (!stale) {
+          setBranchesLoading(false)
+        }
       })
     return () => {
       stale = true

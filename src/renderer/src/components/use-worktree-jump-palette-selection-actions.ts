@@ -175,10 +175,6 @@ export function useWorktreeJumpPaletteSelectionActions({
         .then((result) => {
           if (result.status === 'unavailable') {
             toast.error(getUnavailableQuickActionMessage(action.title, result.reason))
-            return
-          }
-          if (action.id === 'create-workspace') {
-            return
           }
         })
         .catch((error: unknown) => {

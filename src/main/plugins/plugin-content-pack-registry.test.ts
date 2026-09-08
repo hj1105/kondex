@@ -110,9 +110,7 @@ describe('PluginContentPackRegistry', () => {
     const rootDir = await mkdtemp(join(tmpdir(), 'orca-plugin-content-pack-kill-race-'))
     roots.push(rootDir)
     await mkdir(join(rootDir, 'locales'))
-    await Promise.all([
-      writeFile(join(rootDir, 'locales', 'es.json'), JSON.stringify({ settings: 'Ajustes' }))
-    ])
+    await writeFile(join(rootDir, 'locales', 'es.json'), JSON.stringify({ settings: 'Ajustes' }))
     const manifest = pluginManifestSchema.parse({
       manifestVersion: 1,
       id: 'kill-race',

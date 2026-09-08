@@ -53,7 +53,7 @@ describe('declared plugin artifacts', () => {
   it('validates every content-pack file and directory before enablement', async () => {
     const root = await tempRoot()
     await Promise.all([mkdir(join(root, 'locales')), writeFile(join(root, 'agent.json'), '{}')])
-    await Promise.all([writeFile(join(root, 'locales', 'pt-BR.json'), '{}')])
+    await writeFile(join(root, 'locales', 'pt-BR.json'), '{}')
     const pluginManifest = manifest({
       contributes: {
         languagePacks: [{ locale: 'pt-BR', path: 'locales/pt-BR.json' }],

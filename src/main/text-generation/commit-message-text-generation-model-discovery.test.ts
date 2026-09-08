@@ -41,20 +41,19 @@ const claudeDiscoveryArgs = [
   'stream-json',
   '--verbose'
 ]
-const claudeModelListOutput =
-  JSON.stringify({
-    type: 'control_response',
+const claudeModelListOutput = `${JSON.stringify({
+  type: 'control_response',
+  response: {
+    subtype: 'success',
+    request_id: 'orca-model-discovery',
     response: {
-      subtype: 'success',
-      request_id: 'orca-model-discovery',
-      response: {
-        models: [
-          { value: 'sonnet', displayName: 'Sonnet' },
-          { value: 'opus', displayName: 'Opus' }
-        ]
-      }
+      models: [
+        { value: 'sonnet', displayName: 'Sonnet' },
+        { value: 'opus', displayName: 'Opus' }
+      ]
     }
-  }) + '\n'
+  }
+})}\n`
 
 const expectChildTerminated = createChildTerminationExpectation(terminateWindowsProcessTreeMock)
 

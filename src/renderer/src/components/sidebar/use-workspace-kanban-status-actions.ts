@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { useAppStore } from '@/store'
+import type { useAppStore } from '@/store'
 import { getWorkspaceStatus } from './workspace-status'
 import { makeWorkspaceStatusId } from '../../../../shared/workspace-statuses'
 import type { Worktree } from '../../../../shared/worktree/types'

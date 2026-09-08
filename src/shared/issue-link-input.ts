@@ -35,7 +35,7 @@ export function parseIssueLinkInput(
   input: string,
   provider: IssueLinkProvider
 ): ParsedIssueLinkInput | null {
-  if (provider !== 'github') return null
+  if (provider !== 'github') {return null}
   const trimmed = input.trim()
   if (!trimmed) {
     return null

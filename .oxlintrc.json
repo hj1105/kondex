@@ -104,7 +104,6 @@
     "prefer-template": "error",
     "unicorn/consistent-empty-array-spread": "error",
     "unicorn/consistent-existence-index-check": "error",
-    "unicorn/empty-brace-spaces": "error",
     "unicorn/error-message": "error",
     "unicorn/no-array-fill-with-reference-type": "warn",
     "unicorn/no-array-reverse": "error",

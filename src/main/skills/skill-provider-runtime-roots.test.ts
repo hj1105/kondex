@@ -17,7 +17,7 @@ describe('skill provider runtime roots', () => {
     ).toEqual({ claude: join(root, 'skills') })
   })
 
-  it.each(['../claude', '', ' ', '/srv/claude\0other', '/' + 'a'.repeat(32768)])(
+  it.each(['../claude', '', ' ', '/srv/claude\0other', `/${'a'.repeat(32768)}`])(
     'rejects unsafe config root %j',
     (root) => {
       expect(resolveEnvironmentSkillProviderRoots({ CLAUDE_CONFIG_DIR: root })).toEqual({})
@@ -27,7 +27,7 @@ describe('skill provider runtime roots', () => {
   it('normalizes whitespace and lets a managed Claude root win', () => {
     const root = resolve('/srv/claude')
     const managed = resolve('/managed/claude')
-    const roots = resolveEnvironmentSkillProviderRoots({ CLAUDE_CONFIG_DIR: '  ' + root + '  ' })
+    const roots = resolveEnvironmentSkillProviderRoots({ CLAUDE_CONFIG_DIR: `  ${root}  ` })
     expect(roots).toEqual({ claude: join(root, 'skills') })
     expect(withClaudeSkillProviderRoot(roots, managed)).toEqual({ claude: join(managed, 'skills') })
   })

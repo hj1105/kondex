@@ -137,7 +137,6 @@ export function SshStatusSegment({
           'Remote host is not reachable'
         )
       )
-      return
     }
   }, [])
   const disconnectRuntimeHost = useCallback(

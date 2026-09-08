@@ -3,10 +3,11 @@ import {
   resolveWindowsShiftEnterEncoding,
   resolveWindowsShiftEnterEncodingForPane
 } from './terminal-windows-shift-enter'
+import type * as TuiAgentConfig from '../../../../shared/tui-agent-config'
 
 // Exercise opt-in CSI-u routing without enabling it in the shipped provider catalog.
 vi.mock('../../../../shared/tui-agent-config', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../../../shared/tui-agent-config')>()
+  const actual = await importOriginal<typeof TuiAgentConfig>()
   return {
     ...actual,
     TUI_AGENT_CONFIG: {

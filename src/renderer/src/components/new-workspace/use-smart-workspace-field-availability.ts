@@ -65,19 +65,31 @@ export function useSmartWorkspaceFieldAvailability({
     })
   )
   const availableModes = getSmartWorkspaceNameModes().filter((item) => {
-    if (textOnly) return item.id === 'text'
-    if (item.id === 'github') return !repoBackedSourcesDisabled
-    if (item.id === 'gitlab') return gitlabSourceAvailable
-    if (item.id === 'branches') return branchesEnabled && !repoBackedSourcesDisabled
+    if (textOnly) {
+      return item.id === 'text'
+    }
+    if (item.id === 'github') {
+      return !repoBackedSourcesDisabled
+    }
+    if (item.id === 'gitlab') {
+      return gitlabSourceAvailable
+    }
+    if (item.id === 'branches') {
+      return branchesEnabled && !repoBackedSourcesDisabled
+    }
     return true
   })
 
   useEffect(() => {
-    if (!availableModes.some((item) => item.id === mode)) setMode(availableModes[0]?.id ?? 'text')
+    if (!availableModes.some((item) => item.id === mode)) {
+      setMode(availableModes[0]?.id ?? 'text')
+    }
   }, [availableModes, mode, setMode])
 
   useEffect(() => {
-    if (!repoBackedSourcesDisabled) return
+    if (!repoBackedSourcesDisabled) {
+      return
+    }
     setGithubItems([])
     setGitlabItems([])
     setBranches([])
@@ -101,13 +113,16 @@ export function useSmartWorkspaceFieldAvailability({
   const focusControls = useSmartWorkspaceFieldFocusControls({ props, state })
 
   useEffect(() => {
-    if (!disabled && !textOnly && (!preflightStatusChecked || !preflightStatusCurrent))
+    if (!disabled && !textOnly && (!preflightStatusChecked || !preflightStatusCurrent)) {
       void refreshPreflightStatus()
+    }
   }, [disabled, preflightStatusChecked, preflightStatusCurrent, refreshPreflightStatus, textOnly])
 
   useEffect(() => {
     if (textOnly) {
-      if (mode !== 'text') setMode('text')
+      if (mode !== 'text') {
+        setMode('text')
+      }
       setOpen(false)
     } else if (mode === 'gitlab' && !gitlabSourceAvailable) {
       setMode('smart')
@@ -127,7 +142,9 @@ export function useSmartWorkspaceFieldAvailability({
   ])
 
   useEffect(() => {
-    if (!disabled) return
+    if (!disabled) {
+      return
+    }
     setOpen(false)
     setGithubItems([])
     setGitlabItems([])

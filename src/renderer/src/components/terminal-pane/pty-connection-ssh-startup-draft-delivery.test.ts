@@ -207,7 +207,9 @@ describe('connectPanePty', () => {
       platform: 'linux',
       isRemote: true
     })
-    if (!plan) throw new Error('Expected a Claude draft launch plan')
+    if (!plan) {
+      throw new Error('Expected a Claude draft launch plan')
+    }
 
     connectPanePty(
       createPane(1) as never,

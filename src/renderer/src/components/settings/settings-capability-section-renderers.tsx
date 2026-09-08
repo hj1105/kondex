@@ -86,18 +86,16 @@ export function renderDesktopCapabilitySettingsSections(
 ): React.JSX.Element | null {
   const { model, navigation, view } = context
   return model.showDesktopOnlySettings ? (
-    <>
-      <SettingsSection
-        id="computer-use"
-        title={translate('auto.components.settings.Settings.c9841721cb', 'Computer Use')}
-        description={translate(
-          'auto.components.settings.Settings.7118953f14',
-          'Enable agents to control any app on your computer.'
-        )}
-        searchEntries={navigation.getSectionSearchEntries('computer-use')}
-      >
-        {view.isSectionMounted('computer-use') ? <ComputerUsePane /> : null}
-      </SettingsSection>
-    </>
+    <SettingsSection
+      id="computer-use"
+      title={translate('auto.components.settings.Settings.c9841721cb', 'Computer Use')}
+      description={translate(
+        'auto.components.settings.Settings.7118953f14',
+        'Enable agents to control any app on your computer.'
+      )}
+      searchEntries={navigation.getSectionSearchEntries('computer-use')}
+    >
+      {view.isSectionMounted('computer-use') ? <ComputerUsePane /> : null}
+    </SettingsSection>
   ) : null
 }

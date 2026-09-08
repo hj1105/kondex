@@ -117,7 +117,9 @@ export function useIssueSourceActions(input: IssueSourceActionsInput) {
   ])
 
   const smartNameSelection = useMemo<SmartWorkspaceNameSelection | null>(() => {
-    if (isProjectGroupTarget) return getFolderSmartNameSelection(linkedWorkItem)
+    if (isProjectGroupTarget) {
+      return getFolderSmartNameSelection(linkedWorkItem)
+    }
     return buildWorkspaceSourceSelection({
       linkedWorkItem,
       baseBranch

@@ -6,10 +6,11 @@ import {
   resolveDashboardCardTerminalInput,
   type DashboardCardTerminalInputState
 } from './dashboard-card-terminal-input'
+import type * as TuiAgentConfig from '../../../../shared/tui-agent-config'
 
 // Test independent opt-in encodings without enabling either in the shipped catalog.
 vi.mock('../../../../shared/tui-agent-config', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../../../shared/tui-agent-config')>()
+  const actual = await importOriginal<typeof TuiAgentConfig>()
   return {
     ...actual,
     TUI_AGENT_CONFIG: {

@@ -14,6 +14,9 @@ import {
   type TerminalOutputMeta
 } from './terminal-output-frame-chunks'
 
+// Why: 800 trials cost ~10s alone, and the 30s default is not enough under whole-suite load.
+const FUZZ_TIMEOUT_MS = 120_000
+
 // Byte-for-byte reference: the pre-optimization implementation, copied verbatim.
 // It accumulates `chunk += part` over `for (const part of data)` and measures each
 // code point through the shared clipboard measurer.
@@ -510,7 +513,7 @@ describe('iterateTerminalOutputFrameChunks equivalence with the pre-optimization
     const seqs = frames.map((frame) => frame.seq!)
     expect(seqs.every((seq, index) => index === 0 || seq > seqs[index - 1]!)).toBe(true)
     expect(seqs.at(-1)).toBe(999_999)
-  })
+  }, FUZZ_TIMEOUT_MS)
 
   it('emits exactly one frame when the payload fits the cap in bytes but not naively', () => {
     // 3-byte code points: 16384 code units = 49152 bytes = exactly the cap.

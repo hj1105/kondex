@@ -11,7 +11,7 @@ export class OrcaRuntimeWithApplyTrackedPtyTitle extends OrcaRuntimeWithGetUnper
     ptyId: string,
     rawTitle: string,
     normalizedTitle: string,
-    meta?: TerminalTitleFactMeta
+    _meta?: TerminalTitleFactMeta
   ): boolean {
     // Why: status is detected from the RAW title (mirrors the renderer tracker),
     // so working/idle transitions are unaffected by normalization; the records

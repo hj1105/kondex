@@ -104,10 +104,15 @@ export function useSmartWorkspaceNameFieldPresentation(foundation: Foundation) {
     : ''
   const isQueryStale = trimmedValue.length > 0 && trimmedDebouncedQuery !== trimmedValue
   const sourceIntent = useMemo<'github' | 'gitlab' | null>(() => {
-    if (!isSmartWorkspaceSourceQueryWithinLimit(value) || !value.trim()) return null
-    if (/^#\d+$/.test(value.trim()) || parseGitHubIssueOrPRLink(value.trim()) !== null)
+    if (!isSmartWorkspaceSourceQueryWithinLimit(value) || !value.trim()) {
+      return null
+    }
+    if (/^#\d+$/.test(value.trim()) || parseGitHubIssueOrPRLink(value.trim()) !== null) {
       return 'github'
-    if (parseGitLabIssueOrMRLink(value.trim()) !== null) return 'gitlab'
+    }
+    if (parseGitLabIssueOrMRLink(value.trim()) !== null) {
+      return 'gitlab'
+    }
     return null
   }, [value])
   const blockingTaskUrlResolution = isBlockingTaskUrlResolution({
@@ -123,7 +128,9 @@ export function useSmartWorkspaceNameFieldPresentation(foundation: Foundation) {
     sourceIntent
   })
   useEffect(() => {
-    if (commandValue !== resolvedCommandValue) setCommandValue(resolvedCommandValue)
+    if (commandValue !== resolvedCommandValue) {
+      setCommandValue(resolvedCommandValue)
+    }
   }, [commandValue, resolvedCommandValue, setCommandValue])
   const activeEmojiShortcode = useMemo(
     () => getActiveWorkspaceEmojiShortcode(value, emojiCursor),

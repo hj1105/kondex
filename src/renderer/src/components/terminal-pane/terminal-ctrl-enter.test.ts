@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 import { hasCtrlEnterCsiUAuthorityForPane } from './terminal-ctrl-enter'
+import type * as TuiAgentConfig from '../../../../shared/tui-agent-config'
 
 // Exercise the capability boundary without enabling CSI-u in the shipped catalog.
 vi.mock('../../../../shared/tui-agent-config', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../../../shared/tui-agent-config')>()
+  const actual = await importOriginal<typeof TuiAgentConfig>()
   return {
     ...actual,
     TUI_AGENT_CONFIG: {

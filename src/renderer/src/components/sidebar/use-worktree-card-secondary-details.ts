@@ -111,14 +111,18 @@ export function useWorktreeCardSecondaryDetails({
     (event: React.MouseEvent) => {
       event.stopPropagation()
       const url = hoverIssue && 'url' in hoverIssue ? hoverIssue.url : undefined
-      if (repo && url) openLinkedUrlInBrowser(url)
+      if (repo && url) {
+        openLinkedUrlInBrowser(url)
+      }
     },
     [hoverIssue, openLinkedUrlInBrowser, repo]
   )
   const handleOpenReviewInOrca = useCallback(
     (event: React.MouseEvent) => {
       event.stopPropagation()
-      if (repo && hoverReview?.url) openLinkedUrlInBrowser(hoverReview.url)
+      if (repo && hoverReview?.url) {
+        openLinkedUrlInBrowser(hoverReview.url)
+      }
     },
     [hoverReview, openLinkedUrlInBrowser, repo]
   )
