@@ -7,6 +7,9 @@ const SIBLING_PROJECT_NAMES = ['kontext-brain-ts', 'kontext-brain-deepswe-eval']
 // Why: the submodule makes `git clone --recurse-submodules` a working checkout;
 // without this the sidecar is only found when it happens to sit beside the repo.
 const SUBMODULE_PATH = ['vendor', 'kontext-brain']
+export const KONTEXT_SIDECAR_SUBMODULE_DIR = SUBMODULE_PATH.join('/')
+// The sidecar repository gitignores this bundle, so a fresh checkout has to build it.
+export const KONTEXT_SIDECAR_BUNDLE_PATH = ['plugins', 'kontext-brain', 'server.mjs']
 
 export function resolveKontextSidecarSource({
   repoRoot,
@@ -21,19 +24,13 @@ export function resolveKontextSidecarSource({
       : { status: 'unavailable', source: 'environment', path: resolvedPath }
   }
 
-  const submodulePath = path.resolve(
-    repoRoot,
-    ...SUBMODULE_PATH,
-    'plugins',
-    'kontext-brain',
-    'server.mjs'
-  )
+  const submodulePath = path.resolve(repoRoot, ...SUBMODULE_PATH, ...KONTEXT_SIDECAR_BUNDLE_PATH)
   if (isFile(submodulePath)) {
     return { status: 'configured', source: 'submodule', path: submodulePath }
   }
 
   const candidates = SIBLING_PROJECT_NAMES.map((projectName) =>
-    path.resolve(repoRoot, '..', projectName, 'plugins', 'kontext-brain', 'server.mjs')
+    path.resolve(repoRoot, '..', projectName, ...KONTEXT_SIDECAR_BUNDLE_PATH)
   )
   const siblingPath = candidates.find(isFile)
   return siblingPath

@@ -31,6 +31,9 @@ git submodule update --init --recursive
 cd vendor/kontext-brain && pnpm install && pnpm -r build && pnpm bundle:plugin
 ```
 
+The packaging scripts (`build:unpack`, `build:mac`, `build:linux`, `build:win`)
+run that build themselves, so the manual step above is only needed for `pnpm dev`.
+
 Kondex looks for the sidecar in this order: `KONDEX_KONTEXT_SIDECAR_PATH`, then
 the submodule at `vendor/kontext-brain`, then a sibling checkout named
 `kontext-brain-ts` or `kontext-brain-deepswe-eval`. The submodule wins over a

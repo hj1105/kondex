@@ -47,7 +47,9 @@ test('packaged production app registers a source through its bundled sidecar acr
     for (let launch = 0; launch < 2; launch++) {
       app = await _electron.launch({
         executablePath,
-        args: ['--password-store=basic', '--use-mock-keychain'],
+        // The assertions below read English labels, so pin the locale the way
+        // the development harness does rather than following the host OS.
+        args: ['--lang=en-US', '--password-store=basic', '--use-mock-keychain'],
         env: isolation.env,
         timeout: 30_000
       })
