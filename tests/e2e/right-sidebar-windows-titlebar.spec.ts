@@ -14,6 +14,13 @@ test.describe('Right sidebar Windows titlebar spacing', () => {
   test('top activity buttons render inside the sidebar instead of the titlebar', async ({
     orcaPage
   }) => {
+    // Why: the renderer reads its platform from the preload bridge and only falls
+    // back to the user agent when that is missing, so faking the agent cannot put a
+    // macOS host on the desktop-window-chrome branch this spec measures.
+    test.skip(
+      process.platform === 'darwin',
+      'desktop window chrome is a win32/linux branch the preload platform decides'
+    )
     await orcaPage.addInitScript(() => {
       const userAgent =
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/146 Safari/537.36'

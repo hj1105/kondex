@@ -5,6 +5,7 @@
  */
 
 import { execFile } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import { cp, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, sep } from 'node:path'
@@ -15,6 +16,7 @@ import { expect, test } from '@stablyai/playwright-test'
 import { createRestartSession } from './helpers/orca-restart'
 
 const execFileAsync = promisify(execFile)
+const LAUNCH_PLUGIN_PROBE = join('stablyai.orca-portuguese', 'orca-plugin.json')
 
 type MarketplaceFixture = {
   root: string
@@ -275,6 +277,12 @@ async function runMarketplaceJourney(page: Page): Promise<void> {
 
 // oxlint-disable-next-line no-empty-pattern -- Playwright passes fixtures before testInfo.
 test('installs and applies official Phase 1 content from a fresh profile', async ({}, testInfo) => {
+  // Kondex ships no bundled launch plugins, so there is nothing to clone into the
+  // fixture repositories. The journey still runs wherever that content exists.
+  test.skip(
+    !existsSync(join(process.cwd(), 'resources', 'plugins', 'launch', LAUNCH_PLUGIN_PROBE)),
+    'resources/plugins/launch carries no bundled plugin content'
+  )
   test.setTimeout(180_000)
   const fixture = await createMarketplaceFixture()
   const session = createRestartSession(testInfo as TestInfo, fixture.gitEnvironment)
