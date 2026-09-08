@@ -1,0 +1,18 @@
+{
+  "comment": "Tools a Kontext sidecar must expose before Kondex can package it. Host-management tools are excluded because they only appear once the host hands the sidecar a management token. Kept in sync with KONTEXT_TOOL_NAMES by kontext-sidecar-service.tool-contract.test.ts.",
+  "tools": [
+    "kontext_prepare_task",
+    "kontext_begin_logic",
+    "kontext_authorize_write",
+    "kontext_refresh_task_context",
+    "kontext_check_change",
+    "kontext_submit_change_bundle",
+    "kontext_propose_transition",
+    "kontext_inspect_runtimes",
+    "kontext_inspect_task",
+    "kontext_schedule_logic",
+    "kontext_get_schedule",
+    "kontext_cancel_schedule",
+    "kontext_integrate_schedule"
+  ]
+}

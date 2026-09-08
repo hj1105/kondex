@@ -11,6 +11,20 @@ export const KONTEXT_SIDECAR_SUBMODULE_DIR = SUBMODULE_PATH.join('/')
 // The sidecar repository gitignores this bundle, so a fresh checkout has to build it.
 export const KONTEXT_SIDECAR_BUNDLE_PATH = ['plugins', 'kontext-brain', 'server.mjs']
 
+/** Every place a sidecar bundle may live, in the order this repository trusts them. */
+export function listKontextSidecarCandidates(repoRoot) {
+  return [
+    {
+      source: 'submodule',
+      path: path.resolve(repoRoot, ...SUBMODULE_PATH, ...KONTEXT_SIDECAR_BUNDLE_PATH)
+    },
+    ...SIBLING_PROJECT_NAMES.map((projectName) => ({
+      source: 'sibling',
+      path: path.resolve(repoRoot, '..', projectName, ...KONTEXT_SIDECAR_BUNDLE_PATH)
+    }))
+  ]
+}
+
 export function resolveKontextSidecarSource({
   repoRoot,
   environment = process.env,
@@ -24,18 +38,11 @@ export function resolveKontextSidecarSource({
       : { status: 'unavailable', source: 'environment', path: resolvedPath }
   }
 
-  const submodulePath = path.resolve(repoRoot, ...SUBMODULE_PATH, ...KONTEXT_SIDECAR_BUNDLE_PATH)
-  if (isFile(submodulePath)) {
-    return { status: 'configured', source: 'submodule', path: submodulePath }
-  }
-
-  const candidates = SIBLING_PROJECT_NAMES.map((projectName) =>
-    path.resolve(repoRoot, '..', projectName, ...KONTEXT_SIDECAR_BUNDLE_PATH)
-  )
-  const siblingPath = candidates.find(isFile)
-  return siblingPath
-    ? { status: 'configured', source: 'sibling', path: siblingPath }
-    : { status: 'not_configured', candidates: [submodulePath, ...candidates] }
+  const candidates = listKontextSidecarCandidates(repoRoot)
+  const found = candidates.find((candidate) => isFile(candidate.path))
+  return found
+    ? { status: 'configured', source: found.source, path: found.path }
+    : { status: 'not_configured', candidates: candidates.map((candidate) => candidate.path) }
 }
 
 export function configureDevKontextSidecarEnvironment(options) {

@@ -10,7 +10,7 @@ import {
   type KontextSidecarPathResolution
 } from './kontext-sidecar-path'
 
-const HOST_MANAGEMENT_TOOL_NAMES = [
+export const KONTEXT_HOST_MANAGEMENT_TOOL_NAMES = [
   'kontext_inspect_registered_schedule',
   'kontext_list_registered_schedules',
   'kontext_inspect_registered_integration',
@@ -45,7 +45,7 @@ export const KONTEXT_TOOL_NAMES = [
   'kontext_propose_transition',
   'kontext_inspect_runtimes',
   'kontext_inspect_task',
-  ...HOST_MANAGEMENT_TOOL_NAMES,
+  ...KONTEXT_HOST_MANAGEMENT_TOOL_NAMES,
   'kontext_schedule_logic',
   'kontext_get_schedule',
   'kontext_cancel_schedule',
@@ -125,7 +125,7 @@ export class KontextSidecarService {
     }
     let result: Awaited<ReturnType<Client['callTool']>>
     try {
-      const argumentsForHost = HOST_MANAGEMENT_TOOL_NAMES.some((name) => name === toolName)
+      const argumentsForHost = KONTEXT_HOST_MANAGEMENT_TOOL_NAMES.some((name) => name === toolName)
         ? { ...args, hostToken: this.hostManagementToken }
         : args
       result = await client.callTool({ name: toolName, arguments: argumentsForHost }, undefined, {
