@@ -19,6 +19,7 @@ import {
   waitForPaneCount,
   waitForTerminalOutput
 } from './helpers/terminal'
+import { waitForForegroundChild } from './helpers/terminal-foreground-child'
 
 const SORTABLE_TAB = '[data-testid="sortable-tab"]'
 
@@ -40,15 +41,7 @@ async function startBusyTerminal(page: Page): Promise<string> {
   await execInTerminal(page, ptyId, 'echo close-confirm-ready')
   await waitForTerminalOutput(page, 'close-confirm-ready', 20_000)
   await execInTerminal(page, ptyId, 'sleep 300')
-  // Why: `hasChildProcesses` is already true while macOS's `login` wrapper starts the
-  // shell, so wait for `sleep` itself or the close legitimately sees an idle terminal.
-  await expect
-    .poll(
-      async () =>
-        (await page.evaluate((id) => window.api.pty.inspectProcess(id), ptyId)).foregroundProcess,
-      { timeout: 20_000, message: 'sleep 300 never became the foreground process' }
-    )
-    .toBe('sleep')
+  await waitForForegroundChild(page, ptyId, 'sleep')
   return (await getActiveTabId(page))!
 }
 

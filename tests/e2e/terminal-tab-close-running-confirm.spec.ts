@@ -20,6 +20,7 @@ import {
   waitForPaneCount,
   waitForTerminalOutput
 } from './helpers/terminal'
+import { waitForForegroundChild } from './helpers/terminal-foreground-child'
 
 const SORTABLE_TAB = '[data-testid="sortable-tab"]'
 
@@ -50,18 +51,7 @@ test('the tab X button applies the same running-process confirmation as Cmd+W', 
   await execInTerminal(orcaPage, ptyId, 'echo repro-10142-ready')
   await waitForTerminalOutput(orcaPage, 'repro-10142-ready', 20_000)
   await execInTerminal(orcaPage, ptyId, 'sleep 300')
-  // Only press close once `sleep` is the foreground process; otherwise the probe
-  // legitimately sees an idle shell and closing is correct. `hasChildProcesses` alone is
-  // not enough: macOS spawns the shell under `login`, so a still-initialising terminal
-  // reports a child before `sleep 300` has run.
-  await expect
-    .poll(
-      async () =>
-        (await orcaPage.evaluate((id) => window.api.pty.inspectProcess(id), ptyId))
-          .foregroundProcess,
-      { timeout: 20_000, message: 'sleep 300 never became the foreground process' }
-    )
-    .toBe('sleep')
+  await waitForForegroundChild(orcaPage, ptyId, 'sleep')
 
   const busyTabId = (await getActiveTabId(orcaPage))!
   const busyTab = orcaPage.locator(`${SORTABLE_TAB}[data-tab-id="${busyTabId}"]`).first()
