@@ -1,4 +1,5 @@
 import type { ElectronApplication } from '@stablyai/playwright-test'
+import { realpathSync } from 'node:fs'
 import path from 'node:path'
 import { expect, test } from './helpers/orca-app'
 
@@ -23,12 +24,16 @@ async function readElectronHomeState(electronApp: ElectronApplication) {
 // HOME boundary and that real-home routing lands inside the disposable profile.
 test('isolates Electron and Codex from the developer home by default', async ({ electronApp }) => {
   const state = await readElectronHomeState(electronApp)
-  const expectedHome = path.join(state.userDataDir!, 'home')
+  // Why: macOS tmpdir is /var/... but resolves to /private/var/..., and the app
+  // reports the resolved path. Compare what the paths mean, not how they spell it.
+  const canonical = (value: string | undefined): string | undefined =>
+    value === undefined ? undefined : realpathSync(value)
+  const expectedHome = canonical(path.join(state.userDataDir!, 'home'))
 
-  expect(state.appHome).toBe(expectedHome)
-  expect(state.nodeHome).toBe(expectedHome)
-  expect(state.home).toBe(expectedHome)
-  expect(state.userProfile).toBe(expectedHome)
+  expect(canonical(state.appHome)).toBe(expectedHome)
+  expect(canonical(state.nodeHome)).toBe(expectedHome)
+  expect(canonical(state.home)).toBe(expectedHome)
+  expect(canonical(state.userProfile)).toBe(expectedHome)
   expect(state.codexHome).toBeUndefined()
   expect(state.orcaCodexHome).toBeUndefined()
 })

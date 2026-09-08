@@ -32,7 +32,8 @@ type SplitGroupTerminal = {
 }
 
 function agentsSidebarButton(page: Page) {
-  return page.getByRole('radio', { name: /^Agents$/ }).first()
+  // The entry is a plain sidebar button; it never carried a radio role.
+  return page.getByRole('button', { name: 'Agents', exact: true }).first()
 }
 
 async function seedActivityThread(
