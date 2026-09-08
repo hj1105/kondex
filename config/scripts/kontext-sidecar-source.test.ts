@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  KONTEXT_SIDECAR_ENV,
   configureDevKontextSidecarEnvironment,
   resolveKontextSidecarSource
 } from './kontext-sidecar-source.mjs'
@@ -54,7 +55,7 @@ describe('Kontext sidecar source resolution', () => {
     )
   })
 
-  it('returns every supported sibling location when no bundle exists', () => {
+  it('returns every supported location when no bundle exists', () => {
     expect(
       resolveKontextSidecarSource({
         repoRoot: '/workspace/kondex',
@@ -64,9 +65,44 @@ describe('Kontext sidecar source resolution', () => {
     ).toEqual({
       status: 'not_configured',
       candidates: [
+        '/workspace/kondex/vendor/kontext-brain/plugins/kontext-brain/server.mjs',
         '/workspace/kontext-brain-ts/plugins/kontext-brain/server.mjs',
         '/workspace/kontext-brain-deepswe-eval/plugins/kontext-brain/server.mjs'
       ]
     })
+  })
+
+  it('discovers the vendored submodule so a recursive clone works unaided', () => {
+    const submodule = '/workspace/kondex/vendor/kontext-brain/plugins/kontext-brain/server.mjs'
+    expect(
+      resolveKontextSidecarSource({
+        repoRoot: '/workspace/kondex',
+        environment: {},
+        isFile: (candidate) => candidate === submodule
+      })
+    ).toEqual({ status: 'configured', source: 'submodule', path: submodule })
+  })
+
+  it('prefers the submodule over a sibling checkout', () => {
+    // Why: the submodule is pinned by the repo, so it is the reproducible one.
+    expect(
+      resolveKontextSidecarSource({
+        repoRoot: '/workspace/kondex',
+        environment: {},
+        isFile: () => true
+      })
+    ).toMatchObject({ source: 'submodule' })
+  })
+
+  it('exports the submodule path to the dev environment, not only a sibling', () => {
+    const environment: Record<string, string> = {}
+    configureDevKontextSidecarEnvironment({
+      repoRoot: '/workspace/kondex',
+      environment,
+      isFile: (candidate: string) => candidate.includes('/vendor/kontext-brain/')
+    })
+    expect(environment[KONTEXT_SIDECAR_ENV]).toBe(
+      '/workspace/kondex/vendor/kontext-brain/plugins/kontext-brain/server.mjs'
+    )
   })
 })

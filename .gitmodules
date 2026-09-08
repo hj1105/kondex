@@ -1,0 +1,4 @@
+[submodule "vendor/kontext-brain"]
+	path = vendor/kontext-brain
+	url = https://github.com/hj1105/kontext-brain-ts.git
+	branch = codex/kontext-gui

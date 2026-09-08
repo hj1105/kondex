@@ -19,10 +19,22 @@ Kondex is under active development and is not yet distributed as a public releas
 - Codex CLI and/or Claude Code, authenticated with the user's existing subscription
 - a Kontext Brain sidecar
 
-For development, place a Kontext Brain checkout that contains
-`plugins/kontext-brain/server.mjs` beside this repository. The supported sibling checkout names are
-`kontext-brain-ts` and `kontext-brain-deepswe-eval`. Alternatively, set
-`KONDEX_KONTEXT_SIDECAR_PATH` to the sidecar bundle explicitly.
+Kontext Brain ships as a submodule, so a recursive clone gives you a working
+checkout:
+
+```bash
+git clone --recurse-submodules <this repo>
+# or, in an existing clone:
+git submodule update --init --recursive
+
+# The sidecar is a build artifact, not a committed file.
+cd vendor/kontext-brain && pnpm install && pnpm -r build && pnpm bundle:plugin
+```
+
+Kondex looks for the sidecar in this order: `KONDEX_KONTEXT_SIDECAR_PATH`, then
+the submodule at `vendor/kontext-brain`, then a sibling checkout named
+`kontext-brain-ts` or `kontext-brain-deepswe-eval`. The submodule wins over a
+sibling because it is the revision this repository pins.
 
 ## Develop
 

@@ -4,6 +4,9 @@ import path from 'node:path'
 export const KONTEXT_SIDECAR_ENV = 'KONDEX_KONTEXT_SIDECAR_PATH'
 
 const SIBLING_PROJECT_NAMES = ['kontext-brain-ts', 'kontext-brain-deepswe-eval']
+// Why: the submodule makes `git clone --recurse-submodules` a working checkout;
+// without this the sidecar is only found when it happens to sit beside the repo.
+const SUBMODULE_PATH = ['vendor', 'kontext-brain']
 
 export function resolveKontextSidecarSource({
   repoRoot,
@@ -18,18 +21,29 @@ export function resolveKontextSidecarSource({
       : { status: 'unavailable', source: 'environment', path: resolvedPath }
   }
 
+  const submodulePath = path.resolve(
+    repoRoot,
+    ...SUBMODULE_PATH,
+    'plugins',
+    'kontext-brain',
+    'server.mjs'
+  )
+  if (isFile(submodulePath)) {
+    return { status: 'configured', source: 'submodule', path: submodulePath }
+  }
+
   const candidates = SIBLING_PROJECT_NAMES.map((projectName) =>
     path.resolve(repoRoot, '..', projectName, 'plugins', 'kontext-brain', 'server.mjs')
   )
   const siblingPath = candidates.find(isFile)
   return siblingPath
     ? { status: 'configured', source: 'sibling', path: siblingPath }
-    : { status: 'not_configured', candidates }
+    : { status: 'not_configured', candidates: [submodulePath, ...candidates] }
 }
 
 export function configureDevKontextSidecarEnvironment(options) {
   const resolution = resolveKontextSidecarSource(options)
-  if (resolution.status === 'configured' && resolution.source === 'sibling') {
+  if (resolution.status === 'configured' && resolution.source !== 'environment') {
     options.environment[KONTEXT_SIDECAR_ENV] = resolution.path
   }
   return resolution
