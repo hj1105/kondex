@@ -6,6 +6,7 @@ import path from 'node:path'
 import type { ElectronApplication, Locator } from '@stablyai/playwright-test'
 import { test, expect } from './helpers/orca-app'
 import { waitForSessionReady } from './helpers/store'
+import { openAddProjectDialog } from './helpers/add-project-dialog'
 
 const tempRoots: string[] = []
 const IMPORT_AS_GROUP_BUTTON_NAME = 'Yes, import as group'
@@ -166,12 +167,7 @@ test('prioritizes shallow sibling repositories in a bounded nested scan', async 
   const fixture = await createShallowPriorityTruncationFixture()
   await chooseFolderInNativeDialog(electronApp, fixture.parentPath)
 
-  await orcaPage
-    .getByRole('button', { name: /Add Project/i })
-    .first()
-    .click()
-  const dialog = orcaPage.getByRole('dialog', { name: /Add a project/i })
-  await expect(dialog).toBeVisible()
+  const dialog = await openAddProjectDialog(orcaPage)
   await dialog.getByRole('button', { name: /Browse folder/i }).click()
 
   const importDialog = orcaPage.getByRole('dialog', {
@@ -256,11 +252,7 @@ test('can stop a nested repo scan and import repositories found so far', async (
   })
   await chooseFolderInNativeDialog(electronApp, fixture.parentPath)
 
-  await orcaPage
-    .getByRole('button', { name: /Add Project/i })
-    .first()
-    .click()
-  const dialog = orcaPage.getByRole('dialog', { name: /Add a project/i })
+  const dialog = await openAddProjectDialog(orcaPage)
   await dialog.getByRole('button', { name: /Browse folder/i }).click()
 
   const importDialog = orcaPage.getByRole('dialog', {

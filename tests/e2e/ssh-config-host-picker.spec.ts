@@ -70,7 +70,7 @@ test.describe('SSH config host picker', () => {
     await expect(
       picker.getByText('Add a Host entry there, or go back and type the details manually.')
     ).toBeVisible()
-    await expect(picker.getByRole('button', { name: 'Add all to Orca' })).toBeDisabled()
+    await expect(picker.getByRole('button', { name: 'Add all to Kondex' })).toBeDisabled()
 
     await picker.getByRole('button', { name: 'Back' }).click()
     const form = orcaPage.getByRole('dialog', { name: 'Add SSH host' })
@@ -99,7 +99,7 @@ test.describe('SSH config host picker', () => {
     await expect(
       hostList.getByText(hostEndpointSummary(hosts.bravo), { exact: true })
     ).toBeVisible()
-    await expect(picker.getByRole('button', { name: 'Add all 2 to Orca' })).toBeEnabled()
+    await expect(picker.getByRole('button', { name: 'Add all 2 to Kondex' })).toBeEnabled()
   })
 
   // ── P3 + N3 ────────────────────────────────────────────────────────

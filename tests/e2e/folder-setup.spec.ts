@@ -6,6 +6,7 @@ import path from 'node:path'
 import { test, expect } from './helpers/orca-app'
 import { waitForSessionReady } from './helpers/store'
 import type { ElectronApplication, Locator } from '@stablyai/playwright-test'
+import { openAddProjectDialog } from './helpers/add-project-dialog'
 
 const IMPORT_AS_GROUP_BUTTON_NAME = 'Yes, import as group'
 
@@ -122,12 +123,7 @@ test.describe('Folder setup', () => {
     const fixture = await createNestedRepoFixture()
     await chooseFolderInNativeDialog(electronApp, fixture.parentPath)
 
-    await orcaPage
-      .getByRole('button', { name: /Add Project/i })
-      .first()
-      .click()
-    const dialog = orcaPage.getByRole('dialog', { name: /Add a project/i })
-    await expect(dialog).toBeVisible()
+    const dialog = await openAddProjectDialog(orcaPage)
     await dialog.getByRole('button', { name: /Browse folder/i }).click()
 
     const importDialog = orcaPage.getByRole('dialog', {
@@ -190,12 +186,7 @@ test.describe('Folder setup', () => {
     const fixture = await createLargeNestedRepoFixture()
     await chooseFolderInNativeDialog(electronApp, fixture.parentPath)
 
-    await orcaPage
-      .getByRole('button', { name: /Add Project/i })
-      .first()
-      .click()
-    const dialog = orcaPage.getByRole('dialog', { name: /Add a project/i })
-    await expect(dialog).toBeVisible()
+    const dialog = await openAddProjectDialog(orcaPage)
     await dialog.getByRole('button', { name: /Browse folder/i }).click()
 
     const importDialog = orcaPage.getByRole('dialog', {

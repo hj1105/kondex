@@ -5,6 +5,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { test, expect } from './helpers/orca-app'
 import { waitForSessionReady } from './helpers/store'
+import { openAddProjectDialog } from './helpers/add-project-dialog'
 
 const tempRoots: string[] = []
 
@@ -80,18 +81,17 @@ test.afterEach(() => {
 })
 
 test.describe('Add project default checkout', () => {
+  // Why: this flow is about landing on a freshly added project, which only the
+  // empty-state entry point does — adding from the composer hands back to the composer.
+  test.use({ seedTestRepo: false })
+
   test('clones a repo and opens the default checkout without the setup-choice modal', async ({
     orcaPage
   }) => {
     await waitForSessionReady(orcaPage)
     const fixture = await createCloneFixture()
 
-    await orcaPage
-      .getByRole('button', { name: /Add Project/i })
-      .first()
-      .click()
-    const addDialog = orcaPage.getByRole('dialog', { name: /Add a project/i })
-    await expect(addDialog).toBeVisible()
+    const addDialog = await openAddProjectDialog(orcaPage)
     await addDialog.getByRole('button', { name: /Clone from URL/i }).click()
 
     const cloneDialog = orcaPage.getByRole('dialog', { name: /Clone from URL/i })
