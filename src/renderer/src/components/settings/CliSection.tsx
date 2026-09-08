@@ -1,0 +1,349 @@
+import {
+  GLOBAL_AGENT_SKILL_SOURCE_KINDS,
+  useInstalledAgentSkill
+} from '@/hooks/useInstalledAgentSkills'
+import { useMountedRef } from '@/hooks/useMountedRef'
+import { translate } from '@/i18n/i18n'
+import { ORCA_CLI_SKILL_NAME } from '@/lib/agent-feature-install-commands'
+import { ensureOrcaCliAvailableForAgentSkillTerminal } from '@/lib/agent-skill-cli-prerequisite'
+import { FolderOpen, RefreshCw } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { toast } from 'sonner'
+import type { CliInstallStatus } from '../../../../shared/cli-install-types'
+import type { GlobalSettings } from '../../../../shared/global-settings-types'
+import { Button } from '../ui/button'
+import { Label } from '../ui/label'
+import { Switch } from '../ui/switch'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
+import { BundledAgentSkillSetupPanel } from './BundledAgentSkillSetupPanel'
+import { CliRegistrationDialog } from './CliRegistrationDialog'
+import {
+  ensureWslCliAvailableForAgentSkillTerminal,
+  getSelectedAgentRuntime,
+  getSkillDiscoveryTargetForRuntime
+} from './CliSkillRuntimeSetup'
+import { WslCliRegistration } from './WslCliRegistration'
+import { useCliRegistrationActions } from './use-cli-registration-actions'
+
+type CliSectionProps = {
+  currentPlatform: string
+  settings: GlobalSettings
+  wslSupportedPlatform?: boolean
+  wslAvailable?: boolean
+  wslCapabilitiesLoading?: boolean
+}
+
+function getRevealLabel(platform: string): string {
+  if (platform === 'darwin') {
+    return 'Show in Finder'
+  }
+  if (platform === 'win32') {
+    return 'Show in Explorer'
+  }
+  return 'Show in File Manager'
+}
+
+function getInstallDescription(platform: string): string {
+  if (platform === 'darwin') {
+    return 'Register `kondex` in /usr/local/bin.'
+  }
+  if (platform === 'linux') {
+    return 'Register `kondex` in ~/.local/bin.'
+  }
+  if (platform === 'win32') {
+    return 'Register `kondex` in your user PATH.'
+  }
+  return 'CLI registration is not yet available on this platform.'
+}
+
+function getFallbackCommandName(_platform: string): string {
+  return 'kondex'
+}
+
+export function CliSection({
+  currentPlatform,
+  settings,
+  wslSupportedPlatform = false,
+  wslAvailable = false,
+  wslCapabilitiesLoading = false
+}: CliSectionProps): React.JSX.Element {
+  const [status, setStatus] = useState<CliInstallStatus | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const mountedRef = useMountedRef()
+  const agentRuntime = useMemo(
+    () =>
+      getSelectedAgentRuntime(settings, wslSupportedPlatform, wslAvailable, wslCapabilitiesLoading),
+    [settings, wslAvailable, wslCapabilitiesLoading, wslSupportedPlatform]
+  )
+  const cliSkillDiscoveryTarget = useMemo(
+    () => getSkillDiscoveryTargetForRuntime(agentRuntime),
+    [agentRuntime]
+  )
+  const {
+    installed: cliSkillDetected,
+    loading: cliSkillLoading,
+    error: cliSkillError,
+    refresh: refreshCliSkill
+  } = useInstalledAgentSkill(ORCA_CLI_SKILL_NAME, {
+    discoveryTarget: cliSkillDiscoveryTarget,
+    sourceKinds: GLOBAL_AGENT_SKILL_SOURCE_KINDS
+  })
+
+  const handleStatusChange = useCallback(
+    (nextStatus: CliInstallStatus): void => {
+      if (mountedRef.current) {
+        setStatus(nextStatus)
+      }
+    },
+    [mountedRef]
+  )
+
+  const closeDialog = useCallback((): void => setDialogOpen(false), [])
+  const commandName = status?.commandName ?? getFallbackCommandName(currentPlatform)
+  const { busyAction, installFailure, clearInstallFailure, install, remove } =
+    useCliRegistrationActions({
+      commandName,
+      mountedRef,
+      onStatusChange: handleStatusChange,
+      onSettled: closeDialog
+    })
+
+  const refreshStatus = useCallback(async (): Promise<void> => {
+    setLoading(true)
+    clearInstallFailure()
+    try {
+      handleStatusChange(await window.api.cli.getInstallStatus())
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : translate(
+                'auto.components.settings.CliSection.7baec27029',
+                'Failed to load CLI status.'
+              )
+        )
+      }
+    } finally {
+      if (mountedRef.current) {
+        setLoading(false)
+      }
+    }
+  }, [clearInstallFailure, handleStatusChange, mountedRef])
+
+  useEffect(() => {
+    void refreshStatus()
+  }, [refreshStatus])
+
+  const pathStatusUnknown = currentPlatform === 'win32' && status?.pathConfigured === null
+  const isEnabled = status?.state === 'installed' && !pathStatusUnknown
+  const isSupported = status?.supported ?? false
+  const isBrowserManaged = status?.unsupportedReason === 'launch_mode_unavailable'
+  const revealLabel = getRevealLabel(currentPlatform)
+  const canRevealCommandPath =
+    status?.commandPath != null && ['installed', 'stale', 'conflict'].includes(status.state)
+
+  return (
+    <section className="space-y-4" data-settings-section="cli">
+      <div className="space-y-1">
+        <h2 className="text-sm font-semibold">
+          {translate('auto.components.settings.CliSection.c5c0f2641d', 'Kondex CLI')}
+        </h2>
+        <p className="text-xs text-muted-foreground">
+          {translate(
+            'auto.components.settings.CliSection.6930feda9e',
+            'Use Kondex from your terminal to open the app, manage worktrees, and interact with Kondex terminals.'
+          )}
+        </p>
+      </div>
+
+      <div className="space-y-3 rounded-xl border border-border/60 bg-card/50 p-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="space-y-0.5">
+            <Label>
+              {translate('auto.components.settings.CliSection.38edbb5721', 'Shell command')}
+            </Label>
+            <p
+              className={`text-xs ${pathStatusUnknown ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground'}`}
+            >
+              {loading
+                ? translate(
+                    'auto.components.settings.CliSection.d363e5929b',
+                    'Checking CLI registration…'
+                  )
+                : (status?.detail ?? getInstallDescription(currentPlatform))}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <TooltipProvider delayDuration={250}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    onClick={() => void refreshStatus()}
+                    disabled={loading || busyAction !== null}
+                    aria-label={translate(
+                      'auto.components.settings.CliSection.52e640f3a0',
+                      'Refresh CLI status'
+                    )}
+                  >
+                    <RefreshCw className="size-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" sideOffset={6}>
+                  {translate('auto.components.settings.CliSection.5dae812f50', 'Refresh')}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            {!isBrowserManaged ? (
+              <Switch
+                aria-label={translate(
+                  'auto.components.settings.CliSection.38edbb5721',
+                  'Shell command'
+                )}
+                checked={isEnabled}
+                disabled={loading || !isSupported || pathStatusUnknown || busyAction !== null}
+                onCheckedChange={() => setDialogOpen(true)}
+                className="disabled:opacity-60"
+              />
+            ) : null}
+          </div>
+        </div>
+
+        {status?.commandPath ? (
+          <p className="text-xs text-muted-foreground">
+            {translate('auto.components.settings.CliSection.15eaad0d31', 'Command path:')}{' '}
+            <code className="rounded bg-muted px-1 py-0.5 text-[11px]">{status.commandPath}</code>
+          </p>
+        ) : null}
+
+        {status?.state === 'stale' && status.currentTarget ? (
+          <p className="text-xs text-amber-600 dark:text-amber-400">
+            {translate(
+              'auto.components.settings.CliSection.b0c310ab46',
+              'Existing launcher target:'
+            )}{' '}
+            <code>{status.currentTarget}</code>
+          </p>
+        ) : null}
+
+        {status?.state === 'installed' &&
+        status.pathConfigured === false &&
+        status.pathDirectory ? (
+          <p className="text-xs text-amber-600 dark:text-amber-400">
+            {status.pathDirectory}{' '}
+            {translate(
+              'auto.components.settings.CliSection.7f2747f7dd',
+              'is not currently visible on PATH for this shell.'
+            )}
+          </p>
+        ) : null}
+
+        {!loading && !isSupported && !isBrowserManaged && status?.detail ? (
+          <p className="text-xs text-muted-foreground">{status.detail}</p>
+        ) : null}
+
+        {installFailure ? (
+          <div
+            role="alert"
+            className="space-y-1 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive"
+          >
+            <p className="font-medium">
+              {translate(
+                'auto.components.settings.CliSection.a2b13efa94',
+                'Failed to register `{{value0}}` in PATH.',
+                { value0: commandName }
+              )}
+            </p>
+            <p className="leading-snug">{installFailure.reason}</p>
+            {installFailure.conflictCommandPath ? (
+              <p className="leading-snug">
+                {translate(
+                  'auto.components.settings.CliSection.installFailureConflictRemedy',
+                  'Remove {{value0}} and register again if it is no longer needed.',
+                  { value0: installFailure.conflictCommandPath }
+                )}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
+        <div className="flex items-center gap-2">
+          {status?.commandPath ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => void window.api.shell.openPath(status.commandPath as string)}
+              disabled={loading || !canRevealCommandPath}
+              className="gap-2"
+            >
+              <FolderOpen className="size-3.5" />
+              {revealLabel}
+            </Button>
+          ) : null}
+        </div>
+
+        {!isBrowserManaged ? (
+          <div className="border-t border-border/60 pt-3">
+            <div className="space-y-0.5">
+              <Label>
+                {translate('auto.components.settings.CliSection.04873eea3e', 'Agent skills')}
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {translate(
+                  'auto.components.settings.CliSection.36a6f919ba',
+                  'Give agents Kondex-aware workspace, terminal, and progress workflows.'
+                )}
+              </p>
+            </div>
+
+            <BundledAgentSkillSetupPanel
+              title={translate('auto.components.settings.CliSection.6053cf736c', 'CLI skill')}
+              description={translate(
+                'auto.components.settings.CliSection.e8012c03a1',
+                'Enables agents to use Kondex workspace, terminal, and progress commands.'
+              )}
+              variant="inline"
+              className="mt-3"
+              discoveryState={{
+                installed: cliSkillDetected,
+                loading: cliSkillLoading,
+                error: cliSkillError,
+                refresh: refreshCliSkill
+              }}
+              skillName="kondex-cli"
+              onBeforeInstall={async () => {
+                await (agentRuntime.runtime === 'wsl'
+                  ? ensureWslCliAvailableForAgentSkillTerminal(agentRuntime)
+                  : ensureOrcaCliAvailableForAgentSkillTerminal({
+                      onStatusChange: handleStatusChange
+                    }))
+              }}
+              runtimeOverride={{
+                agentRuntime,
+                discoveryTarget: cliSkillDiscoveryTarget,
+                installDisabledReason: null
+              }}
+            />
+          </div>
+        ) : null}
+      </div>
+
+      <WslCliRegistration currentPlatform={currentPlatform} />
+
+      <CliRegistrationDialog
+        busyAction={busyAction}
+        commandName={commandName}
+        commandPath={status?.commandPath}
+        isEnabled={isEnabled}
+        isSupported={isSupported}
+        onInstall={install}
+        onOpenChange={setDialogOpen}
+        onRemove={remove}
+        open={dialogOpen}
+      />
+    </section>
+  )
+}

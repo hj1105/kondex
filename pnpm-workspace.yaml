@@ -1,0 +1,42 @@
+# Kondex is a single-project desktop application.
+packages: []
+
+minimumReleaseAge: 4320
+shamefullyHoist: true
+
+supportedArchitectures:
+  os:
+    - current
+    - darwin
+    - linux
+    - win32
+  cpu:
+    - current
+    - x64
+    - arm64
+
+allowBuilds:
+  '@parcel/watcher': true
+  '@swc/core': false
+  '@vscode/windows-process-tree': false
+  agent-browser: false
+  cpu-features: true
+  electron-winstaller: false
+  esbuild: true
+  msw: false
+  node-pty: true
+  ssh2: false
+  windows-native-registry: false
+
+overrides:
+  monaco-editor>dompurify: 3.4.13
+
+patchedDependencies:
+  node-pty@1.1.0: config/patches/node-pty@1.1.0.patch
+  '@xterm/addon-ligatures@0.11.0-beta.300': config/patches/@xterm__addon-ligatures@0.11.0-beta.300.patch
+  '@xterm/addon-webgl@0.20.0-beta.299': config/patches/@xterm__addon-webgl@0.20.0-beta.299.patch
+  '@xterm/addon-search@0.17.0-beta.300': config/patches/@xterm__addon-search@0.17.0-beta.300.patch
+  '@xterm/addon-serialize@0.15.0-beta.300': config/patches/@xterm__addon-serialize@0.15.0-beta.300.patch
+  '@xterm/xterm@6.1.0-beta.303': config/patches/@xterm__xterm@6.1.0-beta.303.patch
+  lint-staged@16.4.0: config/patches/lint-staged@16.4.0.patch
+  '@vscode/windows-process-tree@0.8.0': config/patches/@vscode__windows-process-tree@0.8.0.patch

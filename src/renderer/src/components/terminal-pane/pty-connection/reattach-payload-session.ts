@@ -1,0 +1,26 @@
+import type { ConnectPanePtySession } from './connect-pane-pty-session'
+
+export type ReattachPayloadSession = Pick<
+  ConnectPanePtySession,
+  | 'applyColdRestoreAgentResumeStartup'
+  | 'applySnapshotKittyKeyboardModes'
+  | 'buildColdRestoreAgentResumeStartup'
+  | 'clearSleepingRecordAfterColdRestoreSpawn'
+  | 'consumeRestoredViewportBlankingMarker'
+  | 'createReattachGridPush'
+  | 'isPaneOnAlternateScreen'
+  | 'kittyKeyboardModes'
+  | 'pane'
+  | 'pendingReattachFit'
+  | 'reattachReplayResetSequence'
+  | 'recordRendererOrderedSeq'
+  | 'schedulePendingStartupCommandDelivery'
+  | 'sendFocusedReattachFocusInAfterReplay'
+  | 'setRestoredSnapshotBaseline'
+  | 'shouldPreserveAgentReattachModes'
+  | 'showSessionRestoredBanner'
+  | 'suppressStructuralReplayPtyResize'
+  | 'transport'
+  | 'writeFreshShellViewportBlanking'
+  | 'writeReplayData'
+>

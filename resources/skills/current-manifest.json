@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 2,
+  "skills": [
+    {
+      "name": "kondex-cli",
+      "sourcePath": "skills/kondex-cli",
+      "releaseRevision": 1,
+      "packageDigest": "76f6082a11142302d4c2a171ebb8a61242fa323aa629d4da47dc1594cd206d8c",
+      "gitTreeSha": "95a68a27edb1c01a7c5995295ca3196c61cb0086",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "size": 3971,
+          "executable": false,
+          "classification": "text",
+          "exactSha256": "19d519e66180626e3c400b22d42595d3c3a009d0d595b612fc0c4bfce79b70df",
+          "textNormalizedSha256": "19d519e66180626e3c400b22d42595d3c3a009d0d595b612fc0c4bfce79b70df",
+          "identitySha256": "19d519e66180626e3c400b22d42595d3c3a009d0d595b612fc0c4bfce79b70df"
+        }
+      ]
+    },
+    {
+      "name": "kondex-computer-use",
+      "sourcePath": "skills/kondex-computer-use",
+      "releaseRevision": 1,
+      "packageDigest": "1a1b63be5f1102ca27d4dfd88f971336553c1cc84c508b1a48b9f84405f94892",
+      "gitTreeSha": "49ea406b868da61228cb4aa1b7d69bd394a6cd92",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "size": 3382,
+          "executable": false,
+          "classification": "text",
+          "exactSha256": "f9577aa666cb15108c0d14a1cd704956c454278e112737c966dec2bfe8f7105c",
+          "textNormalizedSha256": "f9577aa666cb15108c0d14a1cd704956c454278e112737c966dec2bfe8f7105c",
+          "identitySha256": "f9577aa666cb15108c0d14a1cd704956c454278e112737c966dec2bfe8f7105c"
+        }
+      ]
+    },
+    {
+      "name": "kondex-emulator",
+      "sourcePath": "skills/kondex-emulator",
+      "releaseRevision": 1,
+      "packageDigest": "a39c15382e1d8da3769ef0757507195bef8373578e2d873c92b57dc4b3f85054",
+      "gitTreeSha": "58504b614775e0049f52806a877cb5c669d3efa8",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "size": 3634,
+          "executable": false,
+          "classification": "text",
+          "exactSha256": "ae5049454bbebca2edd3e116b653a3d41c5ca2020b44e7feaf50dba80c95f3e0",
+          "textNormalizedSha256": "ae5049454bbebca2edd3e116b653a3d41c5ca2020b44e7feaf50dba80c95f3e0",
+          "identitySha256": "ae5049454bbebca2edd3e116b653a3d41c5ca2020b44e7feaf50dba80c95f3e0"
+        }
+      ]
+    },
+    {
+      "name": "kondex-emulator-android",
+      "sourcePath": "skills/kondex-emulator-android",
+      "releaseRevision": 1,
+      "packageDigest": "000bbc49a8209e8691e826ac03e89d967a5437abdb1bb191835e7502b74dc7c9",
+      "gitTreeSha": "084cda62327ae9a2b6b95fcc53a4edbfb52f5423",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "size": 3433,
+          "executable": false,
+          "classification": "text",
+          "exactSha256": "5544ceb343647b42c7f83cf5f6989ed45b35e284c569142b5e29786e674ca16a",
+          "textNormalizedSha256": "5544ceb343647b42c7f83cf5f6989ed45b35e284c569142b5e29786e674ca16a",
+          "identitySha256": "5544ceb343647b42c7f83cf5f6989ed45b35e284c569142b5e29786e674ca16a"
+        }
+      ]
+    },
+    {
+      "name": "kondex-orchestration",
+      "sourcePath": "skills/kondex-orchestration",
+      "releaseRevision": 1,
+      "packageDigest": "01745bbbc8ff6d6b20cb115812b556adb4e0a77d8354597bd2cc709f39ebb78b",
+      "gitTreeSha": "81de961a2ad7d8124bdcf582668c1e366ba3dc58",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "size": 4382,
+          "executable": false,
+          "classification": "text",
+          "exactSha256": "d8a2cb2064b6a5aead60a5b07087bd3053a86d367c52c333c1744a4d4e828863",
+          "textNormalizedSha256": "d8a2cb2064b6a5aead60a5b07087bd3053a86d367c52c333c1744a4d4e828863",
+          "identitySha256": "d8a2cb2064b6a5aead60a5b07087bd3053a86d367c52c333c1744a4d4e828863"
+        }
+      ]
+    }
+  ]
+}

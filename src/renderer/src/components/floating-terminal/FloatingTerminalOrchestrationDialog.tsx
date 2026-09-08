@@ -1,0 +1,139 @@
+import { IntegrationStatusPill } from '@/components/integration-status-pill'
+import { BundledAgentSkillSetupPanel } from '@/components/settings/BundledAgentSkillSetupPanel'
+import { SkillFreshnessStatusPill } from '@/components/skills/SkillFreshnessStatusPill'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog'
+import { useActiveProjectSkillRuntime } from '@/hooks/useActiveProjectSkillRuntime'
+import {
+  GLOBAL_AGENT_SKILL_SOURCE_KINDS,
+  useInstalledAgentSkill
+} from '@/hooks/useInstalledAgentSkills'
+import { refreshSkillFreshness } from '@/hooks/useSkillFreshness'
+import { ORCHESTRATION_SKILL_NAME } from '@/lib/agent-feature-install-commands'
+import { ensureOrcaCliAvailableForAgentSkillTerminal } from '@/lib/agent-skill-cli-prerequisite'
+import { useEffect } from 'react'
+
+import { ensureWslCliAvailableForAgentSkillTerminal } from '@/components/settings/CliSkillRuntimeSetup'
+import { translate } from '@/i18n/i18n'
+
+type FloatingTerminalOrchestrationDialogProps = {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onSetupStateChange: () => void
+}
+
+export function FloatingTerminalOrchestrationDialog({
+  open,
+  onOpenChange,
+  onSetupStateChange
+}: FloatingTerminalOrchestrationDialogProps): React.JSX.Element {
+  const activeSkillRuntime = useActiveProjectSkillRuntime()
+  const {
+    installed: orchestrationSkillDetected,
+    loading: orchestrationSkillLoading,
+    error: orchestrationSkillError,
+    refresh: refreshOrchestrationSkill
+  } = useInstalledAgentSkill(ORCHESTRATION_SKILL_NAME, {
+    enabled: open,
+    discoveryTarget: activeSkillRuntime.discoveryTarget,
+    sourceKinds: GLOBAL_AGENT_SKILL_SOURCE_KINDS
+  })
+
+  // Why: detecting the installed skill marks setup complete; refresh the banner
+  // so it hides once the same quick-install flow used in Settings/CLI tips lands.
+  useEffect(() => {
+    if (orchestrationSkillDetected) {
+      onSetupStateChange()
+    }
+  }, [orchestrationSkillDetected, onSetupStateChange])
+
+  const recheckOrchestrationSkill = async (): Promise<boolean> => {
+    const installed = await refreshOrchestrationSkill()
+    if (activeSkillRuntime.canUseLocalSkillFreshness) {
+      await refreshSkillFreshness()
+    }
+    return installed
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="gap-4 sm:max-w-[620px]">
+        <DialogHeader>
+          {/* Why: the panel renders with hideHeader, so the modal owns the title
+              and status pill — avoiding a duplicate heading inside the modal. */}
+          <div className="flex flex-wrap items-center gap-2 pr-6">
+            <DialogTitle>
+              {translate(
+                'auto.components.floating.terminal.FloatingTerminalOrchestrationDialog.543f325a14',
+                'Enable orchestration'
+              )}
+            </DialogTitle>
+            {orchestrationSkillLoading && !orchestrationSkillDetected ? (
+              <IntegrationStatusPill tone="neutral">
+                {translate(
+                  'auto.components.floating.terminal.FloatingTerminalOrchestrationDialog.dfd021ce46',
+                  'Checking...'
+                )}
+              </IntegrationStatusPill>
+            ) : orchestrationSkillDetected ? (
+              activeSkillRuntime.canUseLocalSkillFreshness ? (
+                <SkillFreshnessStatusPill skillName={ORCHESTRATION_SKILL_NAME} />
+              ) : (
+                <IntegrationStatusPill tone="connected">
+                  {translate(
+                    'auto.components.floating.terminal.FloatingTerminalOrchestrationDialog.630c0ac8c8',
+                    'Installed'
+                  )}
+                </IntegrationStatusPill>
+              )
+            ) : (
+              <IntegrationStatusPill tone="attention">
+                {translate(
+                  'auto.components.floating.terminal.FloatingTerminalOrchestrationDialog.05d7aabc20',
+                  'Not installed'
+                )}
+              </IntegrationStatusPill>
+            )}
+          </div>
+          <DialogDescription className="sr-only">
+            {translate(
+              'auto.components.floating.terminal.FloatingTerminalOrchestrationDialog.6f0aed26b8',
+              'Install the Kondex CLI and orchestration skill so agents can coordinate through Kondex.'
+            )}
+          </DialogDescription>
+        </DialogHeader>
+
+        <BundledAgentSkillSetupPanel
+          title={translate(
+            'auto.components.floating.terminal.FloatingTerminalOrchestrationDialog.1cd3f8af64',
+            'Orchestration skill'
+          )}
+          description={translate(
+            'auto.components.floating.terminal.FloatingTerminalOrchestrationDialog.f726054620',
+            'Enables agents to hand off context and coordinate work through Kondex.'
+          )}
+          variant="inline"
+          hideHeader
+          installDisabled={Boolean(activeSkillRuntime.installDisabledReason)}
+          discoveryState={{
+            installed: orchestrationSkillDetected,
+            loading: orchestrationSkillLoading,
+            error: activeSkillRuntime.installDisabledReason ?? orchestrationSkillError,
+            refresh: recheckOrchestrationSkill
+          }}
+          skillName="kondex-orchestration"
+          onBeforeInstall={async () => {
+            await (activeSkillRuntime.agentRuntime?.runtime === 'wsl'
+              ? ensureWslCliAvailableForAgentSkillTerminal(activeSkillRuntime.agentRuntime)
+              : ensureOrcaCliAvailableForAgentSkillTerminal())
+          }}
+        />
+      </DialogContent>
+    </Dialog>
+  )
+}

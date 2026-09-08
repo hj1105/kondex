@@ -1,0 +1,295 @@
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { afterEach, describe, expect, it } from 'vitest'
+
+import { ClaudeTranscriptTailIncompleteError } from '../claude/claude-transcript-branch-proof'
+import { readClaudeTranscriptLeafUuid, resolveSessionFilePath } from './session-file-resolver'
+
+let tempRoots: string[] = []
+
+afterEach(async () => {
+  await Promise.all(tempRoots.map((root) => rm(root, { recursive: true, force: true })))
+  tempRoots = []
+})
+
+async function makeRoot(prefix: string): Promise<string> {
+  const root = await mkdtemp(join(tmpdir(), prefix))
+  tempRoots.push(root)
+  return root
+}
+
+function restoreEnv(key: string, previous: string | undefined): void {
+  if (previous === undefined) {
+    delete process.env[key]
+  } else {
+    process.env[key] = previous
+  }
+}
+
+describe('resolveSessionFilePath', () => {
+  it('reads Claude last-prompt leaf metadata as the durable branch marker', async () => {
+    const root = await makeRoot('orca-native-chat-resolve-claude-leaf-')
+    const transcript = join(root, 'session.jsonl')
+    await writeFile(
+      transcript,
+      [
+        { type: 'user', uuid: 'leaf-old', parentUuid: null, sessionId: 'session-1' },
+        {
+          type: 'assistant',
+          uuid: 'leaf-current',
+          parentUuid: 'leaf-old',
+          sessionId: 'session-1'
+        },
+        { type: 'last-prompt', leafUuid: 'leaf-current', sessionId: 'session-1' }
+      ]
+        .map((record) => JSON.stringify(record))
+        .join('\n'),
+      'utf8'
+    )
+
+    await expect(readClaudeTranscriptLeafUuid(transcript, 'session-1', 'leaf-old')).resolves.toBe(
+      'leaf-current'
+    )
+  })
+
+  it('fails closed when a Claude transcript has no branch marker', async () => {
+    const root = await makeRoot('orca-native-chat-resolve-claude-no-leaf-')
+    const transcript = join(root, 'session.jsonl')
+    await writeFile(
+      transcript,
+      '{"type":"assistant","uuid":"not-a-leaf","parentUuid":null,"sessionId":"session-1"}\n',
+      'utf8'
+    )
+
+    await expect(readClaudeTranscriptLeafUuid(transcript, 'session-1')).rejects.toThrow(
+      'missing last-prompt marker'
+    )
+  })
+
+  it('distinguishes an incomplete final Claude JSONL record from durable malformed content', async () => {
+    const root = await makeRoot('orca-native-chat-resolve-claude-torn-tail-')
+    const transcript = join(root, 'session.jsonl')
+    await writeFile(transcript, '{"type":"last-prompt"', 'utf8')
+
+    await expect(readClaudeTranscriptLeafUuid(transcript, 'session-1')).rejects.toBeInstanceOf(
+      ClaudeTranscriptTailIncompleteError
+    )
+
+    await writeFile(transcript, '{"type":"last-prompt"\n', 'utf8')
+    await expect(readClaudeTranscriptLeafUuid(transcript, 'session-1')).rejects.not.toBeInstanceOf(
+      ClaudeTranscriptTailIncompleteError
+    )
+  })
+
+  it('refuses a Claude marker on a sibling branch', async () => {
+    const root = await makeRoot('orca-native-chat-resolve-claude-sibling-')
+    const transcript = join(root, 'session.jsonl')
+    await writeFile(
+      transcript,
+      [
+        { type: 'user', uuid: 'root', parentUuid: null, sessionId: 'session-1' },
+        { type: 'assistant', uuid: 'expected', parentUuid: 'root', sessionId: 'session-1' },
+        { type: 'system', uuid: 'sibling', parentUuid: 'root', sessionId: 'session-1' },
+        { type: 'last-prompt', leafUuid: 'sibling', sessionId: 'session-1' }
+      ]
+        .map((record) => JSON.stringify(record))
+        .join('\n'),
+      'utf8'
+    )
+
+    await expect(readClaudeTranscriptLeafUuid(transcript, 'session-1', 'expected')).rejects.toThrow(
+      'sibling branch'
+    )
+  })
+
+  it('refuses missing and cyclic Claude parent chains', async () => {
+    const root = await makeRoot('orca-native-chat-resolve-claude-invalid-ancestry-')
+    const missing = join(root, 'missing.jsonl')
+    const cycle = join(root, 'cycle.jsonl')
+    await writeFile(
+      missing,
+      [
+        { type: 'user', uuid: 'expected', parentUuid: null, sessionId: 'session-1' },
+        { type: 'assistant', uuid: 'leaf', parentUuid: 'absent', sessionId: 'session-1' },
+        { type: 'last-prompt', leafUuid: 'leaf', sessionId: 'session-1' }
+      ]
+        .map((record) => JSON.stringify(record))
+        .join('\n'),
+      'utf8'
+    )
+    await writeFile(
+      cycle,
+      [
+        { type: 'user', uuid: 'expected', parentUuid: null, sessionId: 'session-1' },
+        { type: 'assistant', uuid: 'left', parentUuid: 'right', sessionId: 'session-1' },
+        { type: 'system', uuid: 'right', parentUuid: 'left', sessionId: 'session-1' },
+        { type: 'last-prompt', leafUuid: 'right', sessionId: 'session-1' }
+      ]
+        .map((record) => JSON.stringify(record))
+        .join('\n'),
+      'utf8'
+    )
+
+    await expect(readClaudeTranscriptLeafUuid(missing, 'session-1', 'expected')).rejects.toThrow(
+      'missing ancestor absent'
+    )
+    await expect(readClaudeTranscriptLeafUuid(cycle, 'session-1', 'expected')).rejects.toThrow(
+      'cycle in parentUuid ancestry'
+    )
+  })
+
+  it('globs Claude project subdirs for <sessionId>.jsonl', async () => {
+    const root = await makeRoot('orca-native-chat-resolve-claude-')
+    const claudeProjectsDir = join(root, 'claude-projects')
+    const projectDir = join(claudeProjectsDir, '-Users-ada-repo')
+    await mkdir(projectDir, { recursive: true })
+    const target = join(projectDir, 'sess-123.jsonl')
+    await writeFile(target, '{}\n')
+
+    const resolved = await resolveSessionFilePath('claude', 'sess-123', { claudeProjectsDir })
+    expect(resolved).toBe(target)
+  })
+
+  it('does not resolve retired providers even with an existing hook transcript', async () => {
+    const root = await makeRoot('kondex-native-chat-retired-')
+    const transcriptPath = join(root, 'session.jsonl')
+    await writeFile(transcriptPath, '{}\n')
+    for (const agent of ['openclaude', 'grok']) {
+      await expect(resolveSessionFilePath(agent, 'session', { transcriptPath })).resolves.toBeNull()
+    }
+  })
+
+  it('does not treat a Claude session id as a relative path', async () => {
+    const root = await makeRoot('kondex-native-chat-invalid-')
+    const claudeProjectsDir = join(root, 'projects')
+    await mkdir(claudeProjectsDir, { recursive: true })
+    await writeFile(join(root, 'escape.jsonl'), '{}\n')
+    await expect(
+      resolveSessionFilePath('claude', '../escape', { claudeProjectsDir })
+    ).resolves.toBeNull()
+  })
+
+  it('matches Codex rollout files by session id suffix', async () => {
+    const root = await makeRoot('orca-native-chat-resolve-codex-')
+    const codexSessionsDir = join(root, 'codex-sessions')
+    const dayDir = join(codexSessionsDir, '2026', '06', '04')
+    await mkdir(dayDir, { recursive: true })
+    const target = join(dayDir, 'rollout-2026-06-04T10-00-00-abc-session.jsonl')
+    await writeFile(target, '{}\n')
+
+    const resolved = await resolveSessionFilePath('codex', 'abc-session', {
+      codexSessionsDirs: [codexSessionsDir]
+    })
+    expect(resolved).toBe(target)
+  })
+
+  it('resolves a rollout from the orca-managed Codex home (ORCA_USER_DATA_PATH)', async () => {
+    // Orca launches Codex with its own managed CODEX_HOME, so rollout files land
+    // under <userData>/codex-runtime-home/home/sessions, NOT ~/.codex/sessions.
+    const root = await makeRoot('orca-native-chat-resolve-managed-')
+    const managedSessionsDir = join(root, 'codex-runtime-home', 'home', 'sessions')
+    const dayDir = join(managedSessionsDir, '2026', '06', '19')
+    await mkdir(dayDir, { recursive: true })
+    const target = join(dayDir, 'rollout-2026-06-19T04-20-39-019edf9c-managed.jsonl')
+    await writeFile(target, '{}\n')
+
+    const previous = process.env.ORCA_USER_DATA_PATH
+    process.env.ORCA_USER_DATA_PATH = root
+    try {
+      const resolved = await resolveSessionFilePath('codex', '019edf9c-managed')
+      expect(resolved).toBe(target)
+    } finally {
+      if (previous === undefined) {
+        delete process.env.ORCA_USER_DATA_PATH
+      } else {
+        process.env.ORCA_USER_DATA_PATH = previous
+      }
+    }
+  })
+
+  it('falls back to CODEX_HOME when the managed home has no match', async () => {
+    const root = await makeRoot('orca-native-chat-resolve-codex-home-')
+    const managedRoot = join(root, 'managed-userdata')
+    await mkdir(managedRoot, { recursive: true })
+    const codexHome = join(root, 'custom-codex-home')
+    const dayDir = join(codexHome, 'sessions', '2026', '06', '05')
+    await mkdir(dayDir, { recursive: true })
+    const target = join(dayDir, 'rollout-xyz-session.jsonl')
+    await writeFile(target, '{}\n')
+
+    const previousCodex = process.env.CODEX_HOME
+    const previousUserData = process.env.ORCA_USER_DATA_PATH
+    process.env.CODEX_HOME = codexHome
+    // Point the managed home at an empty dir so the fallback is exercised.
+    process.env.ORCA_USER_DATA_PATH = managedRoot
+    try {
+      const resolved = await resolveSessionFilePath('codex', 'xyz-session')
+      expect(resolved).toBe(target)
+    } finally {
+      restoreEnv('CODEX_HOME', previousCodex)
+      restoreEnv('ORCA_USER_DATA_PATH', previousUserData)
+    }
+  })
+
+  it('returns null when no transcript matches', async () => {
+    const root = await makeRoot('orca-native-chat-resolve-missing-')
+    const claudeProjectsDir = join(root, 'claude-projects')
+    await mkdir(claudeProjectsDir, { recursive: true })
+    expect(await resolveSessionFilePath('claude', 'nope', { claudeProjectsDir })).toBeNull()
+  })
+
+  it('returns null for unsupported agents', async () => {
+    expect(await resolveSessionFilePath('gemini', 'whatever')).toBeNull()
+  })
+
+  it('prefers the hook transcriptPath when it exists (Claude id != file name)', async () => {
+    // Recent Claude Code names the file with a UUID that differs from the hook
+    // session_id, so the id glob would miss it — but transcript_path is exact.
+    const root = await makeRoot('orca-native-chat-resolve-path-')
+    const claudeProjectsDir = join(root, 'claude-projects')
+    const projectDir = join(claudeProjectsDir, '-Users-ada-repo')
+    await mkdir(projectDir, { recursive: true })
+    // The real transcript is named by a DIFFERENT id than the hook session id.
+    const realFile = join(projectDir, 'real-file-uuid.jsonl')
+    await writeFile(realFile, '{}\n')
+
+    const resolved = await resolveSessionFilePath('claude', 'hook-session-id', {
+      claudeProjectsDir,
+      transcriptPath: realFile
+    })
+    expect(resolved).toBe(realFile)
+  })
+
+  it('falls back to the id glob when the hook transcriptPath does not exist', async () => {
+    const root = await makeRoot('orca-native-chat-resolve-path-stale-')
+    const claudeProjectsDir = join(root, 'claude-projects')
+    const projectDir = join(claudeProjectsDir, '-Users-ada-repo')
+    await mkdir(projectDir, { recursive: true })
+    const target = join(projectDir, 'sess-xyz.jsonl')
+    await writeFile(target, '{}\n')
+
+    const resolved = await resolveSessionFilePath('claude', 'sess-xyz', {
+      claudeProjectsDir,
+      transcriptPath: join(projectDir, 'does-not-exist.jsonl')
+    })
+    expect(resolved).toBe(target)
+  })
+
+  it('ignores a non-jsonl transcriptPath and falls back to the glob', async () => {
+    const root = await makeRoot('orca-native-chat-resolve-path-ext-')
+    const claudeProjectsDir = join(root, 'claude-projects')
+    const projectDir = join(claudeProjectsDir, '-Users-ada-repo')
+    await mkdir(projectDir, { recursive: true })
+    const bogus = join(projectDir, 'not-a-transcript.txt')
+    await writeFile(bogus, 'x')
+    const target = join(projectDir, 'sess-ok.jsonl')
+    await writeFile(target, '{}\n')
+
+    const resolved = await resolveSessionFilePath('claude', 'sess-ok', {
+      claudeProjectsDir,
+      transcriptPath: bogus
+    })
+    expect(resolved).toBe(target)
+  })
+})
