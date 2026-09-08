@@ -7,8 +7,12 @@ export function getOrcaElectronLaunchArgs(mainPath: string, headful: boolean): s
   // these Chromium switches startup can block before the first renderer target.
   const keychainArgs =
     process.platform === 'darwin' ? ['--password-store=basic', '--use-mock-keychain'] : []
+  // Why: the app follows app.getLocale(), so on a machine whose OS language is not
+  // English these specs meet a translated UI and their English locators find nothing.
+  // Pinning the locale keeps the suite the same test everywhere it runs.
+  const localeArgs = ['--lang=en-US']
   if (headful || process.platform !== 'linux') {
-    return [...keychainArgs, appPath]
+    return [...localeArgs, ...keychainArgs, appPath]
   }
 
   // Why: Ubuntu CI cannot run Electron's setuid chrome-sandbox (not root-owned
@@ -24,6 +28,7 @@ export function getOrcaElectronLaunchArgs(mainPath: string, headful: boolean): s
     '--disable-gpu-sandbox',
     '--disable-dev-shm-usage',
     '--in-process-gpu',
+    ...localeArgs,
     ...keychainArgs,
     appPath
   ]

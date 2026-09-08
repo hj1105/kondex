@@ -105,10 +105,10 @@ async function addProjectFromSidebar(
   repoPath: string
 ): Promise<void> {
   await chooseFolderInNativeDialog(electronApp, repoPath)
-  await page
-    .getByRole('button', { name: /Add Project/i })
-    .first()
-    .click()
+  // Why: once a project exists the sidebar shows no standalone Add Project control,
+  // so the workspace composer's Add project button is the path a user actually takes.
+  await page.getByRole('button', { name: 'New workspace', exact: true }).click()
+  await page.getByRole('button', { name: 'Add project', exact: true }).first().click()
   const addDialog = page.getByRole('dialog', { name: /Add a project/i })
   await expect(addDialog).toBeVisible()
   await addDialog.getByRole('button', { name: /Browse folder/i }).click()
@@ -127,8 +127,16 @@ async function addProjectFromSidebar(
 }
 
 async function createWorkspace(page: Page, workspaceName: string): Promise<void> {
-  await page.getByRole('button', { name: 'New workspace', exact: true }).click()
   const dialog = page.getByRole('dialog', { name: /Create (Workspace|Worktree)/i })
+  // Why: adding a project hands back to the composer, so the dialog can already be
+  // open — and it is then scoped to the project that was just added.
+  const alreadyOpen = await dialog
+    .waitFor({ state: 'visible', timeout: 2_000 })
+    .then(() => true)
+    .catch(() => false)
+  if (!alreadyOpen) {
+    await page.getByRole('button', { name: 'New workspace', exact: true }).click()
+  }
   await expect(dialog).toBeVisible()
   const nameInput = dialog.getByPlaceholder(/Type a name/i)
   await expect(nameInput).toBeVisible()

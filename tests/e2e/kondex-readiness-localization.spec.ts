@@ -22,7 +22,7 @@ test('renders localized readiness boundaries through the real runtime bridge', a
     orcaPage.getByText('Kontext 보조 서버에 연결할 수 없음', { exact: true })
   ).toBeVisible()
   await expect(
-    orcaPage.getByText(/새 작업·근거 등록과 최종 작업 완료 판정은 아직 연결되지 않았습니다/)
+    orcaPage.getByText(/관리형 컨텍스트 선택과 최종 작업 완료 처리는 아직 연결되지 않았습니다/)
   ).toBeVisible()
   await expect(orcaPage.getByText('No published task', { exact: true })).toHaveCount(0)
   await expect(orcaPage.getByText('구독 실행 환경', { exact: true })).toHaveCount(0)
@@ -43,8 +43,6 @@ test('renders localized readiness boundaries through the real runtime bridge', a
     orcaPage.getByRole('button', { name: 'Logic Work Items', exact: true })
   ).toBeVisible()
   await expect(
-    orcaPage.getByText(
-      /New task\/source registration and final Task completion are not connected yet/
-    )
+    orcaPage.getByText(/Managed context selection and final Task completion are not connected yet/)
   ).toBeVisible()
 })
