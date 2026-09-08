@@ -7,6 +7,7 @@ import type {
   SkillSourceKind
 } from '../../src/shared/skills'
 import { ORCHESTRATION_ENABLED_STORAGE_KEY } from '../../src/renderer/src/lib/orchestration-setup-state'
+import { ORCHESTRATION_SKILL_NAME } from '../../src/shared/agent-feature-install-commands'
 
 type MockSkillDiscoveryGlobal = typeof globalThis & {
   __orcaSettingsSkillDiscoveryResult?: SkillDiscoveryResult
@@ -15,12 +16,12 @@ type MockSkillDiscoveryGlobal = typeof globalThis & {
 function makeSkill(sourceKind: SkillSourceKind, directoryPath: string): DiscoveredSkill {
   return {
     id: `${sourceKind}-orca-cli`,
-    name: 'orchestration',
+    name: ORCHESTRATION_SKILL_NAME,
     description: null,
     providers: ['agent-skills'],
     sourceKind,
     sourceLabel: sourceKind,
-    rootPath: directoryPath.replace(/[\\/]orchestration$/, ''),
+    rootPath: directoryPath.slice(0, directoryPath.lastIndexOf('/')),
     directoryPath,
     skillFilePath: `${directoryPath}/SKILL.md`,
     installed: true,
@@ -96,8 +97,8 @@ test.describe('Settings skill detection', () => {
     await installMockSkillDiscovery(
       electronApp,
       discoveryResult([
-        makeSkill('repo', '/workspace/.agents/skills/orchestration'),
-        makeSkill('plugin', '/Users/test/.codex/plugins/cache/vendor/orchestration')
+        makeSkill('repo', `/workspace/.agents/skills/${ORCHESTRATION_SKILL_NAME}`),
+        makeSkill('plugin', `/Users/test/.codex/plugins/cache/vendor/${ORCHESTRATION_SKILL_NAME}`)
       ])
     )
 
@@ -107,18 +108,18 @@ test.describe('Settings skill detection', () => {
 
     await expect(section.getByText('Not installed', { exact: true })).toBeVisible()
     await expect(
-      section.getByText('Enables agents to hand off context and coordinate work through Orca.')
+      section.getByText('Enables agents to hand off context and coordinate work through Kondex.')
     ).toBeVisible()
 
     await setMockSkillDiscovery(
       electronApp,
-      discoveryResult([makeSkill('home', '/Users/test/.agents/skills/orchestration')])
+      discoveryResult([makeSkill('home', `/Users/test/.agents/skills/${ORCHESTRATION_SKILL_NAME}`)])
     )
     await section.getByRole('button', { name: 'Re-check' }).click()
 
     await expect(section.getByText('Installed', { exact: true })).toBeVisible()
     await expect(
-      section.getByText('Enables agents to hand off context and coordinate work through Orca.')
+      section.getByText('Enables agents to hand off context and coordinate work through Kondex.')
     ).toBeVisible()
   })
 })

@@ -34,7 +34,9 @@ export function useAutomationsPageEscape({
       }
 
       // Popovers and menus are outside the store modal registry and own Escape.
-      if (hasVisibleOverlay()) {
+      // The worktree sidebar stays mounted beside this page and exposes role="listbox",
+      // so counting it would leave Escape permanently vetoed here.
+      if (hasVisibleOverlay({ ignoreSelector: '[data-worktree-sidebar-container]' })) {
         return
       }
 
