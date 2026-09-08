@@ -8,7 +8,8 @@ import {
   getTerminalContent,
   sendToTerminal,
   waitForActivePanePtyId,
-  waitForActiveTerminalManager
+  waitForActiveTerminalManager,
+  waitForActiveTerminalPane
 } from './helpers/terminal'
 import { nodeTerminalCommand } from './terminal-node-command'
 import { waitForPtyShellEcho } from './terminal-pty-readiness'
@@ -246,6 +247,9 @@ test('reuses a terminal file link already open in a sibling workspace @golden', 
 
   await ensureTerminalVisible(orcaPage)
   await waitForActiveTerminalManager(orcaPage, 30_000)
+  // Why: opening the sibling file can leave an editor tab active a beat longer than
+  // ensureTerminalVisible waits, and then the cols poll below reads no pane at all.
+  await waitForActiveTerminalPane(orcaPage, 30_000)
   await orcaPage.evaluate(() => {
     const state = window.__store?.getState()
     state?.setSidebarOpen(false)
@@ -260,7 +264,7 @@ test('reuses a terminal file link already open in a sibling workspace @golden', 
           const manager = tabId ? window.__paneManagers?.get(tabId) : null
           return manager?.getActivePane?.()?.terminal.cols ?? 0
         }),
-      { message: 'terminal did not expand after closing the sidebars' }
+      { timeout: 30_000, message: 'terminal did not expand after closing the sidebars' }
     )
     .toBeGreaterThan(120)
   const ptyId = await waitForActivePanePtyId(orcaPage, 30_000)

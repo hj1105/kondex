@@ -21,6 +21,7 @@ import {
   sendToTerminal as sendToTerminalImpl,
   splitActiveTerminalPane as splitActiveTerminalPaneImpl,
   waitForActiveTerminalManager as waitForActiveTerminalManagerImpl,
+  waitForActiveTerminalPane as waitForActiveTerminalPaneImpl,
   waitForPaneCount as waitForPaneCountImpl,
   waitForTerminalOutput as waitForTerminalOutputImpl
 } from './terminal-pane-operations'
@@ -167,6 +168,10 @@ export function sendToTerminal(page: Page, ptyId: string, text: string): Promise
 
 export function execInTerminal(page: Page, ptyId: string, command: string): Promise<void> {
   return execInTerminalImpl(page, ptyId, command)
+}
+
+export function waitForActiveTerminalPane(page: Page, timeoutMs = 30_000): Promise<void> {
+  return waitForActiveTerminalPaneImpl(page, timeoutMs)
 }
 
 export function waitForActiveTerminalManager(page: Page, timeoutMs = 30_000): Promise<void> {

@@ -65,6 +65,25 @@ export async function execInTerminal(page: Page, ptyId: string, command: string)
   await sendToTerminal(page, ptyId, `${command}\r`)
 }
 
+/**
+ * Waits for the pane the active tab actually renders into. waitForActiveTerminalManager
+ * only proves panes exist; an assertion that reads getActivePane() can still find
+ * nothing while the active tab is an editor or the pane is still being adopted.
+ */
+export async function waitForActiveTerminalPane(page: Page, timeoutMs = 30_000): Promise<void> {
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const tabId = window.__store?.getState()?.activeTabId
+          const manager = tabId ? window.__paneManagers?.get(tabId) : null
+          return Boolean(manager?.getActivePane?.())
+        }),
+      { timeout: timeoutMs, message: 'active terminal pane did not become available' }
+    )
+    .toBe(true)
+}
+
 export async function waitForActiveTerminalManager(page: Page, timeoutMs = 30_000): Promise<void> {
   await expect
     .poll(
