@@ -221,6 +221,20 @@ describe('Kontext ontology add-source dialog', () => {
     })
   })
 
+  it('treats an owner URL pasted as a repository as the organization it names', () => {
+    render(
+      <KontextOntologyAddSource disabled={false} onAdd={vi.fn()} onListRepositories={vi.fn()} />
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Add a source' }))
+    fireEvent.click(screen.getByRole('button', { name: 'GitHub repository' }))
+    fireEvent.change(screen.getByLabelText('Repository URL'), {
+      target: { value: 'https://github.com/modapl' }
+    })
+    expect(valueOf('Organization or user URL')).toBe('https://github.com/modapl')
+    expect(screen.getByRole('button', { name: 'Load repositories' })).toBeTruthy()
+    expect(screen.queryByLabelText('Name')).toBeNull()
+  })
+
   it('keeps Add disabled until both a name and an address exist', () => {
     open()
     fireEvent.click(screen.getByRole('button', { name: 'GitHub repository' }))

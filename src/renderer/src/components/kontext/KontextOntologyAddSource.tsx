@@ -47,6 +47,11 @@ const PRESETS: readonly Preset[] = [
 
 const TRANSPORTS: readonly AddSourceInput['transport'][] = ['git', 'sse', 'stdio', 'local']
 
+/** `https://github.com/<owner>` with nothing after it names an organization or user, not a repository. */
+export function isGithubOwnerUrl(value: string): boolean {
+  return /^(https?:\/\/)?(www\.)?github\.com\/[A-Za-z0-9][A-Za-z0-9-]*\/?$/i.test(value.trim())
+}
+
 /** One `KEY=VALUE` per line; a line without `=` is left for the CLI to reject by name. */
 function parseEnvironmentLines(text: string): Record<string, string> | undefined {
   const entries = text
@@ -208,7 +213,16 @@ export function KontextOntologyAddSource({
       <Input
         id="kontext-ontology-add-address"
         value={address}
-        onChange={(event) => setAddress(event.target.value)}
+        onChange={(event) => {
+          const value = event.target.value
+          setAddress(value)
+          // Why: git clone of an owner URL fails; the organization list is what that address means.
+          if (!organization && transport === 'git' && isGithubOwnerUrl(value)) {
+            setOrganization(true)
+            setName('')
+            setListing(null)
+          }
+        }}
         disabled={disabled}
         placeholder={
           organization
