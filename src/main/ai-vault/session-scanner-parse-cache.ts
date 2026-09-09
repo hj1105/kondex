@@ -2,6 +2,7 @@ import { readTranscriptSlice } from '../native-chat/wsl-transcript-fs-access'
 import type { AiVaultSession } from '../../shared/ai-vault-types'
 import { parseAgentSessionFile } from './session-scanner-agent-parser'
 import { createCodexSessionResumeState } from './session-scanner-codex-parser'
+import { createGeminiJsonlSessionResumeState } from './session-scanner-gemini-parsers'
 import { createClaudeSessionResumeState } from './session-scanner-primary-parsers'
 import { countSubagentTranscripts } from './session-scanner-subagent-transcripts'
 import type { ResumableSessionParseState, SessionFileCandidate } from './session-scanner-types'
@@ -28,7 +29,9 @@ type SessionParseCacheEntry = {
   resume: ResumePoint | null
 }
 
-// Incremental append-parsing applies to the append-only Codex and Claude JSONL transcripts.
+// Incremental append-parsing applies to append-only JSONL transcripts. A whole-JSON
+// document (Gemini's .json shape) is rewritten in place, so it keeps unchanged-file
+// reuse only and re-parses whole when it changes.
 // Returns a factory (not a state) so steady-state resumes, which clone the
 // cached state instead, never pay for a throwaway accumulator.
 function resumableStateFactoryFor(
@@ -39,6 +42,12 @@ function resumableStateFactoryFor(
       return () => createClaudeSessionResumeState(candidate.file)
     case 'codex':
       return () => createCodexSessionResumeState(candidate.file, candidate.codexHome)
+    // Gemini writes both shapes: the JSONL log folds incrementally, while a
+    // whole-JSON document is rewritten in place and can only be re-parsed whole.
+    case 'gemini':
+      return candidate.file.path.endsWith('.jsonl')
+        ? () => createGeminiJsonlSessionResumeState(candidate.file)
+        : null
   }
 }
 

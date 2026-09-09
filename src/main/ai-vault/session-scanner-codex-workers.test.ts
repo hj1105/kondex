@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { scanAiVaultSessions } from './session-scanner'
+import { isolatedScanRoots } from './session-scanner-test-fixtures'
 
 let tempRoots: string[] = []
 
@@ -19,7 +20,10 @@ describe('scanAiVaultSessions Codex worker sessions', () => {
   it('hides Codex worker transcripts from session history', async () => {
     const root = await mkdtemp(join(tmpdir(), 'orca-ai-vault-codex-workers-'))
     tempRoots.push(root)
-    const codexSessionsDir = join(root, 'codex-sessions')
+    // Why the shared fixture: it isolates every agent root, so a real session in
+    // the developer's own home cannot list itself into this assertion.
+    const roots = isolatedScanRoots(root)
+    const codexSessionsDir = roots.codexSessionsDir
     await mkdir(join(codexSessionsDir, '2026', '06', '12'), { recursive: true })
 
     await writeFile(
@@ -102,11 +106,7 @@ describe('scanAiVaultSessions Codex worker sessions', () => {
       ])
     )
 
-    const result = await scanAiVaultSessions({
-      claudeProjectsDir: join(root, 'claude-projects'),
-      codexSessionsDir,
-      platform: 'darwin'
-    })
+    const result = await scanAiVaultSessions({ ...roots, platform: 'darwin' })
 
     expect(result.issues).toEqual([])
     expect(result.sessions.map((session) => session.sessionId)).toEqual(['user-session'])

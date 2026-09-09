@@ -10,6 +10,10 @@ export type AiVaultScanOptions = {
   claudeProjectsDir?: string
   codexSessionsDir?: string
   additionalCodexSessionsDirs?: readonly string[]
+  // The Kondex-owned CODEX_HOME's sessions dir on this host. Overridable so a
+  // test never reaches the developer's real managed home.
+  codexRuntimeHomeSessionsDir?: string
+  geminiSessionsDir?: string
   // Why: tests inject a sandbox "real ~/.codex" so real-home attribution
   // (codexHome null → unprefixed resume) is testable without the user's home.
   defaultCodexHomeDir?: string

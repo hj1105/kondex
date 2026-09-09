@@ -183,15 +183,15 @@ describe('deleteAiVaultSessionFile', () => {
   })
 
   it('short-circuits a rejected validation (unsupported agent) before touching the filesystem', async () => {
-    const filePath = join(HOME, '.codex', 'sessions', 'rollout-1.jsonl')
+    const filePath = join(HOME, '.opencode', 'sessions', 'session-1.json')
 
     const result = await deleteAiVaultSessionFile({
-      agent: 'codex',
+      agent: 'opencode' as never,
       filePath,
       executionHostId: 'local'
     })
 
-    expect(result).toEqual({ outcome: 'rejected', agent: 'codex', reason: 'unsupported-agent' })
+    expect(result).toEqual({ outcome: 'rejected', agent: 'opencode', reason: 'unsupported-agent' })
     expect(lstatMock).not.toHaveBeenCalled()
     expect(realpathMock).not.toHaveBeenCalled()
     expect(trashItemMock).not.toHaveBeenCalled()

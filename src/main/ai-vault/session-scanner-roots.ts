@@ -30,3 +30,12 @@ export function normalizedWslHomeDirs(homeDirs: readonly string[] | undefined): 
   }
   return unique
 }
+
+/** One host root plus the same relative location inside each WSL distro home. */
+export function sessionRootDirs(
+  hostRootDir: string,
+  wslHomeDirs: readonly string[],
+  segments: readonly string[]
+): string[] {
+  return [hostRootDir, ...wslHomeDirs.map((homeDir) => join(homeDir, ...segments))]
+}

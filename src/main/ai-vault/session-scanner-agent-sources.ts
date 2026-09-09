@@ -3,7 +3,7 @@ import { dirname, extname, join, relative } from 'node:path'
 import type { AiVaultAgent } from '../../shared/ai-vault-types'
 import type { AiVaultDeletableAgent } from '../../shared/ai-vault-session-deletion'
 import { uniqueCodexSessionsDirs } from './session-scanner-codex-paths'
-import { claudeProjectsRootDirs } from './session-scanner-roots'
+import { claudeProjectsRootDirs, sessionRootDirs } from './session-scanner-roots'
 import { SUBAGENT_DIR_NAME } from './session-scanner-subagent-transcripts'
 import type { AiVaultScanOptions } from './session-scanner-types'
 
@@ -12,6 +12,20 @@ const CODEX_SESSIONS_DIR = join(
   process.env.CODEX_HOME?.trim() || DEFAULT_CODEX_HOME_DIR,
   'sessions'
 )
+const GEMINI_SESSIONS_DIR = join(homedir(), '.gemini', 'tmp')
+// Why: Kondex-launched Codex uses a Kondex-owned CODEX_HOME rather than ~/.codex,
+// so the same session exists in both. The WSL entries below already cover their
+// distro homes; this is the local host's, and it has to be part of the source's
+// own roots so the delete validator sees it without extra scan options.
+const CODEX_RUNTIME_HOME_SESSIONS_SEGMENTS = [
+  '.local',
+  'share',
+  'orca',
+  'codex-runtime-home',
+  'home',
+  'sessions'
+] as const
+const LOCAL_CODEX_RUNTIME_SESSIONS_DIR = join(homedir(), ...CODEX_RUNTIME_HOME_SESSIONS_SEGMENTS)
 
 /**
  * Where one agent's session files live and which of them count as sessions.
@@ -55,15 +69,21 @@ export const AI_VAULT_AGENT_SOURCES: AiVaultAgentSourceTable = {
     rootDirs: (options, wslHomeDirs) =>
       uniqueCodexSessionsDirs([
         options.codexSessionsDir ?? CODEX_SESSIONS_DIR,
+        options.codexRuntimeHomeSessionsDir ?? LOCAL_CODEX_RUNTIME_SESSIONS_DIR,
         ...wslHomeDirs.map((homeDir) => join(homeDir, '.codex', 'sessions')),
-        // Why: Kondex-launched WSL Codex sessions use a Kondex-owned CODEX_HOME,
-        // not the user's default ~/.codex history root.
-        ...wslHomeDirs.map((homeDir) =>
-          join(homeDir, '.local', 'share', 'orca', 'codex-runtime-home', 'home', 'sessions')
-        ),
+        ...wslHomeDirs.map((homeDir) => join(homeDir, ...CODEX_RUNTIME_HOME_SESSIONS_SEGMENTS)),
         ...(options.additionalCodexSessionsDirs ?? [])
       ]),
     extensions: ['.jsonl']
+  },
+  // Kondex cannot launch Gemini, but it reads the history Gemini leaves on disk.
+  gemini: {
+    rootDirs: (options, wslHomeDirs) =>
+      sessionRootDirs(options.geminiSessionsDir ?? GEMINI_SESSIONS_DIR, wslHomeDirs, [
+        '.gemini',
+        'tmp'
+      ]),
+    extensions: ['.json', '.jsonl']
   }
 }
 

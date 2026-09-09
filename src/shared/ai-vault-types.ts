@@ -1,7 +1,9 @@
-import type { TuiAgent } from './tui-agent'
 import type { ExecutionHostId, ExecutionHostScope } from './execution-host'
 
-export const AI_VAULT_AGENTS = ['claude', 'codex'] as const satisfies readonly TuiAgent[]
+// Why not `satisfies readonly TuiAgent[]`: TuiAgent is what Kondex can launch.
+// The vault only reads transcripts other tools wrote, so it lists agents whose
+// history is on disk even when Kondex has no runtime provider for them.
+export const AI_VAULT_AGENTS = ['claude', 'codex', 'gemini'] as const
 
 // Why: the aiVault.listSessions RPC schema CLAMPS scopePaths to this bound
 // (safe: scope paths only widen discovery). Producer-side caps against the same
@@ -26,7 +28,8 @@ export type AiVaultGroup = 'project' | 'folder' | 'agent'
 
 export const AI_VAULT_AGENT_LABELS = {
   claude: 'Claude',
-  codex: 'Codex'
+  codex: 'Codex',
+  gemini: 'Gemini'
 } as const satisfies Record<AiVaultAgent, string>
 
 export type AiVaultSessionPreviewMessage = {

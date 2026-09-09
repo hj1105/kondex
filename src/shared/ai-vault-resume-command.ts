@@ -2,6 +2,7 @@
 // session into the shell line that re-enters it, quoted for the target platform
 // and (when known) the live tab's shell.
 import { TUI_AGENT_CONFIG } from './tui-agent-config'
+import type { TuiAgent } from './tui-agent'
 import {
   clearEnvCommand,
   commandSeparator,
@@ -166,8 +167,14 @@ export function realHomeCodexResumeEnvDeletion(
   return { envToDelete: ['CODEX_HOME', 'ORCA_CODEX_HOME'] }
 }
 
+// Agents the vault reads but Kondex cannot launch have no TUI_AGENT_CONFIG entry,
+// so their resume command is just the CLI the user already runs themselves.
+const NON_RUNTIME_RESUME_COMMANDS = { gemini: 'gemini' } as const
+
 function defaultAiVaultResumeCommandBase(agent: AiVaultAgent): string {
-  return TUI_AGENT_CONFIG[agent].detectCmd
+  return agent in NON_RUNTIME_RESUME_COMMANDS
+    ? NON_RUNTIME_RESUME_COMMANDS[agent as keyof typeof NON_RUNTIME_RESUME_COMMANDS]
+    : TUI_AGENT_CONFIG[agent as TuiAgent].detectCmd
 }
 
 function buildAgentResumeInvocation(
@@ -179,6 +186,7 @@ function buildAgentResumeInvocation(
     case 'codex':
       return `${baseCommand} resume ${sessionArg}`
     case 'claude':
+    case 'gemini':
       return `${baseCommand} --resume ${sessionArg}`
   }
 }

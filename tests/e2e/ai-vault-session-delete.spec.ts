@@ -48,37 +48,74 @@ function deleteSession(page: Page, session: AiVaultSession): Promise<AiVaultDele
 }
 
 test.describe('AI Vault session delete', () => {
-  // Kondex scans exactly its two subscription runtimes, and Codex is deliberately
-  // not deletable: its transcripts live in both the managed runtime home and
-  // ~/.codex, so a one-sided delete reappears on the next scan. That leaves Claude
-  // as the only deletable agent, so this case pins the refusal instead of a delete.
-  test('lists a Codex session but refuses to delete it', async ({ electronApp, orcaPage }) => {
+  test('trashes a single-file session and removes it from the list', async ({
+    electronApp,
+    orcaPage
+  }) => {
     const homeDir = await isolatedHome(electronApp)
-    const title = `E2E codex ${Date.now()}`
-    const dir = path.join(homeDir, '.codex', 'sessions', '2026', '07', '20')
+    const title = `E2E gemini ${Date.now()}`
+    const dir = path.join(homeDir, '.gemini', 'tmp', 'proj', 'chats')
     mkdirSync(dir, { recursive: true })
-    const filePath = path.join(dir, 'session-e2e.jsonl')
-    const timestamp = '2026-07-20T10:00:00.000Z'
+    const filePath = path.join(dir, 'session-e2e.json')
     writeFileSync(
       filePath,
-      jsonl([
-        { timestamp, type: 'session_meta', payload: { id: 'codex-e2e', cwd: dir } },
-        {
-          timestamp,
-          type: 'response_item',
-          payload: { type: 'message', role: 'user', content: [{ type: 'text', text: title }] }
-        }
-      ])
+      JSON.stringify({
+        sessionId: 'gemini-e2e',
+        startTime: '2026-07-20T10:00:00.000Z',
+        lastUpdated: '2026-07-20T10:05:00.000Z',
+        messages: [{ type: 'user', content: title, timestamp: '2026-07-20T10:00:00.000Z' }]
+      })
     )
+
+    const session = await findSession(orcaPage, 'gemini', title)
+    expect(session, 'seeded gemini session should be listed').toBeTruthy()
+
+    const result = await deleteSession(orcaPage, session as AiVaultSession)
+
+    expect(result.outcome).toBe('deleted')
+    expect(existsSync(filePath), 'transcript should be gone from disk').toBe(false)
+    expect(await findSession(orcaPage, 'gemini', title)).toBeFalsy()
+  })
+
+  // Codex writes the same session under ~/.codex and the Kondex-managed runtime
+  // home. Deleting only the scanned copy would let its twin list again, so this
+  // seeds both and requires the delete to take them together.
+  test('trashes a Codex session from every Codex home it lives in', async ({
+    electronApp,
+    orcaPage
+  }) => {
+    const homeDir = await isolatedHome(electronApp)
+    const title = `E2E codex ${Date.now()}`
+    const relative = path.join('2026', '07', '20', 'session-e2e.jsonl')
+    const timestamp = '2026-07-20T10:00:00.000Z'
+    const content = jsonl([
+      { timestamp, type: 'session_meta', payload: { id: 'codex-e2e', cwd: homeDir } },
+      {
+        timestamp,
+        type: 'response_item',
+        payload: { type: 'message', role: 'user', content: [{ type: 'text', text: title }] }
+      }
+    ])
+    const homes = [
+      path.join(homeDir, '.codex', 'sessions'),
+      path.join(homeDir, '.local', 'share', 'orca', 'codex-runtime-home', 'home', 'sessions')
+    ]
+    const paths = homes.map((root) => path.join(root, relative))
+    for (const target of paths) {
+      mkdirSync(path.dirname(target), { recursive: true })
+      writeFileSync(target, content)
+    }
 
     const session = await findSession(orcaPage, 'codex', title)
     expect(session, 'seeded codex session should be listed').toBeTruthy()
 
     const result = await deleteSession(orcaPage, session as AiVaultSession)
 
-    expect(result).toMatchObject({ outcome: 'rejected', agent: 'codex' })
-    expect(existsSync(filePath), 'a refused delete must leave the transcript alone').toBe(true)
-    expect(await findSession(orcaPage, 'codex', title)).toBeTruthy()
+    expect(result.outcome).toBe('deleted')
+    for (const target of paths) {
+      expect(existsSync(target), `${target} should be gone from disk`).toBe(false)
+    }
+    expect(await findSession(orcaPage, 'codex', title)).toBeFalsy()
   })
 
   test('trashes a claude directory session and its companions but keeps file-history', async ({

@@ -70,13 +70,32 @@ describe('validateAiVaultSessionDeleteTarget', () => {
     expect(result).toEqual({ allowed: false, agent: 'claude', reason: 'undiscoverable-path' })
   })
 
-  it('rejects an agent whose own registry would keep a dangling entry (codex)', () => {
+  // Codex writes the same session under the user's ~/.codex and the Kondex-owned
+  // runtime home, so deleting only the scanned copy would let its twin list again.
+  it('plans a codex delete across every codex home', () => {
+    const codexSessionsDir = join(HOME, '.codex', 'sessions')
+    const runtimeSessionsDir = join(HOME, 'runtime-codex', 'sessions')
+    const relativePath = join('2026', '06', '12', 'rollout-1.jsonl')
     const result = validateAiVaultSessionDeleteTarget({
       agent: 'codex',
-      filePath: join(HOME, '.codex', 'sessions', 'rollout-1.jsonl'),
+      filePath: join(codexSessionsDir, relativePath),
+      executionHostId: 'local',
+      rootOptions: { codexSessionsDir, codexRuntimeHomeSessionsDir: runtimeSessionsDir }
+    })
+    expect(result).toMatchObject({ allowed: true, agent: 'codex' })
+    expect(result.allowed && result.removals.map((removal) => removal.path)).toEqual([
+      join(codexSessionsDir, relativePath),
+      join(runtimeSessionsDir, relativePath)
+    ])
+  })
+
+  it('rejects an agent the vault does not delete', () => {
+    const result = validateAiVaultSessionDeleteTarget({
+      agent: 'opencode' as never,
+      filePath: join(HOME, '.opencode', 'sessions', 'session-1.json'),
       executionHostId: 'local'
     })
-    expect(result).toEqual({ allowed: false, agent: 'codex', reason: 'unsupported-agent' })
+    expect(result).toEqual({ allowed: false, agent: 'opencode', reason: 'unsupported-agent' })
   })
 
   it('rejects a non-local execution host', () => {

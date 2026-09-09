@@ -2,6 +2,7 @@ import type { AiVaultAgent, AiVaultSession } from '../../shared/ai-vault-types'
 import type { RemoteHostPlatform } from '../ssh/ssh-remote-platform'
 import { joinRemotePath } from '../ssh/ssh-remote-platform'
 import { parseCodexSessionContent } from './session-scanner-codex-parser'
+import { parseGeminiSessionContent } from './session-scanner-gemini-parsers'
 import { parseClaudeSessionContent } from './session-scanner-primary-parsers'
 import { partitionSubagentTranscriptPaths } from './session-scanner-subagent-transcripts'
 import type { FileWithMtime } from './session-scanner-types'
@@ -41,7 +42,15 @@ export function remoteSessionSources(
       // transcripts themselves, which would otherwise list as phantom
       // top-level sessions carrying the parent's sessionId.
       partitionSubagentTranscripts: partitionSubagentTranscriptPaths
-    }
+    },
+    source(
+      'gemini',
+      remoteHome,
+      hostPlatform,
+      ['.gemini', 'tmp'],
+      ['.json', '.jsonl'],
+      parseGeminiSessionContent
+    )
   ]
 }
 

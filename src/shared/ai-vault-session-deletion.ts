@@ -23,7 +23,11 @@ export type AiVaultDeleteSessionResult =
 //
 // Codex is excluded because session_index.jsonl plus hardlink aliases between the Kondex-managed
 //   home and ~/.codex, so a one-sided delete reappears on the next scan.
-export const AI_VAULT_DELETABLE_AGENTS = ['claude'] as const satisfies readonly AiVaultAgent[]
+export const AI_VAULT_DELETABLE_AGENTS = [
+  'claude',
+  'codex',
+  'gemini'
+] as const satisfies readonly AiVaultAgent[]
 
 export type AiVaultDeletableAgent = (typeof AI_VAULT_DELETABLE_AGENTS)[number]
 

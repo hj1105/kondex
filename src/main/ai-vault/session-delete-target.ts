@@ -1,4 +1,4 @@
-import { basename, dirname, extname, join, resolve } from 'node:path'
+import { basename, dirname, extname, join, relative, resolve } from 'node:path'
 import type { AiVaultAgent } from '../../shared/ai-vault-types'
 import {
   isAiVaultDeletableAgent,
@@ -118,6 +118,15 @@ function sessionDeleteRemovals(args: {
       { path: join(sessionEnvRoot, sessionId), kind: 'directory', roots: [sessionEnvRoot] },
       { path: resolvedPath, kind: 'file', roots }
     ]
+  }
+
+  if (agent === 'codex') {
+    // Why every root: Codex writes the same session under the user's ~/.codex and
+    // under the Kondex-managed runtime home, so trashing only the scanned copy
+    // lets its twin list again on the next scan. Same relative path in each root;
+    // a root that never held it is a no-op, because a missing path is success.
+    const relativePath = relative(matchedRoot, resolvedPath)
+    return roots.map((root) => ({ path: join(root, relativePath), kind: 'file' as const, roots }))
   }
 
   return [{ path: resolvedPath, kind: 'file', roots }]

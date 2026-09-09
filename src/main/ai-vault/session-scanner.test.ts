@@ -404,6 +404,17 @@ describe('scanAiVaultSessions', () => {
       ])
     )
 
+    await mkdir(join(roots.geminiSessionsDir, 'project', 'chats'), { recursive: true })
+    await writeFile(
+      join(roots.geminiSessionsDir, 'project', 'chats', 'gemini-session.json'),
+      JSON.stringify({
+        sessionId: 'gemini-session',
+        startTime: '2026-05-01T10:02:00.000Z',
+        lastUpdated: '2026-05-01T10:02:30.000Z',
+        messages: [{ type: 'user', content: 'Gemini title', timestamp: '2026-05-01T10:02:00.000Z' }]
+      })
+    )
+
     const result = await scanAiVaultSessions({ ...roots, platform: 'darwin', limit: 20 })
 
     expect(result.issues).toEqual([])
@@ -420,5 +431,7 @@ describe('scanAiVaultSessions', () => {
     expect(commandByAgent.get('codex')).toBe(
       `cd '/tmp/codex' && CODEX_HOME='${root}' codex resume 'codex-session'`
     )
+    // Kondex cannot launch Gemini, so its resume command is the plain CLI form.
+    expect(commandByAgent.get('gemini')).toBe("gemini --resume 'gemini-session'")
   })
 })
