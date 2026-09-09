@@ -385,6 +385,11 @@
       "readCode": "Also read source code",
       "readCodeHint": "TypeScript, JavaScript and Python files are described by their exported symbols and placed on ontology nodes beside the documents that govern them. Tests and generated files are skipped.",
       "codeBadge": "code"
+    },
+    "localBuild": {
+      "title": "A newer Kondex build is installed",
+      "description": "This window still runs the previous build. Restart to use the new one; your tabs are restored.",
+      "restart": "Restart now"
     }
   },
   "app": {

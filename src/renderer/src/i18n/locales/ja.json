@@ -385,6 +385,11 @@
       "readCode": "ソースコードも読む",
       "readCodeHint": "TypeScript・JavaScript・Python ファイルをエクスポートされたシンボルで説明し、それを規定する文書と同じオントロジーノードに置きます。テストと生成ファイルは対象外です。",
       "codeBadge": "コード"
+    },
+    "localBuild": {
+      "title": "新しい Kondex ビルドがインストールされています",
+      "description": "このウィンドウはまだ以前のビルドで動いています。再起動すると新しいビルドになり、タブは復元されます。",
+      "restart": "今すぐ再起動"
     }
   },
   "app": {

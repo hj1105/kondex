@@ -221,4 +221,6 @@ export type UiCommandEventApi = {
   onResumeSleepingAgents: (callback: (data: { worktreeId: string }) => void) => () => void
   onTerminalZoom: (callback: (direction: 'in' | 'out' | 'reset') => void) => () => void
   onSystemResumed: (callback: () => void) => () => void
+  /** A local rebuild replaced the bundle this process runs from; restart to use it. */
+  onPackagedBuildUpdated: (callback: () => void) => () => void
 }

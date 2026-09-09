@@ -162,6 +162,11 @@ export const uiClipboardAndWindowControlsApi = {
     ipcRenderer.on('system:resumed', listener)
     return () => ipcRenderer.removeListener('system:resumed', listener)
   },
+  onPackagedBuildUpdated: (callback: () => void): (() => void) => {
+    const listener = () => callback()
+    ipcRenderer.on('app:packaged-build-updated', listener)
+    return () => ipcRenderer.removeListener('app:packaged-build-updated', listener)
+  },
   minimize: (): void => {
     ipcRenderer.send('window:minimize')
   },

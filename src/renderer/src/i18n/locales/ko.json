@@ -385,6 +385,11 @@
       "readCode": "소스 코드도 읽기",
       "readCodeHint": "TypeScript·JavaScript·Python 파일을 내보낸 심볼로 설명해, 그 파일을 규정하는 문서와 같은 온톨로지 노드에 놓습니다. 테스트와 생성 파일은 건너뜁니다.",
       "codeBadge": "코드"
+    },
+    "localBuild": {
+      "title": "새 Kondex 빌드가 설치되었습니다",
+      "description": "이 창은 아직 이전 빌드로 실행 중입니다. 다시 시작하면 새 빌드를 쓰고, 탭은 복원됩니다.",
+      "restart": "지금 다시 시작"
     }
   },
   "app": {

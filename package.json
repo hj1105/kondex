@@ -92,6 +92,7 @@
     "reclaim:dev-bundles": "node config/scripts/reclaim-dev-electron-bundles.mjs",
     "rebuild:node": "pnpm rebuild node-pty",
     "build:unpack": "pnpm run build && pnpm run prepare:kontext-sidecar && pnpm run ensure:electron-runtime && electron-builder --config config/electron-builder.config.cjs --dir",
+    "relaunch": "node config/scripts/kondex-relaunch.mjs",
     "build:win": "pnpm run build:desktop && pnpm run prepare:kontext-sidecar && pnpm run ensure:electron-runtime && electron-builder --config config/electron-builder.config.cjs --win",
     "build:icons": "bash resources/icon-source/generate.sh",
     "build:mac": "pnpm run build:desktop && pnpm run build:computer-macos && pnpm run build:keyboard-layout-macos && pnpm run build:notification-status-macos && pnpm run prepare:kontext-sidecar && pnpm run ensure:electron-runtime && node config/scripts/build-mac-local.mjs",

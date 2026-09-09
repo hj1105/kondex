@@ -95,6 +95,8 @@ function installWillQuitHandler(): void {
     }
     state.unsubscribeSystemResumeBroadcast?.()
     state.unsubscribeSystemResumeBroadcast = null
+    state.unsubscribePackagedBuildRefresh?.()
+    state.unsubscribePackagedBuildRefresh = null
     // Why: renderer guards can still cancel before this committed phase; `log stream` must survive those vetoes.
     stopTccPromptNotice()
     // Why: before-quit can still be aborted by renderer beforeunload; only remove the Windows tray icon on the committed quit path.

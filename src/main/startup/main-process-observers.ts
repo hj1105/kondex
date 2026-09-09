@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { AgentAwakeService } from '../agent-awake-service'
 import { normalizeComputerAwakeMode } from '../../shared/computer-awake-mode'
 import { registerSystemResumeBroadcast } from '../system-resume-broadcast'
+import { registerPackagedBuildRefresh } from '../packaged-build-refresh'
 import { agentHookServer, type AgentHookProviderSessionIdentity } from '../agent-hooks/server'
 import { createHookProviderSessionInvalidator } from '../agent-hooks/hook-provider-session-invalidation'
 import { createHookStatusSessionTabsInvalidator } from '../agent-hooks/hook-status-session-tabs-invalidation'
@@ -22,6 +23,7 @@ export function initializeMainProcessObservers(): void {
     throw new Error('Store must be initialized before observers')
   }
   state.unsubscribeSystemResumeBroadcast = registerSystemResumeBroadcast()
+  state.unsubscribePackagedBuildRefresh = registerPackagedBuildRefresh()
   state.agentAwakeService = new AgentAwakeService()
   state.agentAwakeService.setMode(
     normalizeComputerAwakeMode(

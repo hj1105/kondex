@@ -385,6 +385,11 @@
       "readCode": "同时读取源代码",
       "readCodeHint": "TypeScript、JavaScript 和 Python 文件按其导出的符号来描述，并放到与管辖它们的文档相同的本体节点上。测试和生成文件会被跳过。",
       "codeBadge": "代码"
+    },
+    "localBuild": {
+      "title": "已安装更新的 Kondex 构建",
+      "description": "此窗口仍在运行旧构建。重新启动以使用新构建，标签页会恢复。",
+      "restart": "立即重新启动"
     }
   },
   "app": {

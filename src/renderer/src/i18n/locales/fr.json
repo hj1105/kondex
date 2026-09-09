@@ -385,6 +385,11 @@
       "readCode": "Lire aussi le code source",
       "readCodeHint": "Les fichiers TypeScript, JavaScript et Python sont décrits par leurs symboles exportés et placés sur les nœuds d’ontologie à côté des documents qui les régissent. Tests et fichiers générés sont ignorés.",
       "codeBadge": "code source"
+    },
+    "localBuild": {
+      "title": "Une version plus récente de Kondex est installée",
+      "description": "Cette fenêtre exécute encore la version précédente. Redémarrez pour utiliser la nouvelle ; vos onglets sont restaurés.",
+      "restart": "Redémarrer maintenant"
     }
   },
   "app": {

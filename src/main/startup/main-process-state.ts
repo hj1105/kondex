@@ -68,6 +68,7 @@ export const mainProcessState = {
     | ((identities: AgentHookProviderSessionIdentity[]) => void)
     | null,
   unsubscribeSystemResumeBroadcast: null as (() => void) | null,
+  unsubscribePackagedBuildRefresh: null as (() => void) | null,
   watcherShutdownPromise: null as Promise<void> | null,
   watcherShutdownDone: false,
   automations: null as AutomationService | null,

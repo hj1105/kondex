@@ -385,6 +385,11 @@
       "readCode": "Leer también el código fuente",
       "readCodeHint": "Los archivos TypeScript, JavaScript y Python se describen por sus símbolos exportados y se colocan en los nodos de la ontología junto a los documentos que los rigen. Se omiten pruebas y archivos generados.",
       "codeBadge": "código"
+    },
+    "localBuild": {
+      "title": "Hay una compilación de Kondex más reciente instalada",
+      "description": "Esta ventana sigue ejecutando la compilación anterior. Reinicie para usar la nueva; sus pestañas se restauran.",
+      "restart": "Reiniciar ahora"
     }
   },
   "app": {

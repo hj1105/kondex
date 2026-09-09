@@ -74,6 +74,17 @@ pnpm build:win
 
 These commands build local Kondex artifacts. Signing, public distribution, and automatic updates require a separate Kondex release design and are intentionally not inherited from Orca.
 
+To move a running local install onto what you just built:
+
+```bash
+pnpm relaunch
+```
+
+It runs `build:unpack`, asks the running Kondex to quit the way the menu does
+(so the session is saved), and opens the new package. A packaged Kondex also
+notices on its own when `dist/` holds a newer build than the process it runs
+from and offers **Restart now**; closing the window alone never quits the app.
+
 ## Project Status
 
 The desktop shell and Kontext sidecar integration exist. The logic-work-item experience, runtime inspection, and local packaging path are being hardened before distribution.
