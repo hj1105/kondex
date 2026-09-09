@@ -3,7 +3,8 @@ import {
   KONDEX_BUNDLE_ID,
   launchCommand,
   packagedAppLocation,
-  quitCommand
+  quitCommand,
+  runningQuery
 } from './kondex-relaunch.mjs'
 
 describe('kondex-relaunch', () => {
@@ -36,6 +37,17 @@ describe('kondex-relaunch', () => {
     expect(quitCommand({ platform: 'linux', processName: 'kondex' })).toEqual({
       command: 'pkill',
       args: ['-x', 'kondex']
+    })
+  })
+
+  it('looks the app up by process name, since ps escapes non-ASCII paths', () => {
+    expect(runningQuery({ platform: 'darwin', processName: 'Kondex' })).toEqual({
+      command: 'pgrep',
+      args: ['-x', 'Kondex']
+    })
+    expect(runningQuery({ platform: 'win32', processName: 'Kondex.exe' })).toEqual({
+      command: 'tasklist',
+      args: ['/FI', 'IMAGENAME eq Kondex.exe', '/NH']
     })
   })
 

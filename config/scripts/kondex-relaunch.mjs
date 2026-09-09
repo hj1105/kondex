@@ -59,29 +59,37 @@ export function launchCommand({ platform, appPath, executable }) {
   return { command: executable, args: [] }
 }
 
-function runningFrom(executable) {
-  if (process.platform === 'win32') {
-    const result = spawnSync('tasklist', ['/FI', `IMAGENAME eq ${path.basename(executable)}`], {
-      encoding: 'utf8'
-    })
-    return result.status === 0 && result.stdout.includes(path.basename(executable))
+/**
+ * Finds the app by process name, not by path: `ps` escapes non-ASCII bytes in a
+ * command line (this checkout lives under a Korean directory name), so a path
+ * comparison silently misses the very process this script exists to replace.
+ */
+export function runningQuery({ platform, processName }) {
+  if (platform === 'win32') {
+    return { command: 'tasklist', args: ['/FI', `IMAGENAME eq ${processName}`, '/NH'] }
   }
-  const result = spawnSync('ps', ['-axo', 'command'], { encoding: 'utf8' })
-  return (
-    result.status === 0 && result.stdout.split('\n').some((line) => line.startsWith(executable))
-  )
+  return { command: 'pgrep', args: ['-x', processName] }
+}
+
+function isRunning(location) {
+  const query = runningQuery({ platform: process.platform, processName: location.processName })
+  const result = spawnSync(query.command, query.args, { encoding: 'utf8' })
+  if (process.platform === 'win32') {
+    return result.status === 0 && result.stdout.includes(location.processName)
+  }
+  return result.status === 0 && result.stdout.trim() !== ''
 }
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 async function quitRunning(location) {
-  if (!runningFrom(location.executable)) {
+  if (!isRunning(location)) {
     return 'not-running'
   }
   const quit = quitCommand({ platform: process.platform, processName: location.processName })
   spawnSync(quit.command, quit.args, { stdio: 'ignore' })
   for (let waited = 0; waited < 30_000; waited += 500) {
-    if (!runningFrom(location.executable)) {
+    if (!isRunning(location)) {
       return 'quit'
     }
     await sleep(500)
