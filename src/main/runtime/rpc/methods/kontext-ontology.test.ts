@@ -150,6 +150,68 @@ describe('Kontext ontology RPC', () => {
     ])
   })
 
+  it('passes a repository URL, its ref, and one --env per variable', async () => {
+    mocks.run.mockResolvedValue({ command: 'add', ok: true, name: 'handbook', written: true })
+    await call('kontext.addOntologySource', {
+      ...workspace,
+      name: 'handbook',
+      transport: 'git',
+      url: 'https://github.com/org/handbook.git',
+      ref: 'release',
+      apply: true
+    })
+    expect(argsOf()).toEqual([
+      'add',
+      '--name',
+      'handbook',
+      '--transport',
+      'git',
+      '--url',
+      'https://github.com/org/handbook.git',
+      '--ref',
+      'release',
+      '--write'
+    ])
+
+    mocks.run.mockResolvedValue({ command: 'add', ok: true, name: 'github', written: false })
+    await call('kontext.addOntologySource', {
+      ...workspace,
+      name: 'github',
+      transport: 'stdio',
+      command: 'npx',
+      args: ['-y', '@modelcontextprotocol/server-github'],
+      // Why: a value with '=' must survive; the CLI splits on the first one only.
+      env: { GITHUB_PERSONAL_ACCESS_TOKEN: 'ghp_x', GITHUB_API_URL: 'https://ghe.invalid/api?v=3' }
+    })
+    expect(argsOf(1)).toEqual([
+      'add',
+      '--name',
+      'github',
+      '--transport',
+      'stdio',
+      '--command',
+      'npx',
+      '--arg',
+      '-y',
+      '--arg',
+      '@modelcontextprotocol/server-github',
+      '--env',
+      'GITHUB_PERSONAL_ACCESS_TOKEN=ghp_x',
+      '--env',
+      'GITHUB_API_URL=https://ghe.invalid/api?v=3'
+    ])
+  })
+
+  it('refuses a git source without a repository URL before spawning anything', async () => {
+    const response = await call('kontext.addOntologySource', {
+      ...workspace,
+      name: 'handbook',
+      transport: 'git'
+    })
+    expect(response).toMatchObject({ ok: false })
+    expect(mocks.run).not.toHaveBeenCalled()
+  })
+
   it('passes each stdio argument separately so a comma cannot split one', async () => {
     mocks.run.mockResolvedValue({ command: 'add', ok: true, name: 'gh', written: true })
     await call('kontext.addOntologySource', {

@@ -358,7 +358,14 @@
       "commandArgsHint": "El servidor se inicia sin shell, así que escribe cada argumento en su propia línea.",
       "importPreviewAction": "Vista previa de la importación",
       "importNothingNew": "No hay nada nuevo que importar; todos los servidores encontrados ya están conectados.",
-      "importWouldAdd": "Se añadiría:"
+      "importWouldAdd": "Se añadiría:",
+      "presetGithubRepo": "Repositorio de GitHub",
+      "presetGithubMcp": "Servidor MCP de GitHub",
+      "repositoryUrl": "URL del repositorio",
+      "repositoryUrlHint": "Pega la dirección que le darías a git clone. Los repositorios privados funcionan hasta donde llegue tu propio inicio de sesión de git; aquí no se guarda ningún token.",
+      "ref": "Rama o etiqueta (opcional)",
+      "env": "Entorno del servidor, una línea CLAVE=VALOR",
+      "envHint": "Los tokens como GITHUB_PERSONAL_ACCESS_TOKEN van aquí; se escriben en kontext.yaml."
     }
   },
   "app": {

@@ -59,6 +59,19 @@ export function getKontextOntologyCopy() {
       'kondex.ontology.commandArgsHint',
       'The server is started without a shell, so each argument goes on its own line.'
     ),
+    presetGithubRepo: translate('kondex.ontology.presetGithubRepo', 'GitHub repository'),
+    presetGithubMcp: translate('kondex.ontology.presetGithubMcp', 'GitHub MCP server'),
+    repositoryUrl: translate('kondex.ontology.repositoryUrl', 'Repository URL'),
+    repositoryUrlHint: translate(
+      'kondex.ontology.repositoryUrlHint',
+      'Paste the address you would give git clone. Private repositories work as far as your own git sign-in does; no token is stored here.'
+    ),
+    ref: translate('kondex.ontology.ref', 'Branch or tag (optional)'),
+    env: translate('kondex.ontology.env', 'Environment for the server, KEY=VALUE per line'),
+    envHint: translate(
+      'kondex.ontology.envHint',
+      'Tokens such as GITHUB_PERSONAL_ACCESS_TOKEN go here; they are written to kontext.yaml.'
+    ),
     layerType: translate('kondex.ontology.layerType', 'Layer'),
     layerTypeNone: translate('kondex.ontology.layerTypeNone', 'Default'),
 

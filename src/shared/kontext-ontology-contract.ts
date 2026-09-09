@@ -8,7 +8,7 @@ import { z } from 'zod'
  * instead of a terminal transcript.
  */
 
-export const KONTEXT_SOURCE_TRANSPORTS = ['stdio', 'sse', 'local'] as const
+export const KONTEXT_SOURCE_TRANSPORTS = ['stdio', 'sse', 'local', 'git'] as const
 /** Layer adapters Kontext Brain can apply to a source's documents. */
 export const KONTEXT_SOURCE_TYPES = ['notion', 'jira', 'github_pr', 'slack'] as const
 
@@ -57,7 +57,12 @@ export const kontextOntologyAddRequestSchema = kontextOntologyConfigRequestSchem
     transport: kontextSourceTransportSchema,
     command: z.string().optional(),
     args: z.array(z.string()).optional(),
+    /** sse: the server URL; git: the repository to clone. */
     url: z.string().optional(),
+    /** git: branch or tag to read; the remote default when omitted. */
+    ref: z.string().optional(),
+    /** stdio: environment the server needs, such as an API token. */
+    env: z.record(z.string(), z.string()).optional(),
     /** Workspace-relative or absolute directory for a local source. */
     path: z.string().optional(),
     include: z.array(z.string()).optional(),
@@ -68,7 +73,11 @@ export const kontextOntologyAddRequestSchema = kontextOntologyConfigRequestSchem
     // Why: the CLI would reject these too, but failing here keeps the surface from
     // spawning a process only to report a field the form could have caught.
     const required =
-      value.transport === 'stdio' ? 'command' : value.transport === 'sse' ? 'url' : 'path'
+      value.transport === 'stdio'
+        ? 'command'
+        : value.transport === 'sse' || value.transport === 'git'
+          ? 'url'
+          : 'path'
     if (!value[required]?.trim()) {
       context.addIssue({
         code: z.ZodIssueCode.custom,

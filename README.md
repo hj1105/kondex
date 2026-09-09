@@ -39,6 +39,13 @@ the submodule at `vendor/kontext-brain`, then a sibling checkout named
 `kontext-brain-ts` or `kontext-brain-deepswe-eval`. The submodule wins over a
 sibling because it is the revision this repository pins.
 
+## Use
+
+[docs/reference/usage.md](docs/reference/usage.md) ([한국어](docs/reference/usage.ko.md)) walks the loop once:
+connect the places your decisions live — a GitHub repository URL is enough —
+build the ontology, register evidence, plan a Task, run a worker on your own
+subscription, and read the Context Receipt that proves what it was given.
+
 ## Develop
 
 ```bash

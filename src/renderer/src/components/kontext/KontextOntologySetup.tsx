@@ -46,13 +46,28 @@ export function KontextOntologySetup({ owner }: { owner: KontextRequestOwner }):
   useTranslation()
   const copy = getKontextOntologyCopy()
   const worktreesByRepo = useAppStore((s) => s.worktreesByRepo)
+  const folderWorkspaces = useAppStore((s) => s.folderWorkspaces)
   const workspaces = useMemo(() => {
     // Why: the slice is absent until the store hydrates, and a panel that throws
     // there takes the whole Kontext page down with it.
-    const rows = Object.values(worktreesByRepo ?? {})
+    const worktreeRows = Object.values(worktreesByRepo ?? {})
       .flat()
       .filter((worktree) => worktree !== null && worktree !== undefined)
-      .map((worktree) => ({ id: worktree.id, title: worktree.displayName }))
+      .map((worktree) => ({
+        id: worktree.id,
+        title: worktree.displayName,
+        directory: worktree.id.split('::').slice(1).join('::')
+      }))
+    // Why: a folder workspace is a workspace too — its kontext.yaml lives in the
+    // folder — and the host resolves it through the `folder:` selector.
+    const folderRows = (folderWorkspaces ?? [])
+      .filter((workspace) => !workspace.isArchived)
+      .map((workspace) => ({
+        id: `folder:${workspace.id}`,
+        title: workspace.name,
+        directory: workspace.folderPath
+      }))
+    const rows = [...worktreeRows, ...folderRows]
     // Why: two workspaces can share a display name, and identical options are
     // unpickable — the directory is what tells them apart.
     const seen = new Map<string, number>()
@@ -61,13 +76,12 @@ export function KontextOntologySetup({ owner }: { owner: KontextRequestOwner }):
     }
     return rows.map((row) => {
       if ((seen.get(row.title) ?? 0) < 2) {
-        return row
+        return { id: row.id, title: row.title }
       }
-      const segments = row.id.split('::').slice(1).join('::').split('/')
-      const directory = segments.findLast((segment) => segment !== '')
+      const directory = row.directory.split(/[\\/]/).findLast((segment) => segment !== '')
       return { id: row.id, title: directory ? `${row.title} — ${directory}` : row.title }
     })
-  }, [worktreesByRepo])
+  }, [worktreesByRepo, folderWorkspaces])
 
   const [workspace, setWorkspace] = useState('')
   const [includeMarkdown, setIncludeMarkdown] = useState(true)

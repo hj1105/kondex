@@ -46,11 +46,16 @@ const EMPTY: OntologyState = {
 
 export type AddSourceInput = {
   name: string
-  transport: 'stdio' | 'sse' | 'local'
+  transport: 'stdio' | 'sse' | 'local' | 'git'
   command?: string
   /** Kept apart from `command`: the server is spawned without a shell. */
   args?: readonly string[]
+  /** stdio: what the server needs in its environment, such as a token. */
+  env?: Readonly<Record<string, string>>
+  /** sse: server URL; git: repository to clone. */
   url?: string
+  /** git: branch or tag; the remote default when omitted. */
+  ref?: string
   path?: string
   type?: 'notion' | 'jira' | 'github_pr' | 'slack'
 }

@@ -358,7 +358,14 @@
       "commandArgsHint": "Le serveur démarre sans shell : placez chaque argument sur sa propre ligne.",
       "importPreviewAction": "Aperçu de l’import",
       "importNothingNew": "Rien de nouveau à importer : tous les serveurs trouvés sont déjà connectés.",
-      "importWouldAdd": "Serait ajouté :"
+      "importWouldAdd": "Serait ajouté :",
+      "presetGithubRepo": "Dépôt GitHub",
+      "presetGithubMcp": "Serveur MCP GitHub",
+      "repositoryUrl": "URL du dépôt",
+      "repositoryUrlHint": "Collez l’adresse que vous donneriez à git clone. Les dépôts privés fonctionnent dans la limite de votre propre connexion git ; aucun jeton n’est enregistré ici.",
+      "ref": "Branche ou tag (facultatif)",
+      "env": "Environnement du serveur, une ligne CLÉ=VALEUR",
+      "envHint": "Les jetons comme GITHUB_PERSONAL_ACCESS_TOKEN vont ici ; ils sont écrits dans kontext.yaml."
     }
   },
   "app": {

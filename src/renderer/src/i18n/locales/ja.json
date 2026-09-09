@@ -358,7 +358,14 @@
       "commandArgsHint": "サーバーはシェルを介さず起動するため、引数は 1 行に 1 つずつ記入してください。",
       "importPreviewAction": "取り込みをプレビュー",
       "importNothingNew": "新しく取り込むものはありません。見つかったサーバーはすべて接続済みです。",
-      "importWouldAdd": "追加される項目:"
+      "importWouldAdd": "追加される項目:",
+      "presetGithubRepo": "GitHub リポジトリ",
+      "presetGithubMcp": "GitHub MCP サーバー",
+      "repositoryUrl": "リポジトリ URL",
+      "repositoryUrlHint": "git clone に渡すアドレスをそのまま貼り付けてください。非公開リポジトリは自分の git ログインが通る範囲で読め、トークンはここに保存されません。",
+      "ref": "ブランチまたはタグ（任意）",
+      "env": "サーバーの環境変数、1 行に KEY=VALUE を 1 つ",
+      "envHint": "GITHUB_PERSONAL_ACCESS_TOKEN のようなトークンはここに入れます。kontext.yaml に書き込まれます。"
     }
   },
   "app": {

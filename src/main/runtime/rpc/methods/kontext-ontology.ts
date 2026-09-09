@@ -84,6 +84,13 @@ export const kontextOntologyAddSourceMethod = defineMethod({
     if (request.url) {
       args.push('--url', request.url)
     }
+    if (request.ref) {
+      args.push('--ref', request.ref)
+    }
+    for (const [key, value] of Object.entries(request.env ?? {})) {
+      // Why: one flag per variable keeps a value that contains '=' or ',' intact.
+      args.push('--env', `${key}=${value}`)
+    }
     if (request.path) {
       args.push('--path', request.path)
     }

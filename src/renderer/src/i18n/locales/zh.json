@@ -358,7 +358,14 @@
       "commandArgsHint": "服务器不经由 shell 启动，因此每个参数需单独占一行。",
       "importPreviewAction": "预览导入",
       "importNothingNew": "没有新内容可导入，找到的服务器均已连接。",
-      "importWouldAdd": "将添加："
+      "importWouldAdd": "将添加：",
+      "presetGithubRepo": "GitHub 仓库",
+      "presetGithubMcp": "GitHub MCP 服务器",
+      "repositoryUrl": "仓库 URL",
+      "repositoryUrlHint": "粘贴你会交给 git clone 的地址。私有仓库在你自己的 git 登录可达范围内可读，这里不会保存令牌。",
+      "ref": "分支或标签（可选）",
+      "env": "服务器环境变量，每行一个 KEY=VALUE",
+      "envHint": "GITHUB_PERSONAL_ACCESS_TOKEN 之类的令牌填在这里，会写入 kontext.yaml。"
     }
   },
   "app": {

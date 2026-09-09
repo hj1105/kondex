@@ -1,6 +1,13 @@
 [
   {
     "filePath": "src/renderer/src/components/kontext/KontextOntologyAddSource.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "https://github.com/org/repo.git",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/components/kontext/KontextOntologyAddSource.tsx",
     "kind": "jsx-text",
     "text": "local",
     "dynamic": false,

@@ -358,7 +358,14 @@
       "commandArgsHint": "서버는 셸 없이 실행되므로 인자를 한 줄에 하나씩 적으세요.",
       "importPreviewAction": "가져오기 미리 보기",
       "importNothingNew": "새로 가져올 것이 없습니다. 찾은 서버가 모두 이미 연결되어 있습니다.",
-      "importWouldAdd": "추가될 항목:"
+      "importWouldAdd": "추가될 항목:",
+      "presetGithubRepo": "GitHub 저장소",
+      "presetGithubMcp": "GitHub MCP 서버",
+      "repositoryUrl": "저장소 URL",
+      "repositoryUrlHint": "git clone에 넣을 주소를 그대로 붙이세요. 비공개 저장소는 내 git 로그인이 되는 범위까지 읽히며, 토큰은 여기에 저장되지 않습니다.",
+      "ref": "브랜치 또는 태그 (선택)",
+      "env": "서버 환경변수, 한 줄에 KEY=VALUE 하나",
+      "envHint": "GITHUB_PERSONAL_ACCESS_TOKEN 같은 토큰을 여기에 넣습니다. kontext.yaml에 기록됩니다."
     }
   },
   "app": {
