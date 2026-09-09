@@ -13,6 +13,7 @@ import {
   waitForPaneIdentitySnapshot
 } from './helpers/terminal'
 import { parkHiddenTabBehindDecoy } from './helpers/terminal-hidden-parking'
+import { waitForPtyShellEcho } from './terminal-pty-readiness'
 
 /**
  * Repro hunt for the "ghost blank pane" field incident: a split pane whose PTY
@@ -246,6 +247,11 @@ async function setUpSplitTab(page: Page): Promise<SplitTabSetup> {
   if (!splitPane?.ptyId) {
     throw new Error('setUpSplitTab: split pane did not bind a PTY')
   }
+  // Why: a bound PTY is not yet a live shell. The exit cases below type `exit`,
+  // which reports the status of the last command — reaching a still-starting
+  // shell it comes back non-zero, and a failed exit renders the process-exit
+  // card instead of closing the pane, so the layout never settles.
+  await waitForPtyShellEcho(page, splitPane.ptyId, 20_000)
   return { worktreeId, tabId, splitLeafId: splitPane.leafId, splitPtyId: splitPane.ptyId }
 }
 
