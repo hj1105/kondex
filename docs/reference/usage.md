@@ -71,7 +71,10 @@ shows what is there before it changes anything.
    without saving; **Build and save** writes them to `kontext.yaml`. Leave the
    node count empty to let the builder choose (3–200). Building sends collected
    document titles to the model named in `kontext.yaml`; with `provider: codex`
-   that is your logged-in Codex subscription. It starts no agent and approves no
+   that is your logged-in Codex subscription. When the file names no model
+   (Kondex writes only sources), setup uses `provider: codex` and records that
+   in `kontext.yaml`; edit the `llm:` section there to use Claude, OpenAI or
+   Ollama instead. It starts no agent and approves no
    decision.
 
 The same steps exist as a CLI in the sidecar checkout:

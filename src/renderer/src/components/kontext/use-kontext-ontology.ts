@@ -32,6 +32,8 @@ export type OntologyState = {
   readonly lastSetup: KontextOntologySetupResult | null
   readonly busy: OntologyAction | null
   readonly error: string | null
+  /** Which action the error belongs to, so it can be shown beside that step's controls. */
+  readonly errorAction: OntologyAction | null
   readonly notice: string | null
 }
 
@@ -43,6 +45,7 @@ const EMPTY: OntologyState = {
   lastSetup: null,
   busy: null,
   error: null,
+  errorAction: null,
   notice: null
 }
 
@@ -84,7 +87,13 @@ export function useKontextOntology(owner: KontextRequestOwner, workspace: string
       timeoutMs: number
     ): Promise<T | null> => {
       const current = (token.current += 1)
-      setState((previous) => ({ ...previous, busy: action, error: null, notice: null }))
+      setState((previous) => ({
+        ...previous,
+        busy: action,
+        error: null,
+        errorAction: null,
+        notice: null
+      }))
       try {
         const response = await callRuntimeRpc<unknown>(stableOwner, method, params, {
           expectedEnvironmentPairingRevision:
@@ -101,7 +110,8 @@ export function useKontextOntology(owner: KontextRequestOwner, workspace: string
         }
         setState((previous) => ({
           ...previous,
-          error: caught instanceof Error ? caught.message : String(caught)
+          error: caught instanceof Error ? caught.message : String(caught),
+          errorAction: action
         }))
         return null
       } finally {

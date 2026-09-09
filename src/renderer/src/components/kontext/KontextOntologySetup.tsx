@@ -8,7 +8,7 @@ import { KontextOntologyAddSource } from './KontextOntologyAddSource'
 import { getKontextOntologyCopy } from './kontext-ontology-copy'
 import { KontextOntologySourceList } from './KontextOntologySourceList'
 import type { KontextRequestOwner } from './kontext-request-journal'
-import { useKontextOntology } from './use-kontext-ontology'
+import { type OntologyAction, useKontextOntology } from './use-kontext-ontology'
 
 function parseTargetNodes(raw: string): number | 'empty' | 'invalid' {
   const text = raw.trim()
@@ -88,6 +88,16 @@ export function KontextOntologySetup({ owner }: { owner: KontextRequestOwner }):
   const [targetNodes, setTargetNodes] = useState('')
   const [nodeCountError, setNodeCountError] = useState<string | null>(null)
   const ontology = useKontextOntology(owner, workspace)
+  // Why: an error shown at the foot of the section went unread; each step's failure
+  // belongs beside the button that produced it.
+  const errorFor = (...actions: OntologyAction[]): React.JSX.Element | null =>
+    ontology.state.error !== null &&
+    ontology.state.errorAction !== null &&
+    actions.includes(ontology.state.errorAction) ? (
+      <p role="alert" className="mt-2 text-sm text-destructive">
+        {ontology.state.error}
+      </p>
+    ) : null
   const { state, refresh, reset } = ontology
 
   // Choosing a workspace is enough to show what it already has; nothing is written.
@@ -178,6 +188,7 @@ export function KontextOntologySetup({ owner }: { owner: KontextRequestOwner }):
               />
               {copy.includeMarkdown}
             </label>
+            {errorFor('import', 'add', 'repositories')}
             {state.lastImport !== null && (
               <div role="status" className="mt-1 text-xs text-muted-foreground">
                 <p>
@@ -212,6 +223,7 @@ export function KontextOntologySetup({ owner }: { owner: KontextRequestOwner }):
                 {checksPassed ? copy.checkAllOk : copy.checkSomeFailed}
               </p>
             )}
+            {errorFor('check')}
           </Step>
 
           <Step index={4} title={copy.stepBuild}>
@@ -238,6 +250,7 @@ export function KontextOntologySetup({ owner }: { owner: KontextRequestOwner }):
                 {copy.buildAction}
               </Button>
             </div>
+            {errorFor('setup')}
             {nodeCountError !== null && (
               <p role="alert" className="mt-1 text-sm text-destructive">
                 {nodeCountError}
@@ -254,11 +267,7 @@ export function KontextOntologySetup({ owner }: { owner: KontextRequestOwner }):
         </>
       )}
 
-      {state.error !== null && (
-        <p role="alert" className="mt-3 text-sm text-destructive">
-          {state.error}
-        </p>
-      )}
+      {errorFor('list')}
     </section>
   )
 }
