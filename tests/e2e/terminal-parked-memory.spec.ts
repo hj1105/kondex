@@ -409,7 +409,9 @@ const MAX_RETAINED_CELL_FRACTION = 0.05
 // Why a band, not zero: RSS is sampled and moved only -0.7 to -3.0 MB on a
 // ~453 MB baseline across runs, so "must not grow" would flake on noise. 5 MB
 // still fails loudly if an eviction starts planting 512KB/pane capture strings.
-const RENDERER_RSS_NOISE_MB = 5
+// Sampling headroom for the retention assertion below; the heap is quiet here,
+// so this only absorbs an allocation racing the two samples.
+const RETENTION_HEAP_NOISE_MB = 5
 const RETENTION_TEST_TIMEOUT_MS = 420_000
 const UNPARKABLE_PTY_PREFIX = 'remote:e2e-retention-'
 
@@ -764,14 +766,14 @@ test.describe('Terminal hidden worktree retention budget', () => {
       // The decoy holds the cap's last-active exemption, so it stays mounted —
       // this is the same run proving the cap did not simply evict everything.
       expect(await countMountedPaneManagers(orcaPage, decoyTabIds)).toBe(decoyTabIds.length)
-      // Secondary only: freed typed arrays return to the allocator's free lists,
-      // not the OS, so RSS fell just 0.7-3.0 MB locally while 87 MB of buffer was
-      // released — a strict non-growth assertion would be reading sampling noise.
-      // What this CAN catch is the inverse regression the capture path risks:
-      // force-park planting serialized scrollback in the store as it evicts.
-      if (before.rendererMb !== null && after.rendererMb !== null) {
-        expect(after.rendererMb).toBeLessThanOrEqual(before.rendererMb + RENDERER_RSS_NOISE_MB)
-      }
+      // The regression this guards is force-park planting serialized scrollback in
+      // the store as it evicts. Measure that on the heap, not on RSS: freed typed
+      // arrays return to the allocator's free lists rather than the OS, so RSS is
+      // a one-way ratchet that also counts the pages re-rendering the shell
+      // touches while four pane managers unmount. Measured on a passing run here,
+      // the two disagree flatly — heap 146.3 -> 66.0 MB and cells 7,567,128 -> 5,400
+      // while RSS went 232.8 -> 302.0 MB. Planted scrollback would grow the heap.
+      expect(after.heapUsedMb).toBeLessThanOrEqual(before.heapUsedMb + RETENTION_HEAP_NOISE_MB)
       expect(evictionMs).toBeLessThan(MAX_FORCE_PARK_EVICTION_MS)
     } finally {
       rmSync(scriptPath, { force: true })
