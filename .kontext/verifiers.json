@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "verifiers": [
+    {
+      "kind": "lint",
+      "ref": "pnpm run check:code-quality:changed",
+      "command": "pnpm",
+      "args": ["run", "check:code-quality:changed"],
+      "timeoutMilliseconds": 600000
+    },
+    {
+      "kind": "lint",
+      "ref": "oxlint",
+      "command": "pnpm",
+      "args": ["exec", "oxlint"],
+      "timeoutMilliseconds": 600000
+    },
+    {
+      "kind": "typecheck",
+      "ref": "pnpm typecheck",
+      "command": "pnpm",
+      "args": ["run", "typecheck"],
+      "timeoutMilliseconds": 1200000
+    }
+  ],
+  "linkedDirectories": ["node_modules"]
+}

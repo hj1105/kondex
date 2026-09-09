@@ -95,6 +95,43 @@ kontext-ontology setup [--target-nodes 40] --write
    독립 검토를 돌리고, **완료 조건 확인**은 완료 근거를 봅니다. 러너가 끝났다는 것이
    검증된 Task 완료로 취급되는 일은 없습니다.
 
+### 신뢰하는 검증기
+
+Kontext는 워크스페이스가 스스로 선언한 검증기만 실행합니다. 리포지토리 루트의
+`.kontext/verifiers.json`에 적어 두세요. 표준 `package.json` 스크립트(`typecheck`,
+`test`, `build`, `lint`)도 `workspace:typecheck`, `workspace:test`,
+`workspace:build`, `workspace:lint`로 인정됩니다.
+
+```json
+{
+  "schemaVersion": 1,
+  "verifiers": [
+    {
+      "kind": "lint",
+      "ref": "pnpm run check:code-quality:changed",
+      "command": "pnpm",
+      "args": ["run", "check:code-quality:changed"],
+      "timeoutMilliseconds": 600000
+    }
+  ],
+  "linkedDirectories": ["node_modules"]
+}
+```
+
+플래너는 이 목록을 전달받고 그 안에서만 고르므로, Task가 워크스페이스에서 실행할 수
+없는 검사를 이름 붙이는 일이 없습니다. 명령은 셸 없이 워커의 런타임 워크트리에서
+실행됩니다. 그 워크트리는 새 체크아웃이라서, 검증기에 필요한 비추적 디렉터리(설치된
+`node_modules`, `.venv`)를 `"linkedDirectories"`에 적어 두면 Kontext가 다시 설치하는
+대신 내 체크아웃에서 링크해 옵니다.
+Kontext 자체의 빠른 검사(semantic sync, stable symbol identity, domain-term·graph-query
+검사)는 사이드카가 패치를 관찰한 결과로 판정하므로 항목이 필요 없습니다.
+
+Codex 워커에는 Kontext 도구와 쓰기 훅이 그 워커의 `codex exec`에만 주입되며
+`~/.codex`에는 아무것도 쓰지 않습니다. 워커가 제출하는 Change Bundle은
+`kontext_check_change`가 돌려준 패치 다이제스트·변경 경로·변경 심볼·검증 실행 ID를
+그대로 담아야 하고, 추측으로 만든 번들은 `patch_mismatch`나 `missing_verification`으로
+거절됩니다.
+
 ### receipt는 어디에 있나
 
 사이드카는 자기가 승인한 쓰기 권한 옆에 receipt를 두며, 앱의 사용자 데이터 디렉터리

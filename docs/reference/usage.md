@@ -108,6 +108,44 @@ Still under **Logic Work Items**:
    the completion evidence. Runner completion is never treated as verified Task
    completion.
 
+### Trusted verifiers
+
+Kontext only runs verifiers the workspace itself declares. Put them in
+`.kontext/verifiers.json` at the repository root; standard `package.json`
+scripts (`typecheck`, `test`, `build`, `lint`) are also accepted as
+`workspace:typecheck`, `workspace:test`, `workspace:build`, `workspace:lint`.
+
+```json
+{
+  "schemaVersion": 1,
+  "verifiers": [
+    {
+      "kind": "lint",
+      "ref": "pnpm run check:code-quality:changed",
+      "command": "pnpm",
+      "args": ["run", "check:code-quality:changed"],
+      "timeoutMilliseconds": 600000
+    }
+  ],
+  "linkedDirectories": ["node_modules"]
+}
+```
+
+The planner is told this list and may only pick from it, so a Task never names a
+check the workspace cannot execute. Commands run without a shell, in the
+worker's runtime worktree. That worktree is a fresh checkout, so list the
+untracked directories your verifiers need (an installed `node_modules`, a
+`.venv`) under `"linkedDirectories"`; Kontext links them from your checkout
+instead of reinstalling. Kontext's own fast checks (semantic sync, stable symbol
+identity, domain-term and graph-query checks) are judged from the sidecar's
+observation of the patch and need no entry.
+
+A Codex worker gets the Kontext tools and write hooks injected for its own
+`codex exec` only; nothing is written into `~/.codex`. The Change Bundle it
+submits must carry the patch digest, changed paths, changed symbols and
+verification run IDs that `kontext_check_change` returned; a bundle built from
+guesses is rejected with `patch_mismatch` or `missing_verification`.
+
 ### Where the receipt is
 
 The sidecar keeps the receipt beside the write capability it authorized, under

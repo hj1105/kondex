@@ -70,17 +70,36 @@ export function isRootCodeQualityPath(file) {
   return !ROOT_CODE_QUALITY_IGNORED_PREFIXES.some((prefix) => file.startsWith(prefix))
 }
 
+// Why: in this fork `origin` is upstream Orca and has no `main` we can fetch, so a
+// checkout whose default branch lives on another remote (or that tracks one) must
+// still find a base — otherwise the gate, and every verifier that runs it, cannot start.
+function remoteMainCandidates(root) {
+  const result = spawnSync(
+    'git',
+    ['for-each-ref', '--format=%(refname:short)', 'refs/remotes/*/main'],
+    {
+      cwd: root,
+      encoding: 'utf8'
+    }
+  )
+  return result.status === 0 ? result.stdout.split('\n').filter(Boolean) : []
+}
+
 function resolveBase(root, requestedBase) {
   for (const candidate of [
     requestedBase,
     process.env.ORCA_CODE_QUALITY_BASE,
     'origin/main',
+    '@{upstream}',
+    ...remoteMainCandidates(root),
     'main'
   ]) {
     if (!candidate) {
       continue
     }
-    const result = spawnSync('git', ['rev-parse', '--verify', `${candidate}^{commit}`], {
+    // Why: a shallow clone can hold a remote ref that shares no history with HEAD;
+    // only a candidate with a merge base can anchor the diff.
+    const result = spawnSync('git', ['merge-base', candidate, 'HEAD'], {
       cwd: root,
       stdio: 'ignore'
     })
@@ -88,7 +107,9 @@ function resolveBase(root, requestedBase) {
       return candidate
     }
   }
-  throw new Error('Pass the pull request base SHA or make origin/main available locally.')
+  throw new Error(
+    'Pass the pull request base SHA, set ORCA_CODE_QUALITY_BASE, or make a <remote>/main branch available locally.'
+  )
 }
 
 export function collectAddedLineRanges(root, requestedBase) {
