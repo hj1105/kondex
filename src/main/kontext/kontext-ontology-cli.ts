@@ -2,6 +2,7 @@ import { stat } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { runProcess } from '../../shared/child-process/run-process'
 import { resolveKontextSidecarPath } from './kontext-sidecar-path'
+import { hydrateShellPath, mergePathSegments } from '../startup/hydrate-shell-path'
 
 /**
  * Locates and runs the `kontext-ontology` CLI that ships with the same Kontext
@@ -28,6 +29,13 @@ function checkoutRootOf(sidecarPath: string): string {
   return directory
 }
 
+const BUNDLED_CLI_NAME = 'ontology-cli.mjs'
+
+/**
+ * Order: an explicit override, the single-file CLI packaged beside the sidecar
+ * (the only thing a packaged app has), that same file beside a configured
+ * sidecar, and finally the built CLI in a source checkout for `pnpm dev`.
+ */
 export async function resolveKontextOntologyCli(options: {
   resourcesPath?: string
   environment?: NodeJS.ProcessEnv
@@ -37,12 +45,22 @@ export async function resolveKontextOntologyCli(options: {
   if (override) {
     return inspect(resolve(override))
   }
+  if (options.resourcesPath) {
+    const packaged = await inspect(join(options.resourcesPath, 'kontext', BUNDLED_CLI_NAME))
+    if (packaged.status === 'configured') {
+      return packaged
+    }
+  }
   const sidecar = await resolveKontextSidecarPath(options)
   if (sidecar.status !== 'configured') {
     return {
       status: 'not_configured',
       reason: 'No Kontext Brain checkout is configured for this host.'
     }
+  }
+  const beside = await inspect(join(dirname(sidecar.path), BUNDLED_CLI_NAME))
+  if (beside.status === 'configured') {
+    return beside
   }
   return inspect(join(checkoutRootOf(sidecar.path), ...CLI_RELATIVE_PATH))
 }
@@ -64,6 +82,12 @@ async function inspect(candidate: string): Promise<KontextOntologyCliResolution>
   }
 }
 
+/** Electron sets this on every process it starts; plain Node (tests, scripts) has none. */
+function electronResourcesPath(): string | undefined {
+  const value = (process as NodeJS.Process & { resourcesPath?: unknown }).resourcesPath
+  return typeof value === 'string' && value.length > 0 ? value : undefined
+}
+
 export class KontextOntologyCliError extends Error {
   override readonly name = 'KontextOntologyCliError'
 }
@@ -75,12 +99,21 @@ export async function runKontextOntologyCommand(options: {
   environment?: NodeJS.ProcessEnv
   signal?: AbortSignal
 }): Promise<{ exitCode: number; output: string; stdout: string; cliPath: string }> {
+  const resourcesPath = options.resourcesPath ?? electronResourcesPath()
   const resolution = await resolveKontextOntologyCli({
-    ...(options.resourcesPath === undefined ? {} : { resourcesPath: options.resourcesPath }),
+    ...(resourcesPath === undefined ? {} : { resourcesPath }),
     ...(options.environment === undefined ? {} : { environment: options.environment })
   })
   if (resolution.status !== 'configured') {
     throw new KontextOntologyCliError(resolution.reason)
+  }
+  // Why: launched from the Dock, the app inherits a PATH without Homebrew, so the CLI
+  // would miss the user's gh and git even though their terminal has both.
+  if (options.environment === undefined) {
+    const hydration = await hydrateShellPath()
+    if (hydration.ok) {
+      mergePathSegments(hydration.segments)
+    }
   }
   const result = await runProcess({
     program: process.execPath,

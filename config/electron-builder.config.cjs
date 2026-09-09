@@ -36,6 +36,10 @@ const kontextSidecarResource = {
   from: 'resources/kontext/server.mjs',
   to: 'kontext/server.mjs'
 }
+const kontextOntologyCliResource = {
+  from: 'resources/kontext/ontology-cli.mjs',
+  to: 'kontext/ontology-cli.mjs'
+}
 // Why: SSH relay deploy resolves bundles from process.resourcesPath in packaged
 // apps. Keeping relay assets as extraResources makes them real directories
 // instead of paths hidden inside app.asar.
@@ -58,6 +62,7 @@ const commonExtraResources = [
   relayExtraResource,
   skillFreshnessResources,
   kontextSidecarResource,
+  kontextOntologyCliResource,
   emojiShortcodeDatasetResource
 ]
 // electron-builder replaces these defaults when `depends` is configured; retain

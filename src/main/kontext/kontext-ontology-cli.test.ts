@@ -28,6 +28,31 @@ afterEach(() => {
 })
 
 describe('resolveKontextOntologyCli', () => {
+  it('prefers the single-file CLI packaged beside the sidecar, which a packaged app can run', async () => {
+    const resources = realpathSync(mkdtempSync(join(tmpdir(), 'kondex-ontology-resources-')))
+    roots.push(resources)
+    mkdirSync(join(resources, 'kontext'))
+    writeFileSync(join(resources, 'kontext', 'ontology-cli.mjs'), '// bundled cli')
+    const checkout = makeCheckout(true)
+    expect(
+      await resolveKontextOntologyCli({
+        resourcesPath: resources,
+        environment: { KONDEX_KONTEXT_SIDECAR_PATH: checkout.sidecar }
+      })
+    ).toEqual({ status: 'configured', path: join(resources, 'kontext', 'ontology-cli.mjs') })
+  })
+
+  it('uses the bundled CLI beside a configured sidecar before the checkout build', async () => {
+    const checkout = makeCheckout(true)
+    const beside = join(checkout.root, 'plugins', 'kontext-brain', 'ontology-cli.mjs')
+    writeFileSync(beside, '// bundled cli')
+    expect(
+      await resolveKontextOntologyCli({
+        environment: { KONDEX_KONTEXT_SIDECAR_PATH: checkout.sidecar }
+      })
+    ).toEqual({ status: 'configured', path: beside })
+  })
+
   it('finds the CLI in the same checkout as the configured sidecar', async () => {
     const { sidecar, cli } = makeCheckout(true)
     const resolution = await resolveKontextOntologyCli({

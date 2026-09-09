@@ -89,4 +89,14 @@ if (chosen.source !== 'submodule' && chosen.source !== 'environment') {
 const destination = path.join(repoRoot, 'resources', 'kontext', 'server.mjs')
 mkdirSync(path.dirname(destination), { recursive: true })
 copyFileSync(chosen.path, destination)
+// Why: a packaged app has no checkout to run the ontology CLI from, so the
+// single-file build that ships beside the sidecar travels with it.
+const ontologyCli = path.join(path.dirname(chosen.path), 'ontology-cli.mjs')
+if (existsSync(ontologyCli)) {
+  copyFileSync(ontologyCli, path.join(repoRoot, 'resources', 'kontext', 'ontology-cli.mjs'))
+} else {
+  console.warn(
+    `[kondex] WARNING: no ontology-cli.mjs beside ${chosen.path}; the packaged app cannot connect ontology sources.`
+  )
+}
 console.log(`[kondex] Prepared Kontext sidecar from ${chosen.source}.`)
