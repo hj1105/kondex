@@ -22,6 +22,7 @@ import {
   shouldShowAiVaultSessionWorktreeLine,
   type AiVaultSessionWorktreeInfo
 } from './ai-vault-session-worktree'
+import { isTuiAgent } from '../../../../shared/tui-agent-config'
 
 export function getSessionDetailsId(sessionId: string): string {
   return `ai-vault-session-details-${sessionId.replace(/[^A-Za-z0-9_-]/g, '-')}`
@@ -47,7 +48,7 @@ export function SessionMetadata({
       className="mt-1 grid min-w-0 grid-cols-[auto_minmax(0,1fr)] gap-x-1.5 gap-y-0.5 text-[11px] leading-4 text-muted-foreground"
     >
       <span className="flex size-4 shrink-0 items-center justify-center text-muted-foreground">
-        <AgentIcon agent={session.agent} size={14} />
+        <AgentIcon agent={isTuiAgent(session.agent) ? session.agent : null} size={14} />
       </span>
       <div className="flex min-w-0 items-center gap-1.5">
         {/* Why: 'done' is the resting state of every finished pane — badging it

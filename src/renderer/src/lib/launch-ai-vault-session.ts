@@ -1,6 +1,7 @@
 import { useAppStore } from '@/store'
 import { reconcileTabOrder } from '@/components/tab-bar/reconcile-order'
 import { tuiAgentToAgentKind } from '../../../shared/agent-kind'
+import { isTuiAgent } from '../../../shared/tui-agent-config'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import {
   createWebRuntimeSessionTerminal,
@@ -39,7 +40,9 @@ export function launchAiVaultSessionInNewTab(args: {
       environmentId: runtimeEnvironmentId,
       ...(targetGroupId ? { targetGroupId } : {}),
       agentSessionKind: 'resume',
-      launchAgent: args.agent,
+      // Why optional: the vault also lists agents Kondex cannot launch, and their
+      // resume command is a plain shell line with no runtime to attribute it to.
+      ...(isTuiAgent(args.agent) ? { launchAgent: args.agent } : {}),
       command: args.command,
       ...(args.cwd ? { cwd: args.cwd } : {}),
       ...(args.env ? { env: args.env } : {}),
@@ -75,10 +78,12 @@ export function launchAiVaultSessionInNewTab(args: {
     command: args.command,
     ...(args.env ? { env: args.env } : {}),
     ...(args.envToDelete ? { envToDelete: args.envToDelete } : {}),
-    ...(args.launchConfig ? { launchConfig: args.launchConfig, launchAgent: args.agent } : {}),
+    ...(args.launchConfig && isTuiAgent(args.agent)
+      ? { launchConfig: args.launchConfig, launchAgent: args.agent }
+      : {}),
     ...(args.providerSession ? { resumeProviderSession: args.providerSession } : {}),
     telemetry: {
-      agent_kind: tuiAgentToAgentKind(args.agent),
+      agent_kind: isTuiAgent(args.agent) ? tuiAgentToAgentKind(args.agent) : 'other',
       launch_source: 'sidebar',
       request_kind: 'resume'
     }

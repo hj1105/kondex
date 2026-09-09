@@ -1,3 +1,4 @@
+import { isCursorAgentTitle } from '../../../shared/agent-detection'
 import { ORCHESTRATION_DELIVERY_BATCH_LIMIT, type OrchestrationDb } from './db'
 import { formatMessagePointer } from './formatter'
 import type { OrchestrationMailboxDeliveryTarget } from './mailbox-delivery-target'
@@ -240,6 +241,18 @@ export class OrchestrationMailboxPointerDelivery<TWaiter extends OrchestrationMe
       flight.stagedMessageIds = unread.map((message) => message.id)
       db.markAsDelivered(flight.stagedMessageIds)
       this.state.setWatermark(mailboxHandle, newestSequence, ptyId, this.leafKey(leaf))
+      // Why: a Kondex terminal can host any CLI, and Cursor treats injected PTY
+      // text as editable prompt content — an automated Enter would submit on the
+      // user's behalf. Leave the pointer written and let them press it.
+      if (
+        [leaf.lastOscTitle, leaf.paneTitle, this.deps.getTabTitle(leaf.tabId)].some(
+          isCursorAgentTitle
+        )
+      ) {
+        this.state.clearWatermark(mailboxHandle, newestSequence, ptyId)
+        this.redrive(mailboxHandle)
+        return
+      }
       flight.enterTimer = setTimeout(
         () =>
           submitOrchestrationMailboxPointer(

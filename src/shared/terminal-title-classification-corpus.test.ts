@@ -47,7 +47,10 @@ const PINNED_CLASSIFICATIONS: readonly PinnedRow[] = [
   ['◐ working', 'working', 'Claude Code', true, 'claude', null],
   ['codex working', 'working', 'Codex', false, 'codex', 'codex'],
   ['codex ready', 'idle', 'Codex', false, 'codex', 'codex'],
-  ['cursor position reset', null, null, false, null, null],
+  // Upstream pins this as idle too: a recognised agent noun with an idle keyword
+  // reads as idle status, while the label stays null so nothing claims it is an
+  // agent pane by name.
+  ['cursor position reset', 'idle', null, false, null, null],
   ['zsh | ⠋ Codex', 'working', 'Codex', false, 'codex', 'codex'],
   ['tmux | claude - action required', 'permission', null, false, null, null],
   ['ssh host | codex ready', 'idle', 'Codex', false, 'codex', 'codex']

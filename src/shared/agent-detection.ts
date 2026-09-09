@@ -11,6 +11,7 @@
 export type { AgentStatus } from './agent-title-core'
 export {
   isClaudeManagementTitle,
+  isCursorAgentTitle,
   STRONG_IDLE_KEYWORDS_RE,
   STRONG_WORKING_KEYWORDS_RE
 } from './agent-title-core'

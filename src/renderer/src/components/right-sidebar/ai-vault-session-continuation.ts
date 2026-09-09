@@ -1,5 +1,6 @@
 import type { AgentSessionContinuationRequest } from '@/lib/agent-session-continuation'
 import type { AiVaultSession } from '../../../../shared/ai-vault-types'
+import { isTuiAgent } from '../../../../shared/tui-agent-config'
 
 export function canContinueAiVaultSessionInNewSession(
   session: AiVaultSession,
@@ -20,7 +21,8 @@ export function prepareAiVaultSessionContinuation(args: {
   return {
     source: {
       capturedText: previewTranscript(session),
-      sourceAgent: session.agent,
+      // A vault agent Kondex cannot launch has no runtime identity to carry.
+      sourceAgent: isTuiAgent(session.agent) ? session.agent : null,
       sourceTitle: session.title,
       sourceWorkingDirectory: session.cwd,
       transcriptPath: session.filePath.trim() || null,

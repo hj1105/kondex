@@ -108,3 +108,32 @@ function computeIsClaudeAgent(title: string): boolean {
 
 export const isClaudeAgent: (title: string) => boolean =
   memoizeTitleClassification(computeIsClaudeAgent)
+
+const CURSOR_NATIVE_TITLE_LOWER = 'cursor agent'
+
+/**
+ * Kondex launches only its subscription runtimes, but a Kondex terminal can host
+ * any CLI — including Cursor, which treats injected PTY text as editable prompt
+ * content. Recognising its titles is what stops an automated Enter from
+ * submitting on the user's behalf there.
+ *
+ * Why not a name token: `cursor` is an ordinary editor noun that other agents
+ * type into their own task summaries. Cursor's identifying titles are a closed
+ * set, so match that vocabulary instead.
+ */
+export function isCursorAgentTitle(title: string | null | undefined): boolean {
+  if (typeof title !== 'string') {
+    return false
+  }
+  const trimmed = title.trim()
+  const lower = trimmed.toLowerCase()
+  if (
+    lower === CURSOR_NATIVE_TITLE_LOWER ||
+    lower === 'cursor ready' ||
+    lower === 'cursor - action required'
+  ) {
+    return true
+  }
+  // Only the controlled synthetic Cursor spinner title counts as identity.
+  return /^[\u2800-\u28ff] Cursor Agent$/u.test(trimmed)
+}

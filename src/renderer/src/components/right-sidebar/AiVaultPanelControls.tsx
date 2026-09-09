@@ -37,6 +37,7 @@ import { translate } from '@/i18n/i18n'
 import type { AiVaultHostScopeOption } from './ai-vault-host-scope'
 import { AiVaultSessionLimitMenu } from './AiVaultSessionLimitMenu'
 import type { AiVaultSessionLimit } from './ai-vault-session-limit'
+import { isTuiAgent } from '../../../../shared/tui-agent-config'
 
 const VAULT_HEADER_CONTROL_CLASS = 'size-6 shrink-0'
 
@@ -309,7 +310,7 @@ export function VaultViewMenu({
             onCheckedChange={(checked) => onAgentEnabledChange(agent, checked === true)}
             onSelect={(event) => event.preventDefault()}
           >
-            <AgentIcon agent={agent} size={14} />
+            <AgentIcon agent={isTuiAgent(agent) ? agent : null} size={14} />
             {agentLabel(agent)}
           </DropdownMenuCheckboxItem>
         ))}

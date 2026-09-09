@@ -9,7 +9,11 @@
  * path separators (POSIX and Windows) and hyphenated compounds on both sides.
  */
 
-export const AGENT_NAMES = ['claude', 'codex']
+// Why 'cursor' without a Kondex runtime for it: a Kondex terminal can host any
+// CLI, and title classification is what tells the app a pane is an agent that
+// went idle. Cursor has to be recognised for its pane to be treated as one —
+// notably so orchestration mail points at it and then declines to press Enter.
+export const AGENT_NAMES = ['claude', 'codex', 'cursor']
 
 // Why: Windows agent titles can surface launcher process names such as
 // `openclaude.exe`; still reject arbitrary dotted path fragments.
