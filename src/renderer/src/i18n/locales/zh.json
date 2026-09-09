@@ -365,7 +365,26 @@
       "repositoryUrlHint": "粘贴你会交给 git clone 的地址。私有仓库在你自己的 git 登录可达范围内可读，这里不会保存令牌。",
       "ref": "分支或标签（可选）",
       "env": "服务器环境变量，每行一个 KEY=VALUE",
-      "envHint": "GITHUB_PERSONAL_ACCESS_TOKEN 之类的令牌填在这里，会写入 kontext.yaml。"
+      "envHint": "GITHUB_PERSONAL_ACCESS_TOKEN 之类的令牌填在这里，会写入 kontext.yaml。",
+      "presetGithubOrg": "GitHub 组织",
+      "owner": "组织或用户 URL",
+      "ownerHint": "粘贴 https://github.com/<org> 或仅填名称。仓库通过你的 gh 登录列出，私有仓库在该登录可见的范围内显示；这里不会保存任何内容。",
+      "listRepositories": "加载仓库列表",
+      "repositoriesFound": "{{owner}} 中有 {{count}} 个仓库。",
+      "noRepositories": "没有可列出的仓库。",
+      "includeArchived": "包含已归档",
+      "includeForks": "包含分支仓库",
+      "selectAll": "全选",
+      "selectNone": "清除选择",
+      "addSelected": "添加所选 {{count}} 个",
+      "repositoryPrivate": "私有",
+      "repositoryArchived": "已归档",
+      "repositoryFork": "分支仓库",
+      "addProgress": "已添加 {{done}}/{{total}}。",
+      "addFailed": "无法添加：{{names}}",
+      "readCode": "同时读取源代码",
+      "readCodeHint": "TypeScript、JavaScript 和 Python 文件按其导出的符号来描述，并放到与管辖它们的文档相同的本体节点上。测试和生成文件会被跳过。",
+      "codeBadge": "代码"
     }
   },
   "app": {

@@ -202,6 +202,58 @@ describe('Kontext ontology RPC', () => {
     ])
   })
 
+  it('asks for code as one flag and lists an owner through the CLI', async () => {
+    mocks.run.mockResolvedValue({ command: 'add', ok: true, name: 'handbook', written: true })
+    await call('kontext.addOntologySource', {
+      ...workspace,
+      name: 'handbook',
+      transport: 'git',
+      url: 'https://github.com/org/handbook.git',
+      code: true,
+      apply: true
+    })
+    expect(argsOf()).toEqual([
+      'add',
+      '--name',
+      'handbook',
+      '--transport',
+      'git',
+      '--url',
+      'https://github.com/org/handbook.git',
+      '--code',
+      '--write'
+    ])
+
+    const repository = {
+      name: 'handbook',
+      fullName: 'org/handbook',
+      url: 'https://github.com/org/handbook',
+      cloneUrl: 'https://github.com/org/handbook.git',
+      defaultBranch: 'main',
+      private: true,
+      archived: false,
+      fork: false,
+      language: 'TypeScript',
+      description: null,
+      pushedAt: '2026-09-01T00:00:00Z'
+    }
+    mocks.run.mockResolvedValue({
+      command: 'github-repos',
+      ok: true,
+      owner: 'org',
+      kind: 'organization',
+      repositories: [repository]
+    })
+    const response = await call('kontext.listGithubRepositories', {
+      ...workspace,
+      owner: 'https://github.com/org'
+    })
+    expect(argsOf(1)).toEqual(['github-repos', '--owner', 'https://github.com/org'])
+    expect(response).toMatchObject({
+      result: { owner: 'org', kind: 'organization', repositories: [repository] }
+    })
+  })
+
   it('refuses a git source without a repository URL before spawning anything', async () => {
     const response = await call('kontext.addOntologySource', {
       ...workspace,

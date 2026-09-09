@@ -40,6 +40,17 @@ shows what is there before it changes anything.
      is stored. Set **Branch or tag** to read something other than the default
      branch. The cache lives under `~/.cache/kontext-brain/git-sources`
      (override with `KONTEXT_GIT_SOURCE_CACHE`).
+   - **GitHub organization** — paste `https://github.com/<org>` and **Load
+     repositories**. The list comes through your own `gh` login, so private
+     repositories appear as far as it can see and no token is stored. Working
+     repositories are ticked by default; archived ones and forks are hidden
+     until you include them. **Add N selected** adds each as its own git source
+     named `<org>-<repo>`.
+   - **Also read source code** — on a repository, organization or Markdown
+     source, TypeScript, JavaScript and Python files are described by their
+     exported symbols and classified onto ontology nodes beside the documents
+     that govern them (the code ontology). Tests, declarations and generated
+     files are skipped. In `kontext.yaml` this is `code: true` on the source.
    - **Import from Claude / Codex** — brings over MCP servers you already
      configured for those agents (Notion, Slack, Jira, GitHub…). **Preview
      import** lists what would be added before anything is written.

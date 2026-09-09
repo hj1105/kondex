@@ -365,7 +365,26 @@
       "repositoryUrlHint": "Pega la dirección que le darías a git clone. Los repositorios privados funcionan hasta donde llegue tu propio inicio de sesión de git; aquí no se guarda ningún token.",
       "ref": "Rama o etiqueta (opcional)",
       "env": "Entorno del servidor, una línea CLAVE=VALOR",
-      "envHint": "Los tokens como GITHUB_PERSONAL_ACCESS_TOKEN van aquí; se escriben en kontext.yaml."
+      "envHint": "Los tokens como GITHUB_PERSONAL_ACCESS_TOKEN van aquí; se escriben en kontext.yaml.",
+      "presetGithubOrg": "Organización de GitHub",
+      "owner": "URL de la organización o del usuario",
+      "ownerHint": "Pegue https://github.com/<org> o solo el nombre. Los repositorios se listan con su sesión de gh, así que los privados aparecen hasta donde esa sesión alcanza; aquí no se guarda nada.",
+      "listRepositories": "Cargar repositorios",
+      "repositoriesFound": "{{count}} repositorios en {{owner}}.",
+      "noRepositories": "No hay repositorios que mostrar.",
+      "includeArchived": "Incluir archivados",
+      "includeForks": "Incluir bifurcaciones",
+      "selectAll": "Seleccionar todo",
+      "selectNone": "Quitar la selección",
+      "addSelected": "Añadir {{count}} seleccionados",
+      "repositoryPrivate": "privado",
+      "repositoryArchived": "archivado",
+      "repositoryFork": "bifurcación",
+      "addProgress": "Añadidos {{done}} de {{total}}.",
+      "addFailed": "No se pudo añadir: {{names}}",
+      "readCode": "Leer también el código fuente",
+      "readCodeHint": "Los archivos TypeScript, JavaScript y Python se describen por sus símbolos exportados y se colocan en los nodos de la ontología junto a los documentos que los rigen. Se omiten pruebas y archivos generados.",
+      "codeBadge": "código"
     }
   },
   "app": {

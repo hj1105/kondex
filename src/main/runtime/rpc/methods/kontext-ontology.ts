@@ -8,6 +8,8 @@ import {
   kontextOntologyImportRequestSchema,
   kontextOntologyImportResultSchema,
   kontextOntologyListResultSchema,
+  kontextOntologyRepositoriesRequestSchema,
+  kontextOntologyRepositoriesResultSchema,
   kontextOntologySetupRequestSchema,
   kontextOntologySetupResultSchema
 } from '../../../../shared/kontext-ontology-contract'
@@ -100,11 +102,29 @@ export const kontextOntologyAddSourceMethod = defineMethod({
     if (request.type) {
       args.push('--type', request.type)
     }
+    if (request.code) {
+      args.push('--code')
+    }
     if (request.apply) {
       args.push('--write')
     }
     return run(request.workspacePath, args, kontextOntologyAddResultSchema, runtime, signal)
   }
+})
+
+export const kontextOntologyListRepositoriesMethod = defineMethod({
+  name: 'kontext.listGithubRepositories',
+  params: kontextOntologyRepositoriesRequestSchema,
+  // Why: the CLI asks GitHub through the user's own gh login, so the host adds no
+  // token and stores nothing; the result is only a list to choose sources from.
+  handler: async ({ workspacePath, owner }, { runtime, signal }) =>
+    run(
+      workspacePath,
+      ['github-repos', '--owner', owner],
+      kontextOntologyRepositoriesResultSchema,
+      runtime,
+      signal
+    )
 })
 
 export const kontextOntologyCheckSourcesMethod = defineMethod({
@@ -133,6 +153,7 @@ export const kontextOntologyMethods: RpcMethod[] = [
   kontextOntologyListSourcesMethod,
   kontextOntologyImportSourcesMethod,
   kontextOntologyAddSourceMethod,
+  kontextOntologyListRepositoriesMethod,
   kontextOntologyCheckSourcesMethod,
   kontextOntologySetupMethod
 ]

@@ -56,6 +56,12 @@ test('adds a repository by URL from the ontology dialog and reads its documents'
   git(seed, ['init', '--quiet', '--initial-branch=main'])
   await writeFile(path.join(seed, 'docs', 'decisions.md'), '# Decisions\n\nRetry twice.\n')
   await writeFile(path.join(seed, 'docs', 'terms.md'), '# Terms\n\nEstablished term.\n')
+  await mkdir(path.join(seed, 'src'))
+  await writeFile(
+    path.join(seed, 'src', 'retry.ts'),
+    'export function retryTwice<T>(run: () => T): T {\n  try {\n    return run()\n  } catch {\n    return run()\n  }\n}\n'
+  )
+  await writeFile(path.join(seed, 'src', 'retry.test.ts'), 'export const skipped = true\n')
   git(seed, ['add', '.'])
   git(seed, ['commit', '--quiet', '-m', 'seed'])
   git(seed, ['remote', 'add', 'origin', remote])
@@ -91,6 +97,9 @@ test('adds a repository by URL from the ontology dialog and reads its documents'
   await section.getByRole('button', { name: 'GitHub repository' }).click()
   await expect(section.getByLabel('Transport')).toHaveValue('git')
   await section.getByLabel('Repository URL').fill(`file://${remote}`)
+  // Why: the source code option is what turns a documents-only checkout into a
+  // code ontology source; the test file must not count.
+  await section.getByLabel('Also read source code').check()
   await section.getByRole('button', { name: 'Add', exact: true }).click()
   await expect(section.getByText('github_repo', { exact: true })).toBeVisible({ timeout: 30_000 })
 
@@ -98,5 +107,6 @@ test('adds a repository by URL from the ontology dialog and reads its documents'
   await expect(section.getByText('Every source answered.', { exact: true })).toBeVisible({
     timeout: 60_000
   })
-  await expect(section.getByText('2 documents', { exact: true })).toBeVisible()
+  await expect(section.getByText('3 documents', { exact: true })).toBeVisible()
+  await expect(section.getByText('code', { exact: true })).toBeVisible()
 })

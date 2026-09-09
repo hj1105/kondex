@@ -2,14 +2,20 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { KONTEXT_SOURCE_TYPES } from '../../../../shared/kontext-ontology-contract'
+import {
+  KONTEXT_SOURCE_TYPES,
+  type KontextOntologyRepositoriesResult
+} from '../../../../shared/kontext-ontology-contract'
 import { getKontextOntologyCopy } from './kontext-ontology-copy'
+import { KontextOntologyRepositoryPicker } from './KontextOntologyRepositoryPicker'
 import type { AddSourceInput } from './use-kontext-ontology'
 
 /**
  * Adds a provider that is not registered with another agent. Presets pick the
  * transport and layer type a provider actually uses; the address is left to the
  * user because inventing a package name or URL would ship a broken default.
+ * The organization preset lists repositories through the user's own gh login
+ * and hands them to the picker, so a whole org becomes a checklist.
  */
 type Copy = ReturnType<typeof getKontextOntologyCopy>
 
@@ -18,12 +24,20 @@ type Preset = {
   readonly label: string | ((copy: Copy) => string)
   readonly transport: AddSourceInput['transport']
   readonly type?: AddSourceInput['type']
+  /** Lists an owner's repositories instead of taking one address. */
+  readonly organization?: boolean
 }
 
 // Why the repository preset comes first: pasting a clone URL needs no server and
 // no token, so it is the path most people can finish without leaving the dialog.
 const PRESETS: readonly Preset[] = [
   { id: 'github_repo', label: (copy) => copy.presetGithubRepo, transport: 'git' },
+  {
+    id: 'github_org',
+    label: (copy) => copy.presetGithubOrg,
+    transport: 'git',
+    organization: true
+  },
   { id: 'notion', label: 'Notion', transport: 'sse', type: 'notion' },
   { id: 'github_pr', label: (copy) => copy.presetGithubMcp, transport: 'stdio', type: 'github_pr' },
   { id: 'jira', label: 'Jira', transport: 'sse', type: 'jira' },
@@ -48,10 +62,12 @@ function parseEnvironmentLines(text: string): Record<string, string> | undefined
 
 export function KontextOntologyAddSource({
   disabled,
-  onAdd
+  onAdd,
+  onListRepositories
 }: {
   disabled: boolean
   onAdd: (input: AddSourceInput) => Promise<boolean>
+  onListRepositories?: (owner: string) => Promise<KontextOntologyRepositoriesResult | null>
 }): React.JSX.Element {
   const copy = getKontextOntologyCopy()
   const [open, setOpen] = useState(false)
@@ -62,25 +78,38 @@ export function KontextOntologyAddSource({
   const [ref, setRef] = useState('')
   const [commandArgs, setCommandArgs] = useState('')
   const [environment, setEnvironment] = useState('')
+  const [readCode, setReadCode] = useState(false)
+  const [organization, setOrganization] = useState(false)
+  const [listing, setListing] = useState<KontextOntologyRepositoriesResult | null>(null)
 
-  const applyPreset = (preset: Preset): void => {
-    setName(preset.id)
-    setTransport(preset.transport)
-    setType(preset.type ?? '')
+  const reset = (): void => {
+    setName('')
     setAddress('')
     setRef('')
     setCommandArgs('')
     setEnvironment('')
+    setReadCode(false)
+    setListing(null)
   }
 
-  const addressLabel =
-    transport === 'stdio'
+  const applyPreset = (preset: Preset): void => {
+    reset()
+    setName(preset.organization ? '' : preset.id)
+    setTransport(preset.transport)
+    setType(preset.type ?? '')
+    setOrganization(preset.organization === true)
+  }
+
+  const addressLabel = organization
+    ? copy.owner
+    : transport === 'stdio'
       ? copy.command
       : transport === 'sse'
         ? copy.url
         : transport === 'git'
           ? copy.repositoryUrl
           : copy.path
+  const readsFiles = transport === 'git' || transport === 'local'
 
   const submit = async (): Promise<void> => {
     const parsedArgs = commandArgs
@@ -103,16 +132,24 @@ export function KontextOntologyAddSource({
       ...(transport === 'git'
         ? { url: address.trim(), ...(ref.trim() ? { ref: ref.trim() } : {}) }
         : {}),
-      ...(transport === 'local' ? { path: address.trim() } : {})
+      ...(transport === 'local' ? { path: address.trim() } : {}),
+      ...(readsFiles && readCode ? { code: true } : {})
     }
     if (await onAdd(input)) {
-      setOpen(false)
-      setName('')
-      setAddress('')
-      setRef('')
-      setCommandArgs('')
-      setEnvironment('')
+      close()
     }
+  }
+
+  const loadRepositories = async (): Promise<void> => {
+    if (!onListRepositories) {
+      return
+    }
+    setListing(await onListRepositories(address.trim()))
+  }
+
+  const close = (): void => {
+    setOpen(false)
+    reset()
   }
 
   if (!open) {
@@ -140,28 +177,32 @@ export function KontextOntologyAddSource({
         ))}
       </div>
 
-      <Label htmlFor="kontext-ontology-add-name">{copy.sourceName}</Label>
-      <Input
-        id="kontext-ontology-add-name"
-        value={name}
-        onChange={(event) => setName(event.target.value)}
-        disabled={disabled}
-      />
+      {!organization && (
+        <>
+          <Label htmlFor="kontext-ontology-add-name">{copy.sourceName}</Label>
+          <Input
+            id="kontext-ontology-add-name"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            disabled={disabled}
+          />
 
-      <Label htmlFor="kontext-ontology-add-transport">{copy.transport}</Label>
-      <select
-        id="kontext-ontology-add-transport"
-        className="h-9 rounded-md border border-border bg-background px-2 text-sm text-foreground"
-        value={transport}
-        onChange={(event) => setTransport(event.target.value as AddSourceInput['transport'])}
-        disabled={disabled}
-      >
-        {TRANSPORTS.map((value) => (
-          <option key={value} value={value}>
-            {value}
-          </option>
-        ))}
-      </select>
+          <Label htmlFor="kontext-ontology-add-transport">{copy.transport}</Label>
+          <select
+            id="kontext-ontology-add-transport"
+            className="h-9 rounded-md border border-border bg-background px-2 text-sm text-foreground"
+            value={transport}
+            onChange={(event) => setTransport(event.target.value as AddSourceInput['transport'])}
+            disabled={disabled}
+          >
+            {TRANSPORTS.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+        </>
+      )}
 
       <Label htmlFor="kontext-ontology-add-address">{addressLabel}</Label>
       <Input
@@ -169,9 +210,41 @@ export function KontextOntologyAddSource({
         value={address}
         onChange={(event) => setAddress(event.target.value)}
         disabled={disabled}
-        placeholder={transport === 'git' ? 'https://github.com/org/repo.git' : undefined}
+        placeholder={
+          organization
+            ? 'https://github.com/org'
+            : transport === 'git'
+              ? 'https://github.com/org/repo.git'
+              : undefined
+        }
       />
-      {transport === 'git' && (
+
+      {organization && (
+        <>
+          <p className="text-xs text-muted-foreground">{copy.ownerHint}</p>
+          <div>
+            <Button
+              variant="secondary"
+              onClick={() => void loadRepositories()}
+              disabled={disabled || address.trim() === '' || !onListRepositories}
+            >
+              {copy.listRepositories}
+            </Button>
+          </div>
+          {listing !== null && (
+            <KontextOntologyRepositoryPicker
+              key={listing.owner}
+              listing={listing}
+              disabled={disabled}
+              readCode={readCode}
+              onAdd={onAdd}
+              onAllAdded={close}
+            />
+          )}
+        </>
+      )}
+
+      {transport === 'git' && !organization && (
         <>
           <p className="text-xs text-muted-foreground">{copy.repositoryUrlHint}</p>
           <Label htmlFor="kontext-ontology-add-ref">{copy.ref}</Label>
@@ -181,6 +254,21 @@ export function KontextOntologyAddSource({
             onChange={(event) => setRef(event.target.value)}
             disabled={disabled}
           />
+        </>
+      )}
+
+      {readsFiles && (
+        <>
+          <label className="flex items-center gap-2 text-sm text-foreground">
+            <input
+              type="checkbox"
+              checked={readCode}
+              onChange={(event) => setReadCode(event.target.checked)}
+              disabled={disabled}
+            />
+            {copy.readCode}
+          </label>
+          <p className="text-xs text-muted-foreground">{copy.readCodeHint}</p>
         </>
       )}
 
@@ -208,29 +296,35 @@ export function KontextOntologyAddSource({
         </>
       )}
 
-      <Label htmlFor="kontext-ontology-add-type">{copy.layerType}</Label>
-      <select
-        id="kontext-ontology-add-type"
-        className="h-9 rounded-md border border-border bg-background px-2 text-sm text-foreground"
-        value={type}
-        onChange={(event) => setType(event.target.value as AddSourceInput['type'] | '')}
-        disabled={disabled}
-      >
-        <option value="">{copy.layerTypeNone}</option>
-        {KONTEXT_SOURCE_TYPES.map((value) => (
-          <option key={value} value={value}>
-            {value}
-          </option>
-        ))}
-      </select>
+      {!organization && (
+        <>
+          <Label htmlFor="kontext-ontology-add-type">{copy.layerType}</Label>
+          <select
+            id="kontext-ontology-add-type"
+            className="h-9 rounded-md border border-border bg-background px-2 text-sm text-foreground"
+            value={type}
+            onChange={(event) => setType(event.target.value as AddSourceInput['type'] | '')}
+            disabled={disabled}
+          >
+            <option value="">{copy.layerTypeNone}</option>
+            {KONTEXT_SOURCE_TYPES.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+        </>
+      )}
 
       <div className="mt-1 flex gap-2">
-        <Button
-          onClick={() => void submit()}
-          disabled={disabled || name.trim() === '' || address.trim() === ''}
-        >
-          {copy.addConfirm}
-        </Button>
+        {!organization && (
+          <Button
+            onClick={() => void submit()}
+            disabled={disabled || name.trim() === '' || address.trim() === ''}
+          >
+            {copy.addConfirm}
+          </Button>
+        )}
         <Button variant="secondary" onClick={() => setOpen(false)} disabled={disabled}>
           {copy.cancel}
         </Button>

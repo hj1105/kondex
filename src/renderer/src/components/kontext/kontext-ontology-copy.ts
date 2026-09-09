@@ -67,6 +67,38 @@ export function getKontextOntologyCopy() {
       'Paste the address you would give git clone. Private repositories work as far as your own git sign-in does; no token is stored here.'
     ),
     ref: translate('kondex.ontology.ref', 'Branch or tag (optional)'),
+    presetGithubOrg: translate('kondex.ontology.presetGithubOrg', 'GitHub organization'),
+    owner: translate('kondex.ontology.owner', 'Organization or user URL'),
+    ownerHint: translate(
+      'kondex.ontology.ownerHint',
+      'Paste https://github.com/<org> or just the name. Repositories are listed through your gh login, so private ones appear as far as that login can see; nothing is stored here.'
+    ),
+    listRepositories: translate('kondex.ontology.listRepositories', 'Load repositories'),
+    repositoriesFound: (count: number, owner: string): string =>
+      translate('kondex.ontology.repositoriesFound', '{{count}} repositories in {{owner}}.', {
+        count,
+        owner
+      }),
+    noRepositories: translate('kondex.ontology.noRepositories', 'No repositories to list.'),
+    includeArchived: translate('kondex.ontology.includeArchived', 'Include archived'),
+    includeForks: translate('kondex.ontology.includeForks', 'Include forks'),
+    selectAll: translate('kondex.ontology.selectAll', 'Select all'),
+    selectNone: translate('kondex.ontology.selectNone', 'Clear selection'),
+    addSelected: (count: number): string =>
+      translate('kondex.ontology.addSelected', 'Add {{count}} selected', { count }),
+    repositoryPrivate: translate('kondex.ontology.repositoryPrivate', 'private'),
+    repositoryArchived: translate('kondex.ontology.repositoryArchived', 'archived'),
+    repositoryFork: translate('kondex.ontology.repositoryFork', 'fork'),
+    addProgress: (done: number, total: number): string =>
+      translate('kondex.ontology.addProgress', 'Added {{done}} of {{total}}.', { done, total }),
+    addFailed: (names: string): string =>
+      translate('kondex.ontology.addFailed', 'Could not add: {{names}}', { names }),
+    readCode: translate('kondex.ontology.readCode', 'Also read source code'),
+    readCodeHint: translate(
+      'kondex.ontology.readCodeHint',
+      'TypeScript, JavaScript and Python files are described by their exported symbols and placed on ontology nodes beside the documents that govern them. Tests and generated files are skipped.'
+    ),
+    codeBadge: translate('kondex.ontology.codeBadge', 'code'),
     env: translate('kondex.ontology.env', 'Environment for the server, KEY=VALUE per line'),
     envHint: translate(
       'kondex.ontology.envHint',

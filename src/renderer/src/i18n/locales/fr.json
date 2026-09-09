@@ -365,7 +365,26 @@
       "repositoryUrlHint": "Collez l’adresse que vous donneriez à git clone. Les dépôts privés fonctionnent dans la limite de votre propre connexion git ; aucun jeton n’est enregistré ici.",
       "ref": "Branche ou tag (facultatif)",
       "env": "Environnement du serveur, une ligne CLÉ=VALEUR",
-      "envHint": "Les jetons comme GITHUB_PERSONAL_ACCESS_TOKEN vont ici ; ils sont écrits dans kontext.yaml."
+      "envHint": "Les jetons comme GITHUB_PERSONAL_ACCESS_TOKEN vont ici ; ils sont écrits dans kontext.yaml.",
+      "presetGithubOrg": "Organisation GitHub",
+      "owner": "URL de l'organisation ou de l'utilisateur",
+      "ownerHint": "Collez https://github.com/<org> ou seulement le nom. Les dépôts sont listés via votre connexion gh : les dépôts privés apparaissent dans la limite de ce que cette connexion voit ; rien n’est enregistré ici.",
+      "listRepositories": "Charger les dépôts",
+      "repositoriesFound": "{{count}} dépôts dans {{owner}}.",
+      "noRepositories": "Aucun dépôt à afficher.",
+      "includeArchived": "Inclure les archivés",
+      "includeForks": "Inclure les forks",
+      "selectAll": "Tout sélectionner",
+      "selectNone": "Effacer la sélection",
+      "addSelected": "Ajouter les {{count}} sélectionnés",
+      "repositoryPrivate": "privé",
+      "repositoryArchived": "archivé",
+      "repositoryFork": "dépôt dérivé",
+      "addProgress": "{{done}} sur {{total}} ajoutés.",
+      "addFailed": "Impossible d’ajouter : {{names}}",
+      "readCode": "Lire aussi le code source",
+      "readCodeHint": "Les fichiers TypeScript, JavaScript et Python sont décrits par leurs symboles exportés et placés sur les nœuds d’ontologie à côté des documents qui les régissent. Tests et fichiers générés sont ignorés.",
+      "codeBadge": "code source"
     }
   },
   "app": {

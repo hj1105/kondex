@@ -365,7 +365,26 @@
       "repositoryUrlHint": "git clone에 넣을 주소를 그대로 붙이세요. 비공개 저장소는 내 git 로그인이 되는 범위까지 읽히며, 토큰은 여기에 저장되지 않습니다.",
       "ref": "브랜치 또는 태그 (선택)",
       "env": "서버 환경변수, 한 줄에 KEY=VALUE 하나",
-      "envHint": "GITHUB_PERSONAL_ACCESS_TOKEN 같은 토큰을 여기에 넣습니다. kontext.yaml에 기록됩니다."
+      "envHint": "GITHUB_PERSONAL_ACCESS_TOKEN 같은 토큰을 여기에 넣습니다. kontext.yaml에 기록됩니다.",
+      "presetGithubOrg": "GitHub 조직",
+      "owner": "조직 또는 사용자 URL",
+      "ownerHint": "https://github.com/<org> 또는 이름만 붙이세요. 저장소는 내 gh 로그인으로 조회되므로 비공개 저장소도 그 로그인이 보는 범위까지 나타나며, 여기에 저장되는 것은 없습니다.",
+      "listRepositories": "저장소 목록 불러오기",
+      "repositoriesFound": "{{owner}}의 저장소 {{count}}개.",
+      "noRepositories": "표시할 저장소가 없습니다.",
+      "includeArchived": "아카이브 포함",
+      "includeForks": "포크 포함",
+      "selectAll": "모두 선택",
+      "selectNone": "선택 해제",
+      "addSelected": "선택한 {{count}}개 추가",
+      "repositoryPrivate": "비공개",
+      "repositoryArchived": "아카이브",
+      "repositoryFork": "포크",
+      "addProgress": "{{total}}개 중 {{done}}개 추가됨.",
+      "addFailed": "추가 실패: {{names}}",
+      "readCode": "소스 코드도 읽기",
+      "readCodeHint": "TypeScript·JavaScript·Python 파일을 내보낸 심볼로 설명해, 그 파일을 규정하는 문서와 같은 온톨로지 노드에 놓습니다. 테스트와 생성 파일은 건너뜁니다.",
+      "codeBadge": "코드"
     }
   },
   "app": {

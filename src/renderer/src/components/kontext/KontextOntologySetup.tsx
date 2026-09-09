@@ -160,7 +160,11 @@ export function KontextOntologySetup({ owner }: { owner: KontextRequestOwner }):
               >
                 {copy.importAction}
               </Button>
-              <KontextOntologyAddSource disabled={busy} onAdd={ontology.addSource} />
+              <KontextOntologyAddSource
+                disabled={busy}
+                onAdd={ontology.addSource}
+                onListRepositories={ontology.listRepositories}
+              />
               <Button variant="secondary" onClick={() => void refresh()} disabled={busy}>
                 {copy.refreshAction}
               </Button>

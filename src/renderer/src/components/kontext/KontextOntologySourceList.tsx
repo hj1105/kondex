@@ -36,6 +36,11 @@ export function KontextOntologySourceList({
           >
             <span className="text-sm font-medium text-foreground">{source.name}</span>
             <span className="text-xs text-muted-foreground">{source.transport}</span>
+            {source.code === true && (
+              <span className="rounded bg-secondary px-1.5 py-0.5 text-xs text-secondary-foreground">
+                {copy.codeBadge}
+              </span>
+            )}
             {source.type !== null && (
               <span className="rounded bg-secondary px-1.5 py-0.5 text-xs text-secondary-foreground">
                 {source.type}

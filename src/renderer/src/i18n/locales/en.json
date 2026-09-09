@@ -365,7 +365,26 @@
       "repositoryUrlHint": "Paste the address you would give git clone. Private repositories work as far as your own git sign-in does; no token is stored here.",
       "ref": "Branch or tag (optional)",
       "env": "Environment for the server, KEY=VALUE per line",
-      "envHint": "Tokens such as GITHUB_PERSONAL_ACCESS_TOKEN go here; they are written to kontext.yaml."
+      "envHint": "Tokens such as GITHUB_PERSONAL_ACCESS_TOKEN go here; they are written to kontext.yaml.",
+      "presetGithubOrg": "GitHub organization",
+      "owner": "Organization or user URL",
+      "ownerHint": "Paste https://github.com/<org> or just the name. Repositories are listed through your gh login, so private ones appear as far as that login can see; nothing is stored here.",
+      "listRepositories": "Load repositories",
+      "repositoriesFound": "{{count}} repositories in {{owner}}.",
+      "noRepositories": "No repositories to list.",
+      "includeArchived": "Include archived",
+      "includeForks": "Include forks",
+      "selectAll": "Select all",
+      "selectNone": "Clear selection",
+      "addSelected": "Add {{count}} selected",
+      "repositoryPrivate": "private",
+      "repositoryArchived": "archived",
+      "repositoryFork": "fork",
+      "addProgress": "Added {{done}} of {{total}}.",
+      "addFailed": "Could not add: {{names}}",
+      "readCode": "Also read source code",
+      "readCodeHint": "TypeScript, JavaScript and Python files are described by their exported symbols and placed on ontology nodes beside the documents that govern them. Tests and generated files are skipped.",
+      "codeBadge": "code"
     }
   },
   "app": {

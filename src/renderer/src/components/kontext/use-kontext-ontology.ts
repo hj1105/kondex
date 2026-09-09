@@ -5,8 +5,10 @@ import {
   kontextOntologyCheckResultSchema,
   kontextOntologyImportResultSchema,
   kontextOntologyListResultSchema,
+  kontextOntologyRepositoriesResultSchema,
   kontextOntologySetupResultSchema,
   type KontextOntologyCheckResult,
+  type KontextOntologyRepositoriesResult,
   type KontextOntologyImportResult,
   type KontextOntologySetupResult,
   type KontextOntologySource
@@ -19,7 +21,7 @@ const SETUP_TIMEOUT_MS = 16 * 60 * 1000
 // that is still running — and may already have written the file — as a failure.
 const QUICK_TIMEOUT_MS = 16 * 60 * 1000
 
-export type OntologyAction = 'list' | 'import' | 'add' | 'check' | 'setup'
+export type OntologyAction = 'list' | 'import' | 'add' | 'repositories' | 'check' | 'setup'
 
 export type OntologyState = {
   readonly sources: readonly KontextOntologySource[] | null
@@ -58,6 +60,8 @@ export type AddSourceInput = {
   ref?: string
   path?: string
   type?: 'notion' | 'jira' | 'github_pr' | 'slack'
+  /** local/git: read source files too, so code lands on ontology nodes beside its docs. */
+  code?: boolean
 }
 
 export function useKontextOntology(owner: KontextRequestOwner, workspace: string) {
@@ -161,6 +165,18 @@ export function useKontextOntology(owner: KontextRequestOwner, workspace: string
     [call, refresh, workspace]
   )
 
+  const listRepositories = useCallback(
+    async (owner: string): Promise<KontextOntologyRepositoriesResult | null> =>
+      call(
+        'repositories',
+        'kontext.listGithubRepositories',
+        { workspacePath: workspace, owner },
+        (value) => kontextOntologyRepositoriesResultSchema.parse(value),
+        QUICK_TIMEOUT_MS
+      ),
+    [call, workspace]
+  )
+
   const check = useCallback(async (): Promise<void> => {
     const result = await call(
       'check',
@@ -199,5 +215,5 @@ export function useKontextOntology(owner: KontextRequestOwner, workspace: string
     setState(EMPTY)
   }, [])
 
-  return { state, refresh, importSources, addSource, check, setup, reset }
+  return { state, refresh, importSources, addSource, listRepositories, check, setup, reset }
 }

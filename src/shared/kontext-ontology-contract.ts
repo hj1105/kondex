@@ -18,7 +18,9 @@ export const kontextOntologySourceSchema = z.object({
   name: z.string(),
   transport: kontextSourceTransportSchema,
   type: z.string().nullable(),
-  target: z.string()
+  target: z.string(),
+  /** local/git: source files are read as well as Markdown. */
+  code: z.boolean().optional()
 })
 
 export const kontextOntologyConfigRequestSchema = z.object({
@@ -67,6 +69,8 @@ export const kontextOntologyAddRequestSchema = kontextOntologyConfigRequestSchem
     path: z.string().optional(),
     include: z.array(z.string()).optional(),
     type: z.enum(KONTEXT_SOURCE_TYPES).optional(),
+    /** local/git: also read source files through the code providers. */
+    code: z.boolean().optional(),
     apply: z.boolean().default(false)
   })
   .superRefine((value, context) => {
@@ -92,6 +96,33 @@ export const kontextOntologyAddResultSchema = z.object({
   ok: z.literal(true),
   name: z.string(),
   written: z.boolean()
+})
+
+export const kontextOntologyRepositoriesRequestSchema = kontextOntologyConfigRequestSchema.extend({
+  /** Organization or user, as a name or a github.com URL. */
+  owner: z.string().trim().min(1)
+})
+
+export const kontextGithubRepositorySchema = z.object({
+  name: z.string(),
+  fullName: z.string(),
+  url: z.string(),
+  cloneUrl: z.string(),
+  defaultBranch: z.string(),
+  private: z.boolean(),
+  archived: z.boolean(),
+  fork: z.boolean(),
+  language: z.string().nullable(),
+  description: z.string().nullable(),
+  pushedAt: z.string().nullable()
+})
+
+export const kontextOntologyRepositoriesResultSchema = z.object({
+  command: z.literal('github-repos'),
+  ok: z.literal(true),
+  owner: z.string(),
+  kind: z.enum(['organization', 'user']),
+  repositories: z.array(kontextGithubRepositorySchema)
 })
 
 export const kontextOntologyCheckResultSchema = z.object({
@@ -136,3 +167,7 @@ export type KontextOntologyAddResult = z.infer<typeof kontextOntologyAddResultSc
 export type KontextOntologyCheckResult = z.infer<typeof kontextOntologyCheckResultSchema>
 export type KontextOntologySetupResult = z.infer<typeof kontextOntologySetupResultSchema>
 export type KontextOntologyAddRequest = z.infer<typeof kontextOntologyAddRequestSchema>
+export type KontextGithubRepository = z.infer<typeof kontextGithubRepositorySchema>
+export type KontextOntologyRepositoriesResult = z.infer<
+  typeof kontextOntologyRepositoriesResultSchema
+>
