@@ -7,6 +7,7 @@ vi.mock('electron', () => ({
 
 import {
   PACKAGED_BUILD_UPDATED_CHANNEL,
+  bundleMarkerPath,
   isNewerBuild,
   registerPackagedBuildRefresh
 } from './packaged-build-refresh'
@@ -15,6 +16,7 @@ type Listener = () => void
 
 function harness(modified: () => number | null) {
   const sent: string[] = []
+  const statted: string[] = []
   const focusListeners = new Set<Listener>()
   const timers: (() => void)[] = []
   const cleared: unknown[] = []
@@ -22,7 +24,10 @@ function harness(modified: () => number | null) {
     isPackaged: true,
     bundlePath: '/Applications/Kondex.app/Contents/Resources/app.asar',
     startedAtMs: 1_000,
-    bundleModifiedAtMs: async () => modified(),
+    bundleModifiedAtMs: async (statPath) => {
+      statted.push(statPath)
+      return modified()
+    },
     getWindows: () => [
       { isDestroyed: () => false, webContents: { send: (channel) => sent.push(channel) } },
       { isDestroyed: () => true, webContents: { send: () => sent.push('destroyed') } }
@@ -51,7 +56,7 @@ function harness(modified: () => number | null) {
     await Promise.resolve()
     await Promise.resolve()
   }
-  return { sent, tick, focus, dispose, focusListeners, cleared }
+  return { sent, statted, tick, focus, dispose, focusListeners, cleared }
 }
 
 describe('isNewerBuild', () => {
@@ -61,6 +66,15 @@ describe('isNewerBuild', () => {
     expect(isNewerBuild(500, 1_000)).toBe(false)
     // Why: an absent bundle mid-rebuild is not a new build yet.
     expect(isNewerBuild(null, 1_000)).toBe(false)
+  })
+})
+
+describe('bundleMarkerPath', () => {
+  it('stats the directory around an asar, whose synthetic stat would always read as new', () => {
+    expect(bundleMarkerPath('/Applications/Kondex.app/Contents/Resources/app.asar')).toBe(
+      '/Applications/Kondex.app/Contents/Resources'
+    )
+    expect(bundleMarkerPath('/checkout/out')).toBe('/checkout/out')
   })
 })
 
@@ -74,6 +88,7 @@ describe('registerPackagedBuildRefresh', () => {
     modified = 5_000
     await h.tick()
     expect(h.sent).toEqual([PACKAGED_BUILD_UPDATED_CHANNEL])
+    expect(h.statted[0]).toBe('/Applications/Kondex.app/Contents/Resources')
     // Why: one prompt is enough; a second on every focus would nag until restart.
     await h.tick()
     await h.focus()

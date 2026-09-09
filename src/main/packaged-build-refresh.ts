@@ -1,5 +1,6 @@
 import { app, BrowserWindow } from 'electron'
 import { stat } from 'node:fs/promises'
+import { dirname } from 'node:path'
 
 export const PACKAGED_BUILD_UPDATED_CHANNEL = 'app:packaged-build-updated'
 
@@ -32,6 +33,17 @@ export function isNewerBuild(bundleModifiedAtMs: number | null, startedAtMs: num
   return bundleModifiedAtMs !== null && bundleModifiedAtMs > startedAtMs
 }
 
+/**
+ * The path whose mtime says when the build was written. Never the asar itself:
+ * Electron's fs patch answers a stat of an archive path with a synthetic Stats
+ * whose mtime is "now", which reads as a build newer than every process and
+ * made the restart offer reappear after each restart. The directory holding the
+ * archive is a real filesystem entry that a rebuild rewrites.
+ */
+export function bundleMarkerPath(appPath: string): string {
+  return appPath.endsWith('.asar') ? dirname(appPath) : appPath
+}
+
 async function modifiedAt(bundlePath: string): Promise<number | null> {
   try {
     return (await stat(bundlePath)).mtimeMs
@@ -56,7 +68,7 @@ export function registerPackagedBuildRefresh(
   if (!isPackaged) {
     return () => {}
   }
-  const bundlePath = options.bundlePath ?? app.getAppPath()
+  const bundlePath = bundleMarkerPath(options.bundlePath ?? app.getAppPath())
   const startedAtMs = options.startedAtMs ?? Date.now() - process.uptime() * 1000
   const bundleModifiedAtMs = options.bundleModifiedAtMs ?? modifiedAt
   const getWindows = options.getWindows ?? (() => BrowserWindow.getAllWindows())
