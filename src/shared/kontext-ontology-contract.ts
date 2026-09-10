@@ -125,6 +125,33 @@ export const kontextOntologyRepositoriesResultSchema = z.object({
   repositories: z.array(kontextGithubRepositorySchema)
 })
 
+export const kontextKnowledgeSearchRequestSchema = kontextOntologyConfigRequestSchema.extend({
+  question: z.string().trim().min(1).max(2000),
+  limit: z.number().int().min(1).max(50).optional(),
+  ontologyNodeIds: z.array(z.string().min(1)).max(32).optional()
+})
+
+export const kontextKnowledgeSearchHitSchema = z.object({
+  evidenceId: z.string(),
+  resourceId: z.string(),
+  chunkId: z.string(),
+  title: z.string(),
+  source: z.object({ connectorId: z.string(), externalId: z.string(), type: z.string() }),
+  ontologyNodeIds: z.array(z.string()),
+  text: z.string(),
+  score: z.number(),
+  matchedTerms: z.array(z.string())
+})
+
+export const kontextKnowledgeSearchResultSchema = z.object({
+  command: z.literal('query'),
+  ok: z.literal(true),
+  dataDirectory: z.string(),
+  hits: z.array(kontextKnowledgeSearchHitSchema),
+  resourcesScanned: z.number(),
+  chunksScanned: z.number()
+})
+
 export const kontextOntologyCheckResultSchema = z.object({
   command: z.literal('check'),
   ok: z.boolean(),
@@ -172,6 +199,8 @@ export type KontextOntologyCheckResult = z.infer<typeof kontextOntologyCheckResu
 export type KontextOntologySetupResult = z.infer<typeof kontextOntologySetupResultSchema>
 export type KontextOntologyAddRequest = z.infer<typeof kontextOntologyAddRequestSchema>
 export type KontextGithubRepository = z.infer<typeof kontextGithubRepositorySchema>
+export type KontextKnowledgeSearchHit = z.infer<typeof kontextKnowledgeSearchHitSchema>
+export type KontextKnowledgeSearchResult = z.infer<typeof kontextKnowledgeSearchResultSchema>
 export type KontextOntologyRepositoriesResult = z.infer<
   typeof kontextOntologyRepositoriesResultSchema
 >

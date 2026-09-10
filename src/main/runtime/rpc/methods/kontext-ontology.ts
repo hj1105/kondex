@@ -9,6 +9,8 @@ import {
   kontextOntologyFailureSchema,
   kontextOntologyImportRequestSchema,
   kontextOntologyImportResultSchema,
+  kontextKnowledgeSearchRequestSchema,
+  kontextKnowledgeSearchResultSchema,
   kontextOntologyListResultSchema,
   kontextOntologyRepositoriesRequestSchema,
   kontextOntologyRepositoriesResultSchema,
@@ -129,6 +131,29 @@ export const kontextOntologyListRepositoriesMethod = defineMethod({
     )
 })
 
+export const kontextKnowledgeSearchMethod = defineMethod({
+  name: 'kontext.searchKnowledge',
+  params: kontextKnowledgeSearchRequestSchema,
+  // Why: the same graph the Task sidecar reads; a question is answered from connected
+  // documents and code with Evidence ids, not by crawling repositories again.
+  handler: async ({ workspacePath, question, limit, ontologyNodeIds }, { runtime, signal }) => {
+    const args = [
+      'query',
+      '--data-dir',
+      join(getAppEnvironment().getPath('userData'), 'kontext'),
+      '--question',
+      question
+    ]
+    if (limit !== undefined) {
+      args.push('--limit', String(limit))
+    }
+    for (const nodeId of ontologyNodeIds ?? []) {
+      args.push('--node', nodeId)
+    }
+    return run(workspacePath, args, kontextKnowledgeSearchResultSchema, runtime, signal)
+  }
+})
+
 export const kontextOntologyCheckSourcesMethod = defineMethod({
   name: 'kontext.checkOntologySources',
   params: kontextOntologyConfigRequestSchema,
@@ -158,6 +183,7 @@ export const kontextOntologyMethods: RpcMethod[] = [
   kontextOntologyImportSourcesMethod,
   kontextOntologyAddSourceMethod,
   kontextOntologyListRepositoriesMethod,
+  kontextKnowledgeSearchMethod,
   kontextOntologyCheckSourcesMethod,
   kontextOntologySetupMethod
 ]

@@ -257,6 +257,48 @@ describe('Kontext ontology RPC', () => {
     })
   })
 
+  it('searches the knowledge graph in the sidecar data directory with the given filters', async () => {
+    const hit = {
+      evidenceId: 'r1|source|c1',
+      resourceId: 'r1',
+      chunkId: 'c1',
+      title: 'Billing decisions',
+      source: { connectorId: 'handbook', externalId: 'docs/billing.md', type: 'local' },
+      ontologyNodeIds: ['Billing'],
+      text: 'Failed payments retry twice.',
+      score: 2.2,
+      matchedTerms: ['retry']
+    }
+    mocks.run.mockResolvedValue({
+      command: 'query',
+      ok: true,
+      dataDirectory: '/host/userData/kontext',
+      hits: [hit],
+      resourcesScanned: 3,
+      chunksScanned: 4
+    })
+    const response = await call('kontext.searchKnowledge', {
+      ...workspace,
+      question: 'how do payments retry',
+      limit: 5,
+      ontologyNodeIds: ['Billing', 'Payments']
+    })
+    expect(argsOf()).toEqual([
+      'query',
+      '--data-dir',
+      '/host/userData/kontext',
+      '--question',
+      'how do payments retry',
+      '--limit',
+      '5',
+      '--node',
+      'Billing',
+      '--node',
+      'Payments'
+    ])
+    expect(response).toMatchObject({ result: { hits: [hit], chunksScanned: 4 } })
+  })
+
   it('refuses a git source without a repository URL before spawning anything', async () => {
     const response = await call('kontext.addOntologySource', {
       ...workspace,
