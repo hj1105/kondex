@@ -125,10 +125,23 @@ Still under **Logic Work Items**:
 
 ### Trusted verifiers
 
-Kontext only runs verifiers the workspace itself declares. Put them in
-`.kontext/verifiers.json` at the repository root; standard `package.json`
-scripts (`typecheck`, `test`, `build`, `lint`) are also accepted as
-`workspace:typecheck`, `workspace:test`, `workspace:build`, `workspace:lint`.
+Kontext only runs verifiers the workspace itself declares, and most projects
+already do through their manifests, so nothing needs to be added:
+
+- `package.json` scripts named `lint`/`eslint`/`biome`/`oxlint`, `test`,
+  `typecheck`/`type-check`/`check-types`/`tsc`, `build`, run with the package
+  manager the `packageManager` field or lockfile names;
+- `pyproject.toml`/`setup.py`: `python3 -m pytest -q` when tests are
+  configured, `ruff check .` and `python3 -m mypy .` when those tools are
+  configured;
+- `go.mod`: `go vet`, `go test`, `go build` over `./...`;
+- `Cargo.toml`: `cargo clippy`, `cargo test`, `cargo build`;
+- `Makefile` targets `lint`, `test`, `typecheck`, `build`.
+
+These appear as `workspace:lint`, `workspace:test`, `workspace:typecheck`,
+`workspace:build`. Installed dependencies (`node_modules`, `.venv`) are linked
+into each runtime worktree automatically. Only a project whose checks are
+unusual needs `.kontext/verifiers.json` at the repository root:
 
 ```json
 {

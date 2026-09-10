@@ -109,10 +109,22 @@ kontext-ontology setup [--target-nodes 40] --write
 
 ### 신뢰하는 검증기
 
-Kontext는 워크스페이스가 스스로 선언한 검증기만 실행합니다. 리포지토리 루트의
-`.kontext/verifiers.json`에 적어 두세요. 표준 `package.json` 스크립트(`typecheck`,
-`test`, `build`, `lint`)도 `workspace:typecheck`, `workspace:test`,
-`workspace:build`, `workspace:lint`로 인정됩니다.
+Kontext는 워크스페이스가 스스로 선언한 검증기만 실행하는데, 대부분의 프로젝트는
+이미 매니페스트로 선언하고 있으므로 따로 추가할 것이 없습니다:
+
+- `package.json` 스크립트 `lint`/`eslint`/`biome`/`oxlint`, `test`,
+  `typecheck`/`type-check`/`check-types`/`tsc`, `build`. `packageManager` 필드나
+  락파일이 가리키는 패키지 매니저로 실행합니다.
+- `pyproject.toml`/`setup.py`: 테스트가 구성돼 있으면 `python3 -m pytest -q`, ruff·mypy
+  설정이 있으면 `ruff check .`, `python3 -m mypy .`.
+- `go.mod`: `go vet`, `go test`, `go build` (`./...`).
+- `Cargo.toml`: `cargo clippy`, `cargo test`, `cargo build`.
+- `Makefile`의 `lint`, `test`, `typecheck`, `build` 타깃.
+
+이들은 `workspace:lint`, `workspace:test`, `workspace:typecheck`, `workspace:build`로
+나타납니다. 설치된 의존성(`node_modules`, `.venv`)은 런타임 워크트리에 자동으로
+링크됩니다. 검사 방식이 특이한 프로젝트만 리포지토리 루트에
+`.kontext/verifiers.json`을 둡니다:
 
 ```json
 {
