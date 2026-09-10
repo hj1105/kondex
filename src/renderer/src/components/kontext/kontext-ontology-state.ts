@@ -1,4 +1,5 @@
 import type {
+  KontextEmbeddingSettings,
   KontextKnowledgeSearchResult,
   KontextOntologyCheckResult,
   KontextOntologyInspectResult,
@@ -20,6 +21,8 @@ export type OntologyAction =
   | 'search'
   | 'inspect'
   | 'map'
+  | 'embedding'
+  | 'embed'
 
 export type OntologyState = {
   readonly sources: readonly KontextOntologySource[] | null
@@ -35,6 +38,8 @@ export type OntologyState = {
   readonly lastSearch: KontextKnowledgeSearchResult | null
   /** Tools and resources of the source last inspected, for mapping a tools-only server. */
   readonly inspection: KontextOntologyInspectResult | null
+  /** How search embeds chunks for this workspace; null until the list answered. */
+  readonly embedding: KontextEmbeddingSettings | null
   readonly busy: OntologyAction | null
   readonly error: string | null
   /** Which action the error belongs to, so it can be shown beside that step's controls. */
@@ -52,6 +57,7 @@ export const EMPTY_ONTOLOGY_STATE: OntologyState = {
   progress: null,
   lastSearch: null,
   inspection: null,
+  embedding: null,
   busy: null,
   error: null,
   errorAction: null,

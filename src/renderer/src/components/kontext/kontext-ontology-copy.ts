@@ -137,6 +137,74 @@ export function getKontextOntologyCopy() {
       'Path to the text (empty to use the tool text)'
     ),
     saveMapping: translate('kondex.ontology.saveMapping', 'Save mapping'),
+    embeddingTitle: translate('kondex.ontology.embeddingTitle', 'Search embedding'),
+    embeddingUnknown: translate('kondex.ontology.embeddingUnknown', 'not read yet'),
+    embeddingIntro: translate(
+      'kondex.ontology.embeddingIntro',
+      'Vectors let a question find a passage worded differently. The built-in model runs inside Kondex and downloads once (about 120 MB); Ollama or an API can replace it, or vectors can be turned off.'
+    ),
+    embeddingChange: translate('kondex.ontology.embeddingChange', 'Change\u2026'),
+    embedNow: translate('kondex.ontology.embedNow', 'Embed now'),
+    embeddingProvider: translate('kondex.ontology.embeddingProvider', 'Provider'),
+    providerBuiltin: translate('kondex.ontology.providerBuiltin', 'Built-in model (no install)'),
+    providerOllama: translate('kondex.ontology.providerOllama', 'Ollama (local server)'),
+    providerOpenai: translate('kondex.ontology.providerOpenai', 'OpenAI-compatible API'),
+    providerNone: translate('kondex.ontology.providerNone', 'Off (word matching only)'),
+    embeddingModel: translate(
+      'kondex.ontology.embeddingModel',
+      'Model (leave empty for the default)'
+    ),
+    embeddingBaseUrl: translate(
+      'kondex.ontology.embeddingBaseUrl',
+      'Server address (leave empty for the default)'
+    ),
+    embeddingApiKeyEnv: translate(
+      'kondex.ontology.embeddingApiKeyEnv',
+      'Environment variable holding the API key'
+    ),
+    embeddingHintBuiltin: translate(
+      'kondex.ontology.embeddingHintBuiltin',
+      'multilingual-e5-small runs on WebAssembly inside Kondex. Slower than a native runtime, but nothing to install and no data leaves the machine.'
+    ),
+    embeddingHintOllama: translate(
+      'kondex.ontology.embeddingHintOllama',
+      'Needs Ollama running with the model pulled (ollama pull nomic-embed-text). Faster and better than the built-in model on most machines.'
+    ),
+    embeddingHintOpenai: translate(
+      'kondex.ontology.embeddingHintOpenai',
+      'The key is read from the named environment variable when Kondex calls the API; it is never written to kontext.yaml. Any OpenAI-compatible endpoint works through the server address.'
+    ),
+    embeddingHintNone: translate(
+      'kondex.ontology.embeddingHintNone',
+      'Search matches words only. A question phrased differently from the document will miss it.'
+    ),
+    embeddingSave: translate('kondex.ontology.embeddingSave', 'Save embedding'),
+    progressEmbed: (done: number, total: number): string =>
+      translate('kondex.ontology.progressEmbed', 'Embedding chunks {{done}}/{{total}}', {
+        done,
+        total
+      }),
+    progressDownload: (done: number, total: number): string =>
+      translate(
+        'kondex.ontology.progressDownload',
+        'Downloading the embedding model {{done}}/{{total}} MB',
+        {
+          done,
+          total
+        }
+      ),
+    setupEmbedded: (count: number): string =>
+      translate('kondex.ontology.setupEmbedded', '{{count}} chunks embedded', { count }),
+    setupEmbeddingFailed: (error: string): string =>
+      translate(
+        'kondex.ontology.setupEmbeddingFailed',
+        'embedding failed, search stays word-based: {{error}}',
+        {
+          error
+        }
+      ),
+    searchModeHybrid: translate('kondex.ontology.searchModeHybrid', 'words + meaning'),
+    searchModeLexical: translate('kondex.ontology.searchModeLexical', 'words only'),
     rebuildAction: translate('kondex.ontology.rebuildAction', 'Reclassify and save'),
     progressCollect: (done: number): string =>
       translate('kondex.ontology.progressCollect', 'Collecting documents… {{done}}', { done }),

@@ -32,6 +32,8 @@ native/**/.build/
 # Generated from kontext-brain-ts for local packaging; the source bundle remains authoritative.
 /resources/kontext/server.mjs
 /resources/kontext/ontology-cli.mjs
+/resources/kontext/ort-wasm-simd-threaded.mjs
+/resources/kontext/ort-wasm-simd-threaded.wasm
 
 # pnpm
 .pnpm-store/

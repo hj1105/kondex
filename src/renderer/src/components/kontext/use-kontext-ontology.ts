@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { translate } from '@/i18n/i18n'
 import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
+import { useKontextEmbeddingActions } from './use-kontext-embedding-actions'
 import { pollOntologyProgress } from './kontext-ontology-progress-poll'
 import {
   kontextOntologyAddResultSchema,
@@ -104,7 +105,12 @@ export function useKontextOntology(owner: KontextRequestOwner, workspace: string
     )
     if (result) {
       // Checks describe the previous source set, so they stop applying here.
-      setState((previous) => ({ ...previous, sources: result.sources, checks: null }))
+      setState((previous) => ({
+        ...previous,
+        sources: result.sources,
+        checks: null,
+        embedding: result.embedding ?? null
+      }))
     }
   }, [call, workspace])
 
@@ -225,6 +231,13 @@ export function useKontextOntology(owner: KontextRequestOwner, workspace: string
     [call, refresh, workspace]
   )
 
+  const { setEmbedding, embedKnowledge } = useKontextEmbeddingActions({
+    call,
+    workspace,
+    stableOwner,
+    setState
+  })
+
   const check = useCallback(async (): Promise<void> => {
     const result = await call(
       'check',
@@ -299,6 +312,8 @@ export function useKontextOntology(owner: KontextRequestOwner, workspace: string
     searchKnowledge,
     inspectSource,
     mapSource,
+    setEmbedding,
+    embedKnowledge,
     reset
   }
 }

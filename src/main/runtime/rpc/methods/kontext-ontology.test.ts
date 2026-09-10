@@ -339,6 +339,49 @@ describe('Kontext ontology RPC', () => {
     ])
   })
 
+  it('records the embedding choice beside the graph and embeds missing chunks there', async () => {
+    const settings = {
+      provider: 'ollama',
+      model: 'bge-m3',
+      baseUrl: 'http://127.0.0.1:11434',
+      apiKeyEnv: null
+    }
+    mocks.run.mockResolvedValue({
+      command: 'embedding',
+      ok: true,
+      embedding: settings,
+      written: true
+    })
+    await call('kontext.setEmbedding', {
+      ...workspace,
+      provider: 'ollama',
+      model: 'bge-m3',
+      apply: true
+    })
+    expect(argsOf()).toEqual([
+      'embedding',
+      '--provider',
+      'ollama',
+      '--data-dir',
+      '/host/userData/kontext',
+      '--model',
+      'bge-m3',
+      '--write'
+    ])
+    mocks.run.mockResolvedValue({
+      command: 'embed',
+      ok: true,
+      dataDirectory: '/host/userData/kontext',
+      embedding: settings,
+      model: 'ollama:bge-m3',
+      chunksEmbedded: 12,
+      chunksTotal: 40
+    })
+    const embedded = await call('kontext.embedKnowledge', workspace)
+    expect(argsOf(1)).toEqual(['embed', '--data-dir', '/host/userData/kontext'])
+    expect(embedded).toMatchObject({ result: { chunksEmbedded: 12, chunksTotal: 40 } })
+  })
+
   it('searches the knowledge graph in the sidecar data directory with the given filters', async () => {
     const hit = {
       evidenceId: 'r1|source|c1',

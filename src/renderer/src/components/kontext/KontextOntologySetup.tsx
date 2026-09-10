@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAppStore } from '../../store'
+import { KontextEmbeddingSettings } from './KontextEmbeddingSettings'
 import { KontextKnowledgeSearchPanel } from './KontextKnowledgeSearchPanel'
 import { KontextOntologyAddSource } from './KontextOntologyAddSource'
 import { KontextOntologyNodesPanel } from './KontextOntologyNodesPanel'
@@ -131,6 +132,14 @@ export function KontextOntologySetup({ owner }: { owner: KontextRequestOwner }):
         return copy.progressSync(progress.done, progress.total)
       case 'code':
         return copy.progressCode(progress.done, progress.total, progress.message ?? '')
+      case 'embed':
+        // Why: while the model downloads the counters are bytes, not chunks.
+        return progress.message?.startsWith('download')
+          ? copy.progressDownload(
+              Math.round(progress.done / 1_048_576),
+              Math.round(progress.total / 1_048_576)
+            )
+          : copy.progressEmbed(progress.done, progress.total)
     }
   }
   const checksPassed =
@@ -285,7 +294,7 @@ export function KontextOntologySetup({ owner }: { owner: KontextRequestOwner }):
                 {progressLine(state.progress)}
               </p>
             )}
-            {errorFor('setup')}
+            {errorFor('setup', 'embedding', 'embed')}
             {nodeCountError !== null && (
               <p role="alert" className="mt-1 text-sm text-destructive">
                 {nodeCountError}
@@ -295,8 +304,19 @@ export function KontextOntologySetup({ owner }: { owner: KontextRequestOwner }):
               <p role="status" className="mt-1 text-xs text-muted-foreground">
                 {copy.setupSummary(state.lastSetup.nodeIds.length, state.lastSetup.written)}
                 {state.lastSetup.nodeIds.length > 0 && ` — ${state.lastSetup.nodeIds.join(', ')}`}
+                {state.lastSetup.embeddingError
+                  ? ` — ${copy.setupEmbeddingFailed(state.lastSetup.embeddingError)}`
+                  : state.lastSetup.chunksEmbedded !== undefined &&
+                    ` — ${copy.setupEmbedded(state.lastSetup.chunksEmbedded)}`}
               </p>
             )}
+            <KontextEmbeddingSettings
+              settings={state.embedding}
+              disabled={busy}
+              busy={state.busy === 'embedding' || state.busy === 'embed' ? state.busy : null}
+              onSave={ontology.setEmbedding}
+              onEmbed={() => void ontology.embedKnowledge()}
+            />
             <p className="mt-2 text-xs text-muted-foreground">{copy.scope}</p>
           </Step>
 

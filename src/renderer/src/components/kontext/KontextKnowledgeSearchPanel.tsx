@@ -58,6 +58,9 @@ export function KontextKnowledgeSearchPanel({
                   result.chunksScanned,
                   result.resourcesScanned
                 )}
+            {result.mode !== undefined &&
+              ` · ${result.mode === 'hybrid' ? copy.searchModeHybrid : copy.searchModeLexical}`}
+            {result.embeddingError !== undefined && ` · ${result.embeddingError}`}
           </p>
           <ol className="mt-1 flex flex-col gap-1.5">
             {result.hits.map((hit) => (

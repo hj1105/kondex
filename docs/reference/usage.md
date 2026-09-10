@@ -156,6 +156,34 @@ Still under **Logic Work Items**:
    crawl of the repositories. From a shell: `kontext-ontology query --question
 "…" --data-dir <userData>/kontext` and `kontext-ontology nodes --data-dir …`.
 
+### Search embedding
+
+Step 6 and the `kontext_search_knowledge` tool rank by words *and* meaning:
+after a build, every chunk gets a vector, and a question phrased unlike the
+document ("money back rules" against a page titled "Refund policy") still
+finds it. The **Search embedding** box under the build buttons shows what is in
+use and lets you change it:
+
+- **Built-in model (default)** — `Xenova/multilingual-e5-small` runs on
+  WebAssembly inside Kondex. Nothing to install; the model files (about 120 MB)
+  download once into the sidecar data directory (`models/`). Slower than a
+  native runtime, and no text leaves the machine.
+- **Ollama** — a local server you already run: `ollama pull nomic-embed-text`
+  and choose it here (model and address are editable).
+- **OpenAI-compatible API** — name the environment variable that holds the
+  key (default `OPENAI_API_KEY`); the key itself is never written to
+  `kontext.yaml`. Change the server address for any compatible endpoint.
+- **Off** — search matches words only.
+
+Saving writes an `embedding:` section to `kontext.yaml` and records the
+choice beside the graph, so the Task sidecar searches in the same space.
+**Embed now** fills in vectors for chunks that have none in the chosen space
+without rebuilding the ontology; a build does the same at its end. If
+embedding fails (no network for the first download, Ollama not running) the
+build still succeeds and says so; search stays word-based until it works.
+The same controls exist as `kontext-ontology embedding --provider … --write`
+and `kontext-ontology embed --data-dir …`.
+
 ### Where knowledge lives
 
 A build writes every document and code module — Notion pages, Markdown, one

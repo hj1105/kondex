@@ -40,6 +40,12 @@ const kontextOntologyCliResource = {
   from: 'resources/kontext/ontology-cli.mjs',
   to: 'kontext/ontology-cli.mjs'
 }
+// Why: the sidecar's built-in search embedder loads these two files from its own
+// directory; they are plain assets, not code the bundle can inline.
+const kontextEmbeddingRuntimeResources = [
+  'ort-wasm-simd-threaded.mjs',
+  'ort-wasm-simd-threaded.wasm'
+].map((asset) => ({ from: `resources/kontext/${asset}`, to: `kontext/${asset}` }))
 // Why: SSH relay deploy resolves bundles from process.resourcesPath in packaged
 // apps. Keeping relay assets as extraResources makes them real directories
 // instead of paths hidden inside app.asar.
@@ -63,6 +69,7 @@ const commonExtraResources = [
   skillFreshnessResources,
   kontextSidecarResource,
   kontextOntologyCliResource,
+  ...kontextEmbeddingRuntimeResources,
   emojiShortcodeDatasetResource
 ]
 // electron-builder replaces these defaults when `depends` is configured; retain

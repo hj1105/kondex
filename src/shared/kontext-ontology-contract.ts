@@ -28,10 +28,47 @@ export const kontextOntologyConfigRequestSchema = z.object({
   workspacePath: z.string().min(1)
 })
 
+export const KONTEXT_EMBEDDING_PROVIDERS = ['builtin', 'ollama', 'openai', 'none'] as const
+export const kontextEmbeddingProviderSchema = z.enum(KONTEXT_EMBEDDING_PROVIDERS)
+
+/** How chunks are embedded for semantic search, with the sidecar's defaults filled in. */
+export const kontextEmbeddingSettingsSchema = z.object({
+  provider: kontextEmbeddingProviderSchema,
+  model: z.string(),
+  baseUrl: z.string().nullable(),
+  apiKeyEnv: z.string().nullable()
+})
+
 export const kontextOntologyListResultSchema = z.object({
   command: z.literal('list'),
   ok: z.literal(true),
-  sources: z.array(kontextOntologySourceSchema)
+  sources: z.array(kontextOntologySourceSchema),
+  embedding: kontextEmbeddingSettingsSchema.optional()
+})
+
+export const kontextOntologyEmbeddingRequestSchema = kontextOntologyConfigRequestSchema.extend({
+  provider: kontextEmbeddingProviderSchema,
+  model: z.string().optional(),
+  baseUrl: z.string().optional(),
+  apiKeyEnv: z.string().optional(),
+  apply: z.boolean().default(false)
+})
+
+export const kontextOntologyEmbeddingResultSchema = z.object({
+  command: z.literal('embedding'),
+  ok: z.literal(true),
+  embedding: kontextEmbeddingSettingsSchema,
+  written: z.boolean()
+})
+
+export const kontextOntologyEmbedResultSchema = z.object({
+  command: z.literal('embed'),
+  ok: z.literal(true),
+  dataDirectory: z.string(),
+  embedding: kontextEmbeddingSettingsSchema,
+  model: z.string(),
+  chunksEmbedded: z.number(),
+  chunksTotal: z.number()
 })
 
 export const kontextOntologyImportRequestSchema = kontextOntologyConfigRequestSchema.extend({
@@ -198,11 +235,14 @@ export const kontextKnowledgeSearchResultSchema = z.object({
   dataDirectory: z.string(),
   hits: z.array(kontextKnowledgeSearchHitSchema),
   resourcesScanned: z.number(),
-  chunksScanned: z.number()
+  chunksScanned: z.number(),
+  /** hybrid when vectors scored the search; lexical otherwise. */
+  mode: z.enum(['lexical', 'hybrid']).optional(),
+  embeddingError: z.string().optional()
 })
 
 export const kontextOntologyProgressSchema = z.object({
-  phase: z.enum(['collect', 'discover', 'design', 'classify', 'sync', 'code']),
+  phase: z.enum(['collect', 'discover', 'design', 'classify', 'sync', 'code', 'embed']),
   done: z.number(),
   total: z.number(),
   message: z.string().optional(),
@@ -260,7 +300,12 @@ export const kontextOntologySetupResultSchema = z.object({
   /** Sidecar data directory the documents were written into; null when the CLI had none. */
   knowledgeStore: z.string().nullable().optional(),
   /** Source files projected into the knowledge graph at symbol level. */
-  codeFilesSynced: z.number().optional()
+  codeFilesSynced: z.number().optional(),
+  /** Chunks given a search vector after the sync. */
+  chunksEmbedded: z.number().optional(),
+  embedding: kontextEmbeddingSettingsSchema.optional(),
+  /** Embedding was configured but failed; the ontology itself was still built. */
+  embeddingError: z.string().nullable().optional()
 })
 
 export const kontextOntologyFailureSchema = z.object({
@@ -279,6 +324,9 @@ export type KontextOntologyAddRequest = z.infer<typeof kontextOntologyAddRequest
 export type KontextGithubRepository = z.infer<typeof kontextGithubRepositorySchema>
 export type KontextKnowledgeSearchHit = z.infer<typeof kontextKnowledgeSearchHitSchema>
 export type KontextOntologyProgress = z.infer<typeof kontextOntologyProgressSchema>
+export type KontextEmbeddingSettings = z.infer<typeof kontextEmbeddingSettingsSchema>
+export type KontextEmbeddingProvider = z.infer<typeof kontextEmbeddingProviderSchema>
+export type KontextOntologyEmbedResult = z.infer<typeof kontextOntologyEmbedResultSchema>
 export type KontextToolDocumentMapping = z.infer<typeof kontextToolDocumentMappingSchema>
 export type KontextOntologyInspectResult = z.infer<typeof kontextOntologyInspectResultSchema>
 export type KontextOntologyNodeMembers = z.infer<typeof kontextOntologyNodeMembersSchema>

@@ -122,6 +122,10 @@ describe('electron-builder config', () => {
         from: 'resources/kontext/server.mjs',
         to: 'kontext/server.mjs'
       })
+      expect(electronBuilderConfig[platform].extraResources).toContainEqual({
+        from: 'resources/kontext/ort-wasm-simd-threaded.wasm',
+        to: 'kontext/ort-wasm-simd-threaded.wasm'
+      })
       expect(electronBuilderConfig[platform].extraResources).not.toEqual(
         expect.arrayContaining([expect.objectContaining({ to: 'onboarding/feature-wall' })])
       )

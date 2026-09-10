@@ -1,14 +1,11 @@
 import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
-import type { z } from 'zod'
-import { getAppEnvironment } from '../../../../shared/app-environment'
 import {
   kontextOntologyAddRequestSchema,
   kontextOntologyAddResultSchema,
   kontextOntologyCheckResultSchema,
   kontextOntologyConfigRequestSchema,
-  kontextOntologyFailureSchema,
   kontextOntologyImportRequestSchema,
   kontextOntologyImportResultSchema,
   kontextOntologyInspectRequestSchema,
@@ -26,40 +23,18 @@ import {
   kontextOntologySetupRequestSchema,
   kontextOntologySetupResultSchema
 } from '../../../../shared/kontext-ontology-contract'
-import { runKontextOntologyJson } from '../../../kontext/kontext-ontology-cli'
 import { defineMethod, type RpcMethod } from '../core'
+import {
+  kontextOntologyEmbeddingMethod,
+  kontextOntologyEmbedMethod
+} from './kontext-ontology-embedding'
+import { runKontextOntology as run, sidecarDataDirectory } from './kontext-ontology-run'
 
 /**
  * Host-side ontology setup. These run the Kontext Brain CLI in the selected
  * workspace; none of them start an agent, register evidence, or approve
  * anything. Add, import and setup write only when the caller asks them to.
  */
-
-type Runtime = { resolveKontextSourceWorkspace: (value: string) => Promise<string> }
-
-async function run<Schema extends z.ZodTypeAny>(
-  workspace: string,
-  args: readonly string[],
-  schema: Schema,
-  runtime: Runtime,
-  signal: AbortSignal | undefined
-): Promise<z.infer<Schema>> {
-  signal?.throwIfAborted()
-  const workspacePath = await runtime.resolveKontextSourceWorkspace(workspace)
-  signal?.throwIfAborted()
-  const raw = await runKontextOntologyJson({
-    args,
-    workspacePath,
-    ...(signal ? { signal } : {})
-  })
-  // Why: a reported failure names the source or field at fault, so it is passed
-  // through as a result rather than collapsed into a generic RPC error.
-  const failure = kontextOntologyFailureSchema.safeParse(raw)
-  if (failure.success) {
-    throw new Error(failure.data.error)
-  }
-  return schema.parse(raw)
-}
 
 export const kontextOntologyListSourcesMethod = defineMethod({
   name: 'kontext.listOntologySources',
@@ -152,13 +127,7 @@ export const kontextKnowledgeSearchMethod = defineMethod({
   // Why: the same graph the Task sidecar reads; a question is answered from connected
   // documents and code with Evidence ids, not by crawling repositories again.
   handler: async ({ workspacePath, question, limit, ontologyNodeIds }, { runtime, signal }) => {
-    const args = [
-      'query',
-      '--data-dir',
-      join(getAppEnvironment().getPath('userData'), 'kontext'),
-      '--question',
-      question
-    ]
+    const args = ['query', '--data-dir', sidecarDataDirectory(), '--question', question]
     if (limit !== undefined) {
       args.push('--limit', String(limit))
     }
@@ -168,10 +137,6 @@ export const kontextKnowledgeSearchMethod = defineMethod({
     return run(workspacePath, args, kontextKnowledgeSearchResultSchema, runtime, signal)
   }
 })
-
-function sidecarDataDirectory(): string {
-  return join(getAppEnvironment().getPath('userData'), 'kontext')
-}
 
 export const kontextOntologyNodesMethod = defineMethod({
   name: 'kontext.listOntologyNodes',
@@ -279,7 +244,7 @@ export const kontextOntologySetupMethod = defineMethod({
   handler: async ({ workspacePath, targetNodeCount, apply }, { runtime, signal }) => {
     // Why: the build writes every document into the Task sidecar's knowledge graph, so
     // it must be told where that graph lives; without it only the node schema is kept.
-    const args = ['setup', '--data-dir', join(getAppEnvironment().getPath('userData'), 'kontext')]
+    const args = ['setup', '--data-dir', sidecarDataDirectory()]
     if (targetNodeCount !== undefined) {
       args.push('--target-nodes', String(targetNodeCount))
     }
@@ -300,6 +265,8 @@ export const kontextOntologyMethods: RpcMethod[] = [
   kontextOntologyProgressMethod,
   kontextOntologyInspectSourceMethod,
   kontextOntologyMapSourceMethod,
+  kontextOntologyEmbeddingMethod,
+  kontextOntologyEmbedMethod,
   kontextOntologyCheckSourcesMethod,
   kontextOntologySetupMethod
 ]

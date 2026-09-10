@@ -99,4 +99,16 @@ if (existsSync(ontologyCli)) {
     `[kondex] WARNING: no ontology-cli.mjs beside ${chosen.path}; the packaged app cannot connect ontology sources.`
   )
 }
+// Why: the built-in search embedder runs ONNX Runtime's WebAssembly build, whose
+// binary and loader are fetched from the directory the CLI sits in at run time.
+for (const asset of ['ort-wasm-simd-threaded.mjs', 'ort-wasm-simd-threaded.wasm']) {
+  const source = path.join(path.dirname(chosen.path), asset)
+  if (existsSync(source)) {
+    copyFileSync(source, path.join(repoRoot, 'resources', 'kontext', asset))
+  } else {
+    console.warn(
+      `[kondex] WARNING: no ${asset} beside ${chosen.path}; the packaged app falls back to lexical search.`
+    )
+  }
+}
 console.log(`[kondex] Prepared Kontext sidecar from ${chosen.source}.`)

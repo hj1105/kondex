@@ -133,6 +133,31 @@ kontext-ontology setup [--target-nodes 40] --write
    저장소를 다시 긁는 대신 그래프에서 답합니다. 셸에서는 `kontext-ontology query
 --question "…" --data-dir <userData>/kontext`, `kontext-ontology nodes --data-dir …`.
 
+### 검색 임베딩
+
+6단계와 `kontext_search_knowledge` 도구는 단어와 *의미* 둘 다로 순위를 매깁니다.
+빌드가 끝나면 청크마다 벡터가 만들어져서, 문서와 표현이 다른 질문("돈을 돌려주는
+규칙" ↔ "환불 정책")도 찾습니다. 빌드 버튼 아래 **검색 임베딩** 상자가 지금 무엇을
+쓰는지 보여주고 바꿀 수 있게 합니다.
+
+- **내장 모델(기본)** — `Xenova/multilingual-e5-small`이 Kondex 안에서 WebAssembly로
+  돕니다. 설치할 것이 없고, 모델 파일(약 120MB)은 사이드카 데이터 디렉터리의
+  `models/`에 한 번만 내려받습니다. 네이티브보다 느리고, 텍스트가 기기를 떠나지
+  않습니다.
+- **Ollama** — 이미 돌리고 있는 로컬 서버. `ollama pull nomic-embed-text` 후 여기서
+  고릅니다(모델·주소 변경 가능).
+- **OpenAI 호환 API** — 키가 든 환경변수 이름을 적습니다(기본 `OPENAI_API_KEY`). 키
+  자체는 `kontext.yaml`에 기록되지 않습니다. 서버 주소를 바꾸면 호환 엔드포인트도
+  됩니다.
+- **끄기** — 단어 일치만 봅니다.
+
+저장하면 `kontext.yaml`에 `embedding:` 절이 쓰이고 그래프 옆에도 기록되어 Task
+사이드카가 같은 공간에서 검색합니다. **지금 벡터 만들기**는 온톨로지를 다시 빌드하지
+않고 벡터가 없는 청크만 채웁니다. 빌드도 끝날 때 같은 일을 합니다. 임베딩이 실패해도
+(첫 다운로드에 네트워크가 없거나 Ollama가 꺼져 있으면) 빌드는 성공하고 그 사실을
+알려주며, 그때까지 검색은 단어 일치로 동작합니다. CLI로는 `kontext-ontology embedding
+--provider … --write`와 `kontext-ontology embed --data-dir …`입니다.
+
 ### 지식은 어디에 저장되나
 
 빌드는 Notion 페이지, Markdown, 코드 모듈(소스 파일마다 Resource 하나, 심볼마다 Chunk
