@@ -15,7 +15,9 @@ import { hydrateShellPath, mergePathSegments } from '../startup/hydrate-shell-pa
 const SIDECAR_DEPTH_FROM_CHECKOUT = 3
 const CLI_RELATIVE_PATH = ['packages', 'loader', 'dist', 'ontology-cli-main.js'] as const
 /** Setup drives a model over every collected document; a short cap would kill real work. */
-const COMMAND_TIMEOUT_MS = 15 * 60 * 1000
+// Why: a build over an organization's code runs dozens of model batches; a short cap
+// reported that as a hang while the CLI was still, correctly, working.
+const COMMAND_TIMEOUT_MS = 60 * 60 * 1000
 
 export type KontextOntologyCliResolution =
   | { status: 'configured'; path: string }

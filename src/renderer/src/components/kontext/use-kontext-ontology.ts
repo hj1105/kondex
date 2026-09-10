@@ -16,10 +16,10 @@ import {
 import type { KontextRequestOwner } from './kontext-request-journal'
 
 /** Setup drives a model over every collected document, so it outlives a normal RPC wait. */
-const SETUP_TIMEOUT_MS = 16 * 60 * 1000
+const SETUP_TIMEOUT_MS = 61 * 60 * 1000
 // Why: must outlast the host's own command budget. Giving up first reports a command
 // that is still running — and may already have written the file — as a failure.
-const QUICK_TIMEOUT_MS = 16 * 60 * 1000
+const QUICK_TIMEOUT_MS = 61 * 60 * 1000
 
 export type OntologyAction = 'list' | 'import' | 'add' | 'repositories' | 'check' | 'setup'
 
