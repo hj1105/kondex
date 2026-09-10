@@ -153,7 +153,9 @@ export const kontextOntologySetupResultSchema = z.object({
   nodeIds: z.array(z.string()),
   written: z.boolean(),
   /** Sidecar data directory the documents were written into; null when the CLI had none. */
-  knowledgeStore: z.string().nullable().optional()
+  knowledgeStore: z.string().nullable().optional(),
+  /** Source files projected into the knowledge graph at symbol level. */
+  codeFilesSynced: z.number().optional()
 })
 
 export const kontextOntologyFailureSchema = z.object({
