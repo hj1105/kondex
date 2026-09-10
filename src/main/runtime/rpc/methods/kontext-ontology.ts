@@ -1,4 +1,6 @@
+import { join } from 'node:path'
 import type { z } from 'zod'
+import { getAppEnvironment } from '../../../../shared/app-environment'
 import {
   kontextOntologyAddRequestSchema,
   kontextOntologyAddResultSchema,
@@ -138,7 +140,9 @@ export const kontextOntologySetupMethod = defineMethod({
   name: 'kontext.setupOntology',
   params: kontextOntologySetupRequestSchema,
   handler: async ({ workspacePath, targetNodeCount, apply }, { runtime, signal }) => {
-    const args = ['setup']
+    // Why: the build writes every document into the Task sidecar's knowledge graph, so
+    // it must be told where that graph lives; without it only the node schema is kept.
+    const args = ['setup', '--data-dir', join(getAppEnvironment().getPath('userData'), 'kontext')]
     if (targetNodeCount !== undefined) {
       args.push('--target-nodes', String(targetNodeCount))
     }

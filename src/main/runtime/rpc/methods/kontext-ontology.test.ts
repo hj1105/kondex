@@ -7,6 +7,9 @@ const mocks = vi.hoisted(() => ({ run: vi.fn(), resolve: vi.fn() }))
 vi.mock('../../../kontext/kontext-ontology-cli', () => ({
   runKontextOntologyJson: mocks.run
 }))
+vi.mock('../../../../shared/app-environment', () => ({
+  getAppEnvironment: () => ({ getPath: () => '/host/userData' })
+}))
 
 const workspace = { workspacePath: 'id:folder:one' }
 
@@ -109,7 +112,7 @@ describe('Kontext ontology RPC', () => {
       written: false
     })
     await call('kontext.setupOntology', { ...workspace, apply: false })
-    expect(argsOf(1)).toEqual(['setup'])
+    expect(argsOf(1)).toEqual(['setup', '--data-dir', '/host/userData/kontext'])
   })
 
   it("passes the caller's choices through as command flags", async () => {
