@@ -57,6 +57,18 @@ Git 저장소를 엽니다. 아래 모든 것은 그 워크스페이스 단위�
      서버도 토큰도 필요 없습니다.
    - **Markdown** — 로컬 디렉터리. **이 워크스페이스의 Markdown도 사용**을 켜면 현재
      저장소의 `.md`가 함께 들어갑니다.
+   - **MCP 서버 (일반) / 원격 MCP (HTTP)** — Model Context Protocol을 말하는 서버라면
+     무엇이든 stdio·SSE·Streamable HTTP로 붙습니다. 호스팅 서버는 **URL**에 주소를,
+     **요청 헤더**에 한 줄에 하나씩 `Authorization=Bearer ${NOTION_TOKEN}` 형식으로
+     넣습니다. `${NAME}` 값은 서버를 부를 때 환경변수에서 읽으므로 토큰 자체는
+     `kontext.yaml`에 남지 않습니다. 대부분의 서버는 리소스가 아니라 도구를 내놓기
+     때문에 확인 결과가 *문서 0개, 도구 N개*로 나옵니다. 소스 목록 아래에서 그 서버를
+     고르고 **서버 살펴보기**로 도구 목록을 본 뒤 **문서 매핑…**을 누릅니다. 문서 목록을
+     돌려주는 도구(고정 인자와 항목 배열 경로, 예: `items`), 항목 안의 ID·제목 경로,
+     문서 하나를 읽는 도구(ID를 받는 인자 이름과 결과 안의 본문 경로)를 적고 저장하면
+     그 서버는 다른 소스와 같은 문서 소스가 됩니다. 확인이 문서 수를 세고, 빌드가
+     노드에 분류하고, 작업자는 `kontext_search_knowledge`로 찾습니다. `kontext.yaml`
+     에는 소스의 `documents:` 절로 기록됩니다.
 3. **응답 확인** — 모든 소스에 연결해 각각 몇 개의 문서를 내놓는지 보여줍니다.
    답하지 않는 소스는 이름이 찍히고, 지금 빌드하면 그 문서들은 빠진다고 경고합니다.
 4. **온톨로지 빌드** — **미리보기**는 저장 없이 만들어질 노드 수를, **빌드하고 저장**은
@@ -73,6 +85,9 @@ kontext-ontology list
 kontext-ontology import-mcp --from claude,codex --project . [--markdown .] --write
 kontext-ontology add --name handbook --transport git --url https://github.com/org/handbook.git [--ref main] --write
 kontext-ontology add --name github --transport stdio --command npx --arg -y --arg @modelcontextprotocol/server-github --env GITHUB_PERSONAL_ACCESS_TOKEN=… --write
+kontext-ontology add --name issues --transport http --url https://mcp.example.com/mcp --header 'Authorization=Bearer ${ISSUES_TOKEN}' --write
+kontext-ontology inspect --name issues
+kontext-ontology map --name issues --list-tool list_issues --items items --id number --title title --read-tool get_issue --read-arg number --content body --write
 kontext-ontology check
 kontext-ontology setup [--target-nodes 40] --write
 ```

@@ -257,6 +257,88 @@ describe('Kontext ontology RPC', () => {
     })
   })
 
+  it('adds an HTTP server with headers and a tool document mapping, then inspects and maps by name', async () => {
+    mocks.run.mockResolvedValue({ command: 'add', ok: true, name: 'issues', written: true })
+    await call('kontext.addOntologySource', {
+      ...workspace,
+      name: 'issues',
+      transport: 'http',
+      url: 'https://mcp.example.com/mcp',
+      headers: { Authorization: 'Bearer ${ISSUES_TOKEN}' },
+      documents: {
+        list: { tool: 'list_issues', arguments: { state: 'open' }, items: 'items', id: 'number' },
+        read: { tool: 'get_issue', idArgument: 'number', content: 'body' }
+      },
+      apply: true
+    })
+    expect(argsOf()).toEqual([
+      'add',
+      '--name',
+      'issues',
+      '--transport',
+      'http',
+      '--url',
+      'https://mcp.example.com/mcp',
+      '--header',
+      'Authorization=Bearer ${ISSUES_TOKEN}',
+      '--list-tool',
+      'list_issues',
+      '--id',
+      'number',
+      '--read-tool',
+      'get_issue',
+      '--read-arg',
+      'number',
+      '--list-args',
+      '{"state":"open"}',
+      '--items',
+      'items',
+      '--content',
+      'body',
+      '--write'
+    ])
+
+    const inspection = {
+      command: 'inspect',
+      ok: true,
+      name: 'issues',
+      transport: 'http',
+      resourceCount: 0,
+      tools: [{ name: 'list_issues', description: 'List issues' }]
+    }
+    mocks.run.mockResolvedValue(inspection)
+    const inspected = await call('kontext.inspectOntologySource', { ...workspace, name: 'issues' })
+    expect(argsOf(1)).toEqual(['inspect', '--name', 'issues'])
+    expect(inspected).toMatchObject({ result: inspection })
+
+    mocks.run.mockResolvedValue({ command: 'map', ok: true, name: 'issues', written: true })
+    await call('kontext.mapOntologySource', {
+      ...workspace,
+      name: 'issues',
+      documents: {
+        list: { tool: 'list_issues', id: 'number', title: 'title' },
+        read: { tool: 'get_issue', idArgument: 'number' }
+      },
+      apply: true
+    })
+    expect(argsOf(2)).toEqual([
+      'map',
+      '--name',
+      'issues',
+      '--list-tool',
+      'list_issues',
+      '--id',
+      'number',
+      '--read-tool',
+      'get_issue',
+      '--read-arg',
+      'number',
+      '--title',
+      'title',
+      '--write'
+    ])
+  })
+
   it('searches the knowledge graph in the sidecar data directory with the given filters', async () => {
     const hit = {
       evidenceId: 'r1|source|c1',

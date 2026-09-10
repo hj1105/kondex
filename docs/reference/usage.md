@@ -65,6 +65,22 @@ shows what is there before it changes anything.
      GitHub repository preset above — it needs neither a server nor a token.
    - **Markdown** — a local directory. **Also use this workspace's own
      Markdown** adds the current repository's `.md` files.
+   - **Any MCP server / Remote MCP (HTTP)** — any server that speaks the
+     Model Context Protocol, over stdio, SSE or Streamable HTTP. For a hosted
+     server put the URL in **URL** and one header per line under **Request
+     headers**, e.g. `Authorization=Bearer ${NOTION_TOKEN}`; a `${NAME}` value
+     is read from your environment when the server is called, so the token
+     itself never lands in `kontext.yaml`. Most servers expose tools rather
+     than resources, and a check then shows *0 documents, N tools*. Under the
+     source list, pick the server and **Look at the server** to see its tools,
+     then **Map documents…**: name the tool that lists documents (with fixed
+     arguments and the path to its item array, e.g. `items`), the path to an
+     item's id and title, and the tool that reads one document (the argument
+     that takes the id, and the path to the text in its result). Save, and the
+     server is a document source like any other: check counts its documents,
+     build files them onto nodes, and workers reach them through
+     `kontext_search_knowledge`. In `kontext.yaml` this is the `documents:`
+     block on the source.
 3. **Check they answer** — connects to every source and shows how many
    documents each exposes. A source that does not answer is named; building now
    would leave its documents out.
@@ -85,6 +101,9 @@ kontext-ontology list
 kontext-ontology import-mcp --from claude,codex --project . [--markdown .] --write
 kontext-ontology add --name handbook --transport git --url https://github.com/org/handbook.git [--ref main] --write
 kontext-ontology add --name github --transport stdio --command npx --arg -y --arg @modelcontextprotocol/server-github --env GITHUB_PERSONAL_ACCESS_TOKEN=… --write
+kontext-ontology add --name issues --transport http --url https://mcp.example.com/mcp --header 'Authorization=Bearer ${ISSUES_TOKEN}' --write
+kontext-ontology inspect --name issues
+kontext-ontology map --name issues --list-tool list_issues --items items --id number --title title --read-tool get_issue --read-arg number --content body --write
 kontext-ontology check
 kontext-ontology setup [--target-nodes 40] --write
 ```

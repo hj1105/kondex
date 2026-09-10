@@ -99,6 +99,44 @@ export function getKontextOntologyCopy() {
       'Each directory of TypeScript, JavaScript or Python becomes one module document, described by what it exports, and is placed on ontology nodes beside the documents that govern it. Tests and generated files are skipped.'
     ),
     codeBadge: translate('kondex.ontology.codeBadge', 'code'),
+    presetMcpServer: translate('kondex.ontology.presetMcpServer', 'Any MCP server'),
+    presetMcpRemote: translate('kondex.ontology.presetMcpRemote', 'Remote MCP (HTTP)'),
+    headers: translate('kondex.ontology.headers', 'Request headers, KEY=VALUE per line'),
+    headersHint: translate(
+      'kondex.ontology.headersHint',
+      'For a hosted server: Authorization=Bearer ${NOTION_TOKEN}. A ${NAME} value is read from your environment when the server is called, so the token itself is not written to kontext.yaml.'
+    ),
+    toolsCount: (count: number): string =>
+      translate('kondex.ontology.toolsCount', '{{count}} tools', { count }),
+    mapAction: translate('kondex.ontology.mapAction', 'Map documents…'),
+    mapIntro: translate(
+      'kondex.ontology.mapIntro',
+      'This server exposes tools rather than resources. Choose the tool that lists documents and the tool that reads one; paths point into their JSON results, like items or data.pages.'
+    ),
+    inspectAction: translate('kondex.ontology.inspectAction', 'Look at the server'),
+    inspectSummary: (resources: number, tools: number): string =>
+      translate('kondex.ontology.inspectSummary', '{{resources}} resources, {{tools}} tools', {
+        resources,
+        tools
+      }),
+    listTool: translate('kondex.ontology.listTool', 'Tool that lists documents'),
+    listArguments: translate(
+      'kondex.ontology.listArguments',
+      'Fixed arguments for it (JSON, optional)'
+    ),
+    itemsPath: translate(
+      'kondex.ontology.itemsPath',
+      'Path to the array of items (empty if the result is the array)'
+    ),
+    idPath: translate('kondex.ontology.idPath', 'Path to the id inside an item'),
+    titlePath: translate('kondex.ontology.titlePath', 'Path to the title (optional)'),
+    readTool: translate('kondex.ontology.readTool', 'Tool that reads one document'),
+    idArgument: translate('kondex.ontology.idArgument', 'Argument that receives the id'),
+    contentPath: translate(
+      'kondex.ontology.contentPath',
+      'Path to the text (empty to use the tool text)'
+    ),
+    saveMapping: translate('kondex.ontology.saveMapping', 'Save mapping'),
     rebuildAction: translate('kondex.ontology.rebuildAction', 'Reclassify and save'),
     progressCollect: (done: number): string =>
       translate('kondex.ontology.progressCollect', 'Collecting documents… {{done}}', { done }),

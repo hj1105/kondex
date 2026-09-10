@@ -7,6 +7,7 @@ import { useAppStore } from '../../store'
 import { KontextKnowledgeSearchPanel } from './KontextKnowledgeSearchPanel'
 import { KontextOntologyAddSource } from './KontextOntologyAddSource'
 import { KontextOntologyNodesPanel } from './KontextOntologyNodesPanel'
+import { KontextOntologyServerMappingPanel } from './KontextOntologyServerMappingPanel'
 import { getKontextOntologyCopy } from './kontext-ontology-copy'
 import { KontextOntologySourceList } from './KontextOntologySourceList'
 import type { KontextRequestOwner } from './kontext-request-journal'
@@ -209,7 +210,15 @@ export function KontextOntologySetup({ owner }: { owner: KontextRequestOwner }):
               />
               {copy.includeMarkdown}
             </label>
-            {errorFor('import', 'add', 'repositories')}
+            <KontextOntologyServerMappingPanel
+              sources={state.sources ?? []}
+              inspection={state.inspection}
+              disabled={busy}
+              busy={state.busy === 'inspect' || state.busy === 'map' ? state.busy : null}
+              onInspect={(name) => void ontology.inspectSource(name)}
+              onMap={ontology.mapSource}
+            />
+            {errorFor('import', 'add', 'repositories', 'inspect', 'map')}
             {state.lastImport !== null && (
               <div role="status" className="mt-1 text-xs text-muted-foreground">
                 <p>

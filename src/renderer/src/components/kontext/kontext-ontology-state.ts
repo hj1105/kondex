@@ -1,6 +1,7 @@
 import type {
   KontextKnowledgeSearchResult,
   KontextOntologyCheckResult,
+  KontextOntologyInspectResult,
   KontextOntologyImportResult,
   KontextOntologyNodeMembers,
   KontextOntologyProgress,
@@ -17,6 +18,8 @@ export type OntologyAction =
   | 'setup'
   | 'nodes'
   | 'search'
+  | 'inspect'
+  | 'map'
 
 export type OntologyState = {
   readonly sources: readonly KontextOntologySource[] | null
@@ -30,6 +33,8 @@ export type OntologyState = {
   /** Live build progress while setup runs; null otherwise. */
   readonly progress: KontextOntologyProgress | null
   readonly lastSearch: KontextKnowledgeSearchResult | null
+  /** Tools and resources of the source last inspected, for mapping a tools-only server. */
+  readonly inspection: KontextOntologyInspectResult | null
   readonly busy: OntologyAction | null
   readonly error: string | null
   /** Which action the error belongs to, so it can be shown beside that step's controls. */
@@ -46,6 +51,7 @@ export const EMPTY_ONTOLOGY_STATE: OntologyState = {
   nodes: null,
   progress: null,
   lastSearch: null,
+  inspection: null,
   busy: null,
   error: null,
   errorAction: null,
@@ -54,7 +60,7 @@ export const EMPTY_ONTOLOGY_STATE: OntologyState = {
 
 export type AddSourceInput = {
   name: string
-  transport: 'stdio' | 'sse' | 'local' | 'git'
+  transport: 'stdio' | 'sse' | 'http' | 'local' | 'git'
   command?: string
   /** Kept apart from `command`: the server is spawned without a shell. */
   args?: readonly string[]
@@ -68,4 +74,6 @@ export type AddSourceInput = {
   type?: 'notion' | 'jira' | 'github_pr' | 'slack'
   /** local/git: read source files too, so code lands on ontology nodes beside its docs. */
   code?: boolean
+  /** sse/http: request headers; a `${NAME}` value is read from the environment at run time. */
+  headers?: Readonly<Record<string, string>>
 }

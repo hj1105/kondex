@@ -11,6 +11,11 @@ import {
   kontextOntologyFailureSchema,
   kontextOntologyImportRequestSchema,
   kontextOntologyImportResultSchema,
+  kontextOntologyInspectRequestSchema,
+  kontextOntologyInspectResultSchema,
+  kontextOntologyMapRequestSchema,
+  kontextOntologyMapResultSchema,
+  type KontextToolDocumentMapping,
   kontextKnowledgeSearchRequestSchema,
   kontextKnowledgeSearchResultSchema,
   kontextOntologyListResultSchema,
@@ -113,6 +118,12 @@ export const kontextOntologyAddSourceMethod = defineMethod({
     if (request.code) {
       args.push('--code')
     }
+    for (const [key, value] of Object.entries(request.headers ?? {})) {
+      args.push('--header', `${key}=${value}`)
+    }
+    if (request.documents) {
+      args.push(...documentMappingArgs(request.documents))
+    }
     if (request.apply) {
       args.push('--write')
     }
@@ -194,6 +205,67 @@ export const kontextOntologyProgressMethod = defineMethod({
   }
 })
 
+/** One flag per mapping field, so a path or argument JSON survives untouched. */
+function documentMappingArgs(documents: KontextToolDocumentMapping): string[] {
+  const { list, read } = documents
+  const args = [
+    '--list-tool',
+    list.tool,
+    '--id',
+    list.id,
+    '--read-tool',
+    read.tool,
+    '--read-arg',
+    read.idArgument
+  ]
+  if (list.arguments) {
+    args.push('--list-args', JSON.stringify(list.arguments))
+  }
+  if (list.items) {
+    args.push('--items', list.items)
+  }
+  if (list.title) {
+    args.push('--title', list.title)
+  }
+  if (list.description) {
+    args.push('--description', list.description)
+  }
+  if (read.arguments) {
+    args.push('--read-args', JSON.stringify(read.arguments))
+  }
+  if (read.content) {
+    args.push('--content', read.content)
+  }
+  return args
+}
+
+export const kontextOntologyMapSourceMethod = defineMethod({
+  name: 'kontext.mapOntologySource',
+  params: kontextOntologyMapRequestSchema,
+  handler: async ({ workspacePath, name, documents, apply }, { runtime, signal }) => {
+    const args = ['map', '--name', name, ...documentMappingArgs(documents)]
+    if (apply) {
+      args.push('--write')
+    }
+    return run(workspacePath, args, kontextOntologyMapResultSchema, runtime, signal)
+  }
+})
+
+export const kontextOntologyInspectSourceMethod = defineMethod({
+  name: 'kontext.inspectOntologySource',
+  params: kontextOntologyInspectRequestSchema,
+  // Why: a person mapping a tools-only server needs to see its tools first; this reads
+  // the server and writes nothing.
+  handler: async ({ workspacePath, name }, { runtime, signal }) =>
+    run(
+      workspacePath,
+      ['inspect', '--name', name],
+      kontextOntologyInspectResultSchema,
+      runtime,
+      signal
+    )
+})
+
 export const kontextOntologyCheckSourcesMethod = defineMethod({
   name: 'kontext.checkOntologySources',
   params: kontextOntologyConfigRequestSchema,
@@ -226,6 +298,8 @@ export const kontextOntologyMethods: RpcMethod[] = [
   kontextKnowledgeSearchMethod,
   kontextOntologyNodesMethod,
   kontextOntologyProgressMethod,
+  kontextOntologyInspectSourceMethod,
+  kontextOntologyMapSourceMethod,
   kontextOntologyCheckSourcesMethod,
   kontextOntologySetupMethod
 ]

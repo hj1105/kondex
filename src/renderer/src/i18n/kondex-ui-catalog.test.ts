@@ -41,7 +41,7 @@ describe('Kondex UI catalog', () => {
   )
 
   it('pins the full new-surface key inventory', () => {
-    expect(Object.keys(english)).toHaveLength(378)
+    expect(Object.keys(english)).toHaveLength(396)
     expect(Object.keys(en.kondex.planning)).toEqual(
       expect.arrayContaining([
         'refine',
@@ -56,7 +56,7 @@ describe('Kondex UI catalog', () => {
     expect(Object.keys(en.kondex.registeredSchedule)).toHaveLength(14)
     expect(Object.keys(en.kondex.taskInventory)).toHaveLength(13)
     expect(Object.keys(en.kondex.sessionSource)).toHaveLength(20)
-    expect(Object.keys(en.kondex.ontology)).toHaveLength(88)
+    expect(Object.keys(en.kondex.ontology)).toHaveLength(106)
   })
 
   it.each(Object.entries({ es, fr, ja, ko, zh }))(

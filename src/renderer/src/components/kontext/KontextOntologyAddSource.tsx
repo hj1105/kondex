@@ -42,10 +42,12 @@ const PRESETS: readonly Preset[] = [
   { id: 'github_pr', label: (copy) => copy.presetGithubMcp, transport: 'stdio', type: 'github_pr' },
   { id: 'jira', label: 'Jira', transport: 'sse', type: 'jira' },
   { id: 'slack', label: 'Slack', transport: 'sse', type: 'slack' },
-  { id: 'local', label: 'Markdown', transport: 'local' }
+  { id: 'local', label: 'Markdown', transport: 'local' },
+  { id: 'mcp_server', label: (copy) => copy.presetMcpServer, transport: 'stdio' },
+  { id: 'mcp_remote', label: (copy) => copy.presetMcpRemote, transport: 'http' }
 ]
 
-const TRANSPORTS: readonly AddSourceInput['transport'][] = ['git', 'sse', 'stdio', 'local']
+const TRANSPORTS: readonly AddSourceInput['transport'][] = ['git', 'sse', 'http', 'stdio', 'local']
 
 /** `https://github.com/<owner>` with nothing after it names an organization or user, not a repository. */
 export function isGithubOwnerUrl(value: string): boolean {
@@ -83,6 +85,7 @@ export function KontextOntologyAddSource({
   const [ref, setRef] = useState('')
   const [commandArgs, setCommandArgs] = useState('')
   const [environment, setEnvironment] = useState('')
+  const [headers, setHeaders] = useState('')
   const [readCode, setReadCode] = useState(false)
   const [organization, setOrganization] = useState(false)
   const [listing, setListing] = useState<KontextOntologyRepositoriesResult | null>(null)
@@ -93,6 +96,7 @@ export function KontextOntologyAddSource({
     setRef('')
     setCommandArgs('')
     setEnvironment('')
+    setHeaders('')
     setReadCode(false)
     setListing(null)
   }
@@ -109,12 +113,13 @@ export function KontextOntologyAddSource({
     ? copy.owner
     : transport === 'stdio'
       ? copy.command
-      : transport === 'sse'
+      : transport === 'sse' || transport === 'http'
         ? copy.url
         : transport === 'git'
           ? copy.repositoryUrl
           : copy.path
   const readsFiles = transport === 'git' || transport === 'local'
+  const remoteServer = transport === 'sse' || transport === 'http'
 
   const submit = async (): Promise<void> => {
     const parsedArgs = commandArgs
@@ -122,6 +127,7 @@ export function KontextOntologyAddSource({
       .map((line) => line.trim())
       .filter((line) => line !== '')
     const env = transport === 'stdio' ? parseEnvironmentLines(environment) : undefined
+    const parsedHeaders = remoteServer ? parseEnvironmentLines(headers) : undefined
     const input: AddSourceInput = {
       name: name.trim(),
       transport,
@@ -133,7 +139,9 @@ export function KontextOntologyAddSource({
             ...(env ? { env } : {})
           }
         : {}),
-      ...(transport === 'sse' ? { url: address.trim() } : {}),
+      ...(remoteServer
+        ? { url: address.trim(), ...(parsedHeaders ? { headers: parsedHeaders } : {}) }
+        : {}),
       ...(transport === 'git'
         ? { url: address.trim(), ...(ref.trim() ? { ref: ref.trim() } : {}) }
         : {}),
@@ -283,6 +291,21 @@ export function KontextOntologyAddSource({
             {copy.readCode}
           </label>
           <p className="text-xs text-muted-foreground">{copy.readCodeHint}</p>
+        </>
+      )}
+
+      {remoteServer && (
+        <>
+          <Label htmlFor="kontext-ontology-add-headers">{copy.headers}</Label>
+          <textarea
+            id="kontext-ontology-add-headers"
+            className="scrollbar-sleek min-h-16 rounded-md border border-border bg-background px-2 py-1.5 font-mono text-sm text-foreground"
+            value={headers}
+            onChange={(event) => setHeaders(event.target.value)}
+            disabled={disabled}
+            spellCheck={false}
+          />
+          <p className="text-xs text-muted-foreground">{copy.headersHint}</p>
         </>
       )}
 

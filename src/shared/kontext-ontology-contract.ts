@@ -8,7 +8,7 @@ import { z } from 'zod'
  * instead of a terminal transcript.
  */
 
-export const KONTEXT_SOURCE_TRANSPORTS = ['stdio', 'sse', 'local', 'git'] as const
+export const KONTEXT_SOURCE_TRANSPORTS = ['stdio', 'sse', 'http', 'local', 'git'] as const
 /** Layer adapters Kontext Brain can apply to a source's documents. */
 export const KONTEXT_SOURCE_TYPES = ['notion', 'jira', 'github_pr', 'slack'] as const
 
@@ -53,6 +53,51 @@ export const kontextOntologyImportResultSchema = z.object({
   written: z.boolean()
 })
 
+export const kontextToolDocumentMappingSchema = z.object({
+  list: z.object({
+    tool: z.string().min(1),
+    arguments: z.record(z.string(), z.unknown()).optional(),
+    items: z.string().optional(),
+    id: z.string().min(1),
+    title: z.string().optional(),
+    description: z.string().optional()
+  }),
+  read: z.object({
+    tool: z.string().min(1),
+    idArgument: z.string().min(1),
+    arguments: z.record(z.string(), z.unknown()).optional(),
+    content: z.string().optional()
+  })
+})
+
+export const kontextOntologyMapRequestSchema = kontextOntologyConfigRequestSchema.extend({
+  name: z.string().min(1),
+  documents: kontextToolDocumentMappingSchema,
+  apply: z.boolean().default(false)
+})
+
+export const kontextOntologyMapResultSchema = z.object({
+  command: z.literal('map'),
+  ok: z.literal(true),
+  name: z.string(),
+  written: z.boolean()
+})
+
+export const kontextOntologyInspectRequestSchema = kontextOntologyConfigRequestSchema.extend({
+  name: z.string().min(1)
+})
+
+export const kontextOntologyInspectResultSchema = z.object({
+  command: z.literal('inspect'),
+  ok: z.literal(true),
+  name: z.string(),
+  transport: kontextSourceTransportSchema,
+  resourceCount: z.number(),
+  tools: z.array(
+    z.object({ name: z.string(), description: z.string(), inputSchema: z.unknown().optional() })
+  )
+})
+
 export const kontextOntologyAddRequestSchema = kontextOntologyConfigRequestSchema
   .extend({
     name: z.string().min(1),
@@ -65,6 +110,10 @@ export const kontextOntologyAddRequestSchema = kontextOntologyConfigRequestSchem
     ref: z.string().optional(),
     /** stdio: environment the server needs, such as an API token. */
     env: z.record(z.string(), z.string()).optional(),
+    /** sse/http: request headers; a `${NAME}` value is read from the environment at run time. */
+    headers: z.record(z.string(), z.string()).optional(),
+    /** Tool servers: which tool lists documents and which reads one, with result paths. */
+    documents: kontextToolDocumentMappingSchema.optional(),
     /** Workspace-relative or absolute directory for a local source. */
     path: z.string().optional(),
     include: z.array(z.string()).optional(),
@@ -79,7 +128,7 @@ export const kontextOntologyAddRequestSchema = kontextOntologyConfigRequestSchem
     const required =
       value.transport === 'stdio'
         ? 'command'
-        : value.transport === 'sse' || value.transport === 'git'
+        : value.transport === 'sse' || value.transport === 'http' || value.transport === 'git'
           ? 'url'
           : 'path'
     if (!value[required]?.trim()) {
@@ -188,6 +237,7 @@ export const kontextOntologyCheckResultSchema = z.object({
       name: z.string(),
       ok: z.boolean(),
       resourceCount: z.number().nullable(),
+      toolCount: z.number().nullable().optional(),
       error: z.string().nullable()
     })
   )
@@ -229,6 +279,8 @@ export type KontextOntologyAddRequest = z.infer<typeof kontextOntologyAddRequest
 export type KontextGithubRepository = z.infer<typeof kontextGithubRepositorySchema>
 export type KontextKnowledgeSearchHit = z.infer<typeof kontextKnowledgeSearchHitSchema>
 export type KontextOntologyProgress = z.infer<typeof kontextOntologyProgressSchema>
+export type KontextToolDocumentMapping = z.infer<typeof kontextToolDocumentMappingSchema>
+export type KontextOntologyInspectResult = z.infer<typeof kontextOntologyInspectResultSchema>
 export type KontextOntologyNodeMembers = z.infer<typeof kontextOntologyNodeMembersSchema>
 export type KontextOntologyNodesResult = z.infer<typeof kontextOntologyNodesResultSchema>
 export type KontextKnowledgeSearchResult = z.infer<typeof kontextKnowledgeSearchResultSchema>

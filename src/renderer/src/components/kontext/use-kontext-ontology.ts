@@ -7,12 +7,15 @@ import {
   kontextOntologyAddResultSchema,
   kontextOntologyCheckResultSchema,
   kontextOntologyImportResultSchema,
+  kontextOntologyInspectResultSchema,
+  kontextOntologyMapResultSchema,
   kontextKnowledgeSearchResultSchema,
   kontextOntologyListResultSchema,
   kontextOntologyNodesResultSchema,
   kontextOntologyRepositoriesResultSchema,
   kontextOntologySetupResultSchema,
-  type KontextOntologyRepositoriesResult
+  type KontextOntologyRepositoriesResult,
+  type KontextToolDocumentMapping
 } from '../../../../shared/kontext-ontology-contract'
 import type { KontextRequestOwner } from './kontext-request-journal'
 
@@ -188,6 +191,40 @@ export function useKontextOntology(owner: KontextRequestOwner, workspace: string
     [call, workspace]
   )
 
+  const inspectSource = useCallback(
+    async (name: string): Promise<void> => {
+      const result = await call(
+        'inspect',
+        'kontext.inspectOntologySource',
+        { workspacePath: workspace, name },
+        (value) => kontextOntologyInspectResultSchema.parse(value),
+        QUICK_TIMEOUT_MS
+      )
+      if (result) {
+        setState((previous) => ({ ...previous, inspection: result }))
+      }
+    },
+    [call, workspace]
+  )
+
+  const mapSource = useCallback(
+    async (name: string, documents: KontextToolDocumentMapping): Promise<boolean> => {
+      const result = await call(
+        'map',
+        'kontext.mapOntologySource',
+        { workspacePath: workspace, name, documents, apply: true },
+        (value) => kontextOntologyMapResultSchema.parse(value),
+        QUICK_TIMEOUT_MS
+      )
+      if (!result) {
+        return false
+      }
+      await refresh()
+      return true
+    },
+    [call, refresh, workspace]
+  )
+
   const check = useCallback(async (): Promise<void> => {
     const result = await call(
       'check',
@@ -260,6 +297,8 @@ export function useKontextOntology(owner: KontextRequestOwner, workspace: string
     setup,
     loadNodes,
     searchKnowledge,
+    inspectSource,
+    mapSource,
     reset
   }
 }

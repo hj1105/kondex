@@ -4,5 +4,5 @@
   "semi": false,
   "printWidth": 100,
   "trailingComma": "none",
-  "ignorePatterns": ["cloud/**", ".github/actions/cloud-sql-rollout-lease/**"]
+  "ignorePatterns": ["cloud/**", "vendor/**", ".github/actions/cloud-sql-rollout-lease/**"]
 }

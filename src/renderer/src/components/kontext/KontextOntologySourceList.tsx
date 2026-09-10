@@ -50,6 +50,9 @@ export function KontextOntologySourceList({
               (check.ok ? (
                 <span className="text-xs text-muted-foreground">
                   {copy.resourceCount(check.resourceCount ?? 0)}
+                  {typeof check.toolCount === 'number' &&
+                    check.toolCount > 0 &&
+                    `, ${copy.toolsCount(check.toolCount)}`}
                 </span>
               ) : (
                 <span className="text-xs text-destructive">{check.error ?? copy.checkFailed}</span>
