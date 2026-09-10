@@ -96,7 +96,7 @@ export function getKontextOntologyCopy() {
     readCode: translate('kondex.ontology.readCode', 'Also read source code'),
     readCodeHint: translate(
       'kondex.ontology.readCodeHint',
-      'TypeScript, JavaScript and Python files are described by their exported symbols and placed on ontology nodes beside the documents that govern them. Tests and generated files are skipped.'
+      'Each directory of TypeScript, JavaScript or Python becomes one module document, described by what it exports, and is placed on ontology nodes beside the documents that govern it. Tests and generated files are skipped.'
     ),
     codeBadge: translate('kondex.ontology.codeBadge', 'code'),
     env: translate('kondex.ontology.env', 'Environment for the server, KEY=VALUE per line'),

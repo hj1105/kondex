@@ -383,7 +383,7 @@
       "addProgress": "{{done}} sur {{total}} ajoutés.",
       "addFailed": "Impossible d’ajouter : {{names}}",
       "readCode": "Lire aussi le code source",
-      "readCodeHint": "Les fichiers TypeScript, JavaScript et Python sont décrits par leurs symboles exportés et placés sur les nœuds d’ontologie à côté des documents qui les régissent. Tests et fichiers générés sont ignorés.",
+      "readCodeHint": "Chaque dossier TypeScript, JavaScript ou Python devient un document de module, décrit par ce qu’il exporte, et placé sur les nœuds d’ontologie à côté des documents qui le régissent. Tests et fichiers générés sont ignorés.",
       "codeBadge": "code source"
     },
     "localBuild": {

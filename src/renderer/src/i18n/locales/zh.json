@@ -383,7 +383,7 @@
       "addProgress": "已添加 {{done}}/{{total}}。",
       "addFailed": "无法添加：{{names}}",
       "readCode": "同时读取源代码",
-      "readCodeHint": "TypeScript、JavaScript 和 Python 文件按其导出的符号来描述，并放到与管辖它们的文档相同的本体节点上。测试和生成文件会被跳过。",
+      "readCodeHint": "每个 TypeScript、JavaScript 或 Python 目录成为一个模块文档，按其导出内容描述，并放到与管辖它的文档相同的本体节点上。测试和生成文件会被跳过。",
       "codeBadge": "代码"
     },
     "localBuild": {

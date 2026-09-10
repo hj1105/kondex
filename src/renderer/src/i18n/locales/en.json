@@ -383,7 +383,7 @@
       "addProgress": "Added {{done}} of {{total}}.",
       "addFailed": "Could not add: {{names}}",
       "readCode": "Also read source code",
-      "readCodeHint": "TypeScript, JavaScript and Python files are described by their exported symbols and placed on ontology nodes beside the documents that govern them. Tests and generated files are skipped.",
+      "readCodeHint": "Each directory of TypeScript, JavaScript or Python becomes one module document, described by what it exports, and is placed on ontology nodes beside the documents that govern it. Tests and generated files are skipped.",
       "codeBadge": "code"
     },
     "localBuild": {

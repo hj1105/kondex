@@ -383,7 +383,7 @@
       "addProgress": "{{total}} 件中 {{done}} 件を追加しました。",
       "addFailed": "追加できませんでした: {{names}}",
       "readCode": "ソースコードも読む",
-      "readCodeHint": "TypeScript・JavaScript・Python ファイルをエクスポートされたシンボルで説明し、それを規定する文書と同じオントロジーノードに置きます。テストと生成ファイルは対象外です。",
+      "readCodeHint": "TypeScript・JavaScript・Python のディレクトリごとにモジュール文書を 1 つ作り、エクスポート内容で説明して、それを規定する文書と同じオントロジーノードに置きます。テストと生成ファイルは対象外です。",
       "codeBadge": "コード"
     },
     "localBuild": {

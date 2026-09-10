@@ -383,7 +383,7 @@
       "addProgress": "{{total}}개 중 {{done}}개 추가됨.",
       "addFailed": "추가 실패: {{names}}",
       "readCode": "소스 코드도 읽기",
-      "readCodeHint": "TypeScript·JavaScript·Python 파일을 내보낸 심볼로 설명해, 그 파일을 규정하는 문서와 같은 온톨로지 노드에 놓습니다. 테스트와 생성 파일은 건너뜁니다.",
+      "readCodeHint": "TypeScript·JavaScript·Python 디렉터리마다 모듈 문서 하나를 만들어 내보낸 심볼로 설명하고, 그 모듈을 규정하는 문서와 같은 온톨로지 노드에 놓습니다. 테스트와 생성 파일은 건너뜁니다.",
       "codeBadge": "코드"
     },
     "localBuild": {

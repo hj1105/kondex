@@ -47,10 +47,11 @@ shows what is there before it changes anything.
      until you include them. **Add N selected** adds each as its own git source
      named `<org>-<repo>`.
    - **Also read source code** — on a repository, organization or Markdown
-     source, TypeScript, JavaScript and Python files are described by their
-     exported symbols and classified onto ontology nodes beside the documents
-     that govern them (the code ontology). Tests, declarations and generated
-     files are skipped. In `kontext.yaml` this is `code: true` on the source.
+     source, each directory of TypeScript, JavaScript or Python becomes one
+     module document described by what it exports, classified onto ontology
+     nodes beside the documents that govern it (the code ontology). Up to 80
+     modules per source, the ones exporting most first; tests, declarations and
+     generated files are skipped. In `kontext.yaml` this is `code: true`.
    - **Import from Claude / Codex** — brings over MCP servers you already
      configured for those agents (Notion, Slack, Jira, GitHub…). **Preview
      import** lists what would be added before anything is written.
