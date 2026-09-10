@@ -4,11 +4,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAppStore } from '../../store'
+import { KontextKnowledgeSearchPanel } from './KontextKnowledgeSearchPanel'
 import { KontextOntologyAddSource } from './KontextOntologyAddSource'
+import { KontextOntologyNodesPanel } from './KontextOntologyNodesPanel'
 import { getKontextOntologyCopy } from './kontext-ontology-copy'
 import { KontextOntologySourceList } from './KontextOntologySourceList'
 import type { KontextRequestOwner } from './kontext-request-journal'
 import { type OntologyAction, useKontextOntology } from './use-kontext-ontology'
+import type { KontextOntologyProgress } from '../../../../shared/kontext-ontology-contract'
 
 function parseTargetNodes(raw: string): number | 'empty' | 'invalid' {
   const text = raw.trim()
@@ -98,7 +101,7 @@ export function KontextOntologySetup({ owner }: { owner: KontextRequestOwner }):
         {ontology.state.error}
       </p>
     ) : null
-  const { state, refresh, reset } = ontology
+  const { state, refresh, reset, loadNodes } = ontology
 
   // Choosing a workspace is enough to show what it already has; nothing is written.
   useEffect(() => {
@@ -107,10 +110,28 @@ export function KontextOntologySetup({ owner }: { owner: KontextRequestOwner }):
       return
     }
     void refresh()
-  }, [workspace, refresh, reset])
+    void loadNodes()
+  }, [workspace, refresh, loadNodes, reset])
 
   const busy = state.busy !== null
   const hasSources = (state.sources?.length ?? 0) > 0
+  const hasOntology = (state.nodes?.length ?? 0) > 0
+  const progressLine = (progress: KontextOntologyProgress): string => {
+    switch (progress.phase) {
+      case 'collect':
+        return copy.progressCollect(progress.done)
+      case 'discover':
+        return copy.progressDiscover(progress.done, progress.total)
+      case 'design':
+        return copy.progressDesign
+      case 'classify':
+        return copy.progressClassify(progress.done, progress.total)
+      case 'sync':
+        return copy.progressSync(progress.done, progress.total)
+      case 'code':
+        return copy.progressCode(progress.done, progress.total, progress.message ?? '')
+    }
+  }
   const checksPassed =
     state.checks !== null && state.checks.length > 0 && state.checks.every((entry) => entry.ok)
 
@@ -247,9 +268,14 @@ export function KontextOntologySetup({ owner }: { owner: KontextRequestOwner }):
                 {state.busy === 'setup' ? copy.busy : copy.previewAction}
               </Button>
               <Button onClick={() => runSetup(true)} disabled={busy || !hasSources}>
-                {copy.buildAction}
+                {hasOntology ? copy.rebuildAction : copy.buildAction}
               </Button>
             </div>
+            {state.progress !== null && (
+              <p role="status" className="mt-1 text-xs text-muted-foreground">
+                {progressLine(state.progress)}
+              </p>
+            )}
             {errorFor('setup')}
             {nodeCountError !== null && (
               <p role="alert" className="mt-1 text-sm text-destructive">
@@ -263,6 +289,25 @@ export function KontextOntologySetup({ owner }: { owner: KontextRequestOwner }):
               </p>
             )}
             <p className="mt-2 text-xs text-muted-foreground">{copy.scope}</p>
+          </Step>
+
+          <Step index={5} title={copy.stepNodes}>
+            <KontextOntologyNodesPanel
+              nodes={state.nodes}
+              disabled={busy}
+              onLoad={() => void ontology.loadNodes()}
+            />
+            {errorFor('nodes')}
+          </Step>
+
+          <Step index={6} title={copy.stepSearch}>
+            <KontextKnowledgeSearchPanel
+              result={state.lastSearch}
+              disabled={busy}
+              busy={state.busy === 'search'}
+              onSearch={(question) => void ontology.searchKnowledge(question)}
+            />
+            {errorFor('search')}
           </Step>
         </>
       )}

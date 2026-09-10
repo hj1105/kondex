@@ -1,4 +1,6 @@
-import { join } from 'node:path'
+import { createHash } from 'node:crypto'
+import { readFile } from 'node:fs/promises'
+import { join, resolve } from 'node:path'
 import type { z } from 'zod'
 import { getAppEnvironment } from '../../../../shared/app-environment'
 import {
@@ -12,6 +14,8 @@ import {
   kontextKnowledgeSearchRequestSchema,
   kontextKnowledgeSearchResultSchema,
   kontextOntologyListResultSchema,
+  kontextOntologyNodesResultSchema,
+  kontextOntologyProgressSchema,
   kontextOntologyRepositoriesRequestSchema,
   kontextOntologyRepositoriesResultSchema,
   kontextOntologySetupRequestSchema,
@@ -154,6 +158,42 @@ export const kontextKnowledgeSearchMethod = defineMethod({
   }
 })
 
+function sidecarDataDirectory(): string {
+  return join(getAppEnvironment().getPath('userData'), 'kontext')
+}
+
+export const kontextOntologyNodesMethod = defineMethod({
+  name: 'kontext.listOntologyNodes',
+  params: kontextOntologyConfigRequestSchema,
+  handler: async ({ workspacePath }, { runtime, signal }) =>
+    run(
+      workspacePath,
+      ['nodes', '--data-dir', sidecarDataDirectory()],
+      kontextOntologyNodesResultSchema,
+      runtime,
+      signal
+    )
+})
+
+export const kontextOntologyProgressMethod = defineMethod({
+  name: 'kontext.ontologyProgress',
+  params: kontextOntologyConfigRequestSchema,
+  // Why: the CLI writes progress to a file named after the config path; reading it
+  // here costs nothing and works while the build's own process is still running.
+  handler: async ({ workspacePath }, { runtime, signal }) => {
+    signal?.throwIfAborted()
+    const workspace = await runtime.resolveKontextSourceWorkspace(workspacePath)
+    const configPath = resolve(workspace, 'kontext.yaml')
+    const digest = createHash('sha256').update(configPath).digest('hex').slice(0, 32)
+    const file = join(sidecarDataDirectory(), 'ontology-progress', `${digest}.json`)
+    try {
+      return kontextOntologyProgressSchema.parse(JSON.parse(await readFile(file, 'utf8')))
+    } catch {
+      return null
+    }
+  }
+})
+
 export const kontextOntologyCheckSourcesMethod = defineMethod({
   name: 'kontext.checkOntologySources',
   params: kontextOntologyConfigRequestSchema,
@@ -184,6 +224,8 @@ export const kontextOntologyMethods: RpcMethod[] = [
   kontextOntologyAddSourceMethod,
   kontextOntologyListRepositoriesMethod,
   kontextKnowledgeSearchMethod,
+  kontextOntologyNodesMethod,
+  kontextOntologyProgressMethod,
   kontextOntologyCheckSourcesMethod,
   kontextOntologySetupMethod
 ]

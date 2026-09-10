@@ -299,6 +299,32 @@ describe('Kontext ontology RPC', () => {
     expect(response).toMatchObject({ result: { hits: [hit], chunksScanned: 4 } })
   })
 
+  it('lists nodes with their members from the sidecar graph and reads progress without spawning', async () => {
+    mocks.run.mockResolvedValue({
+      command: 'nodes',
+      ok: true,
+      nodes: [
+        {
+          id: 'Billing',
+          description: 'invoices',
+          parentId: null,
+          resourceCount: 2,
+          samples: [{ title: 'Billing', connectorId: 'handbook', externalId: 'docs/billing.md' }]
+        }
+      ],
+      knowledgeStore: '/host/userData/kontext'
+    })
+    const nodes = await call('kontext.listOntologyNodes', workspace)
+    expect(argsOf()).toEqual(['nodes', '--data-dir', '/host/userData/kontext'])
+    expect(nodes).toMatchObject({ result: { nodes: [{ id: 'Billing', resourceCount: 2 }] } })
+
+    mocks.run.mockClear()
+    // Why null: no build has written progress for this workspace; the page shows nothing.
+    const progress = await call('kontext.ontologyProgress', workspace)
+    expect(progress).toMatchObject({ result: null })
+    expect(mocks.run).not.toHaveBeenCalled()
+  })
+
   it('refuses a git source without a repository URL before spawning anything', async () => {
     const response = await call('kontext.addOntologySource', {
       ...workspace,

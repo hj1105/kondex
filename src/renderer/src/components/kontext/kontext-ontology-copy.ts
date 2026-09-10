@@ -99,6 +99,65 @@ export function getKontextOntologyCopy() {
       'Each directory of TypeScript, JavaScript or Python becomes one module document, described by what it exports, and is placed on ontology nodes beside the documents that govern it. Tests and generated files are skipped.'
     ),
     codeBadge: translate('kondex.ontology.codeBadge', 'code'),
+    rebuildAction: translate('kondex.ontology.rebuildAction', 'Reclassify and save'),
+    progressCollect: (done: number): string =>
+      translate('kondex.ontology.progressCollect', 'Collecting documents… {{done}}', { done }),
+    progressDiscover: (done: number, total: number): string =>
+      translate(
+        'kondex.ontology.progressDiscover',
+        'Discovering topics: batch {{done}} of {{total}}',
+        {
+          done,
+          total
+        }
+      ),
+    progressDesign: translate('kondex.ontology.progressDesign', 'Designing nodes…'),
+    progressClassify: (done: number, total: number): string =>
+      translate(
+        'kondex.ontology.progressClassify',
+        'Classifying documents: batch {{done}} of {{total}}',
+        { done, total }
+      ),
+    progressSync: (done: number, total: number): string =>
+      translate(
+        'kondex.ontology.progressSync',
+        'Writing knowledge: {{done}} of {{total}} documents',
+        {
+          done,
+          total
+        }
+      ),
+    progressCode: (done: number, total: number, source: string): string =>
+      translate(
+        'kondex.ontology.progressCode',
+        'Projecting code symbols: {{done}} of {{total}} files ({{source}})',
+        { done, total, source }
+      ),
+    stepNodes: translate('kondex.ontology.stepNodes', 'Read what each node holds'),
+    loadNodes: translate('kondex.ontology.loadNodes', 'Show nodes and their documents'),
+    nodeDocuments: (count: number): string =>
+      translate('kondex.ontology.nodeDocuments', '{{count}} documents', { count }),
+    nodeDocumentsUnknown: translate(
+      'kondex.ontology.nodeDocumentsUnknown',
+      'membership unknown (no knowledge store)'
+    ),
+    stepSearch: translate('kondex.ontology.stepSearch', 'Ask the knowledge graph'),
+    searchQuestion: translate('kondex.ontology.searchQuestion', 'Question'),
+    searchAction: translate('kondex.ontology.searchAction', 'Search'),
+    searchHint: translate(
+      'kondex.ontology.searchHint',
+      'Answers come from the connected documents and code with an Evidence id per hit. Workers get the same search as the kontext_search_knowledge tool.'
+    ),
+    searchSummary: (hits: number, chunks: number, resources: number): string =>
+      translate(
+        'kondex.ontology.searchSummary',
+        '{{hits}} hits over {{chunks}} chunks in {{resources}} documents.',
+        { hits, chunks, resources }
+      ),
+    searchNoHits: translate(
+      'kondex.ontology.searchNoHits',
+      'Nothing matched. Build the ontology first, or ask with words from the documents.'
+    ),
     env: translate('kondex.ontology.env', 'Environment for the server, KEY=VALUE per line'),
     envHint: translate(
       'kondex.ontology.envHint',

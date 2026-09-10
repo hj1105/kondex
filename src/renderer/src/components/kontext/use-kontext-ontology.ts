@@ -1,17 +1,18 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
+import { translate } from '@/i18n/i18n'
 import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
+import { pollOntologyProgress } from './kontext-ontology-progress-poll'
 import {
   kontextOntologyAddResultSchema,
   kontextOntologyCheckResultSchema,
   kontextOntologyImportResultSchema,
+  kontextKnowledgeSearchResultSchema,
   kontextOntologyListResultSchema,
+  kontextOntologyNodesResultSchema,
   kontextOntologyRepositoriesResultSchema,
   kontextOntologySetupResultSchema,
-  type KontextOntologyCheckResult,
-  type KontextOntologyRepositoriesResult,
-  type KontextOntologyImportResult,
-  type KontextOntologySetupResult,
-  type KontextOntologySource
+  type KontextOntologyRepositoriesResult
 } from '../../../../shared/kontext-ontology-contract'
 import type { KontextRequestOwner } from './kontext-request-journal'
 
@@ -21,51 +22,18 @@ const SETUP_TIMEOUT_MS = 61 * 60 * 1000
 // that is still running — and may already have written the file — as a failure.
 const QUICK_TIMEOUT_MS = 61 * 60 * 1000
 
-export type OntologyAction = 'list' | 'import' | 'add' | 'repositories' | 'check' | 'setup'
-
-export type OntologyState = {
-  readonly sources: readonly KontextOntologySource[] | null
-  readonly checks: KontextOntologyCheckResult['sources'] | null
-  readonly lastImport: KontextOntologyImportResult | null
-  /** True when lastImport came from a preview, so nothing was written. */
-  readonly importWasPreview: boolean
-  readonly lastSetup: KontextOntologySetupResult | null
-  readonly busy: OntologyAction | null
-  readonly error: string | null
-  /** Which action the error belongs to, so it can be shown beside that step's controls. */
-  readonly errorAction: OntologyAction | null
-  readonly notice: string | null
-}
-
-const EMPTY: OntologyState = {
-  sources: null,
-  checks: null,
-  lastImport: null,
-  importWasPreview: false,
-  lastSetup: null,
-  busy: null,
-  error: null,
-  errorAction: null,
-  notice: null
-}
-
-export type AddSourceInput = {
-  name: string
-  transport: 'stdio' | 'sse' | 'local' | 'git'
-  command?: string
-  /** Kept apart from `command`: the server is spawned without a shell. */
-  args?: readonly string[]
-  /** stdio: what the server needs in its environment, such as a token. */
-  env?: Readonly<Record<string, string>>
-  /** sse: server URL; git: repository to clone. */
-  url?: string
-  /** git: branch or tag; the remote default when omitted. */
-  ref?: string
-  path?: string
-  type?: 'notion' | 'jira' | 'github_pr' | 'slack'
-  /** local/git: read source files too, so code lands on ontology nodes beside its docs. */
-  code?: boolean
-}
+export {
+  EMPTY_ONTOLOGY_STATE,
+  type AddSourceInput,
+  type OntologyAction,
+  type OntologyState
+} from './kontext-ontology-state'
+import {
+  type AddSourceInput,
+  EMPTY_ONTOLOGY_STATE as EMPTY,
+  type OntologyAction,
+  type OntologyState
+} from './kontext-ontology-state'
 
 export function useKontextOntology(owner: KontextRequestOwner, workspace: string) {
   const [state, setState] = useState<OntologyState>(EMPTY)
@@ -137,6 +105,39 @@ export function useKontextOntology(owner: KontextRequestOwner, workspace: string
     }
   }, [call, workspace])
 
+  const loadNodes = useCallback(async (): Promise<void> => {
+    const result = await call(
+      'nodes',
+      'kontext.listOntologyNodes',
+      { workspacePath: workspace },
+      (value) => kontextOntologyNodesResultSchema.parse(value),
+      QUICK_TIMEOUT_MS
+    )
+    if (result) {
+      setState((previous) => ({ ...previous, nodes: result.nodes }))
+    }
+  }, [call, workspace])
+
+  const searchKnowledge = useCallback(
+    async (question: string, ontologyNodeIds?: readonly string[]): Promise<void> => {
+      const result = await call(
+        'search',
+        'kontext.searchKnowledge',
+        {
+          workspacePath: workspace,
+          question,
+          ...(ontologyNodeIds && ontologyNodeIds.length > 0 ? { ontologyNodeIds } : {})
+        },
+        (value) => kontextKnowledgeSearchResultSchema.parse(value),
+        QUICK_TIMEOUT_MS
+      )
+      if (result) {
+        setState((previous) => ({ ...previous, lastSearch: result }))
+      }
+    },
+    [call, workspace]
+  )
+
   const importSources = useCallback(
     async (includeMarkdown: boolean, apply: boolean): Promise<void> => {
       const result = await call(
@@ -202,22 +203,46 @@ export function useKontextOntology(owner: KontextRequestOwner, workspace: string
 
   const setup = useCallback(
     async (targetNodeCount: number | undefined, apply: boolean): Promise<void> => {
-      const result = await call(
-        'setup',
-        'kontext.setupOntology',
-        {
-          workspacePath: workspace,
-          apply,
-          ...(targetNodeCount === undefined ? {} : { targetNodeCount })
-        },
-        (value) => kontextOntologySetupResultSchema.parse(value),
-        SETUP_TIMEOUT_MS
+      const stopPolling = pollOntologyProgress(stableOwner, workspace, (progress) =>
+        setState((previous) => ({ ...previous, progress }))
       )
-      if (result) {
-        setState((previous) => ({ ...previous, lastSetup: result }))
+      try {
+        const result = await call(
+          'setup',
+          'kontext.setupOntology',
+          {
+            workspacePath: workspace,
+            apply,
+            ...(targetNodeCount === undefined ? {} : { targetNodeCount })
+          },
+          (value) => kontextOntologySetupResultSchema.parse(value),
+          SETUP_TIMEOUT_MS
+        )
+        if (result) {
+          setState((previous) => ({ ...previous, lastSetup: result }))
+          toast.success(
+            apply
+              ? translate('kondex.ontology.builtToast', 'Ontology saved: {{count}} nodes', {
+                  count: result.nodeIds.length
+                })
+              : translate(
+                  'kondex.ontology.previewedToast',
+                  'Ontology preview ready: {{count}} nodes',
+                  {
+                    count: result.nodeIds.length
+                  }
+                )
+          )
+          if (apply) {
+            await loadNodes()
+          }
+        }
+      } finally {
+        stopPolling()
+        setState((previous) => ({ ...previous, progress: null }))
       }
     },
-    [call, workspace]
+    [call, loadNodes, stableOwner, workspace]
   )
 
   const reset = useCallback(() => {
@@ -225,5 +250,16 @@ export function useKontextOntology(owner: KontextRequestOwner, workspace: string
     setState(EMPTY)
   }, [])
 
-  return { state, refresh, importSources, addSource, listRepositories, check, setup, reset }
+  return {
+    state,
+    refresh,
+    importSources,
+    addSource,
+    listRepositories,
+    check,
+    setup,
+    loadNodes,
+    searchKnowledge,
+    reset
+  }
 }

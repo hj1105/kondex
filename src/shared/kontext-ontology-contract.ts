@@ -152,6 +152,34 @@ export const kontextKnowledgeSearchResultSchema = z.object({
   chunksScanned: z.number()
 })
 
+export const kontextOntologyProgressSchema = z.object({
+  phase: z.enum(['collect', 'discover', 'design', 'classify', 'sync', 'code']),
+  done: z.number(),
+  total: z.number(),
+  message: z.string().optional(),
+  configPath: z.string(),
+  startedAt: z.string(),
+  updatedAt: z.string(),
+  finished: z.boolean(),
+  ok: z.boolean().optional(),
+  error: z.string().optional()
+})
+
+export const kontextOntologyNodeMembersSchema = z.object({
+  id: z.string(),
+  description: z.string(),
+  parentId: z.string().nullable(),
+  resourceCount: z.number().nullable(),
+  samples: z.array(z.object({ title: z.string(), connectorId: z.string(), externalId: z.string() }))
+})
+
+export const kontextOntologyNodesResultSchema = z.object({
+  command: z.literal('nodes'),
+  ok: z.literal(true),
+  nodes: z.array(kontextOntologyNodeMembersSchema),
+  knowledgeStore: z.string().nullable()
+})
+
 export const kontextOntologyCheckResultSchema = z.object({
   command: z.literal('check'),
   ok: z.boolean(),
@@ -200,6 +228,9 @@ export type KontextOntologySetupResult = z.infer<typeof kontextOntologySetupResu
 export type KontextOntologyAddRequest = z.infer<typeof kontextOntologyAddRequestSchema>
 export type KontextGithubRepository = z.infer<typeof kontextGithubRepositorySchema>
 export type KontextKnowledgeSearchHit = z.infer<typeof kontextKnowledgeSearchHitSchema>
+export type KontextOntologyProgress = z.infer<typeof kontextOntologyProgressSchema>
+export type KontextOntologyNodeMembers = z.infer<typeof kontextOntologyNodeMembersSchema>
+export type KontextOntologyNodesResult = z.infer<typeof kontextOntologyNodesResultSchema>
 export type KontextKnowledgeSearchResult = z.infer<typeof kontextKnowledgeSearchResultSchema>
 export type KontextOntologyRepositoriesResult = z.infer<
   typeof kontextOntologyRepositoriesResultSchema

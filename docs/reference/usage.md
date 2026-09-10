@@ -123,6 +123,28 @@ Still under **Logic Work Items**:
    the completion evidence. Runner completion is never treated as verified Task
    completion.
 
+5. **Read what each node holds** — **Show nodes and their documents** lists
+   every node with how many documents the knowledge graph filed under it and a
+   few of them by source. A node with nothing under it is a topic the build
+   imagined; merge or drop it in `kontext.yaml` and rebuild. While a build runs,
+   step 4 shows the phase and batch it is on (discovering topics, classifying
+   documents, writing knowledge, projecting code), and a toast reports the saved
+   node count when it finishes.
+6. **Ask the knowledge graph** — type a question and get Evidence-cited chunks
+   from the connected documents and code, filtered by node if you like. Workers
+   reach the same search as the `kontext_search_knowledge` tool, so a question
+   about a decision or a module is answered from the graph instead of a fresh
+   crawl of the repositories. From a shell: `kontext-ontology query --question
+"…" --data-dir <userData>/kontext` and `kontext-ontology nodes --data-dir …`.
+
+### Where knowledge lives
+
+A build writes every document and code module — Notion pages, Markdown, one
+Resource per source file with a Chunk per symbol — into the Task sidecar's
+SQLite graph under `<userData>/kontext`, with the ontology nodes the
+classifier assigned. `kontext.yaml` keeps only the node schema. Nothing is
+sent anywhere but the model you configured.
+
 ### Trusted verifiers
 
 Kontext only runs verifiers the workspace itself declares, and most projects
