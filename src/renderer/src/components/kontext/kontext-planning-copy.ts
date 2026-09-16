@@ -15,6 +15,7 @@ export function getKontextPlanningCopy() {
     ),
     provider: translate('kondex.planning.provider', 'Planning runtime'),
     recover: translate('kondex.planning.recover', 'Recover original planning request'),
+    discard: translate('kondex.planning.discard', 'Discard this saved request'),
     title: translate('kondex.planning.title', 'Plan a new task'),
     intro: translate(
       'kondex.planning.intro',

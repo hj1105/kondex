@@ -207,6 +207,10 @@ export function KontextTaskPlanner({
                 setApproval(null)
                 void work.recover()
               }}
+              onDiscard={() => {
+                setApproval(null)
+                work.discard()
+              }}
             />
           )}
           {refinement && (

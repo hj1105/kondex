@@ -12,7 +12,12 @@ import {
   type KontextPlanView
 } from '../../../../shared/kontext-planning-contract'
 import type { KontextRequestOwner } from './kontext-request-journal'
-import { readKontextPlans, saveKontextPlan, type KontextPlanEntry } from './kontext-plan-journal'
+import {
+  deleteKontextPlan,
+  readKontextPlans,
+  saveKontextPlan,
+  type KontextPlanEntry
+} from './kontext-plan-journal'
 
 export function useKontextPlanner(
   owner: KontextRequestOwner,
@@ -184,6 +189,22 @@ export function useKontextPlanner(
           await recoverSaved(entry)
         }
       }),
+    discard: () => {
+      if (!entry) {
+        return
+      }
+      try {
+        deleteKontextPlan(window.localStorage, entry.requestId)
+      } catch {
+        setError('storage')
+        return
+      }
+      const remaining = entries.filter((value) => value.requestId !== entry.requestId)
+      setEntries(remaining)
+      setSelected(remaining[0]?.requestId ?? null)
+      setPlan(null)
+      setError(null)
+    },
     cancel: () =>
       run(async () => {
         if (!entry) {

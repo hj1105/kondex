@@ -60,3 +60,16 @@ export function saveKontextPlan(storage: Storage, value: KontextPlanEntry): void
     throw new Error('Planning request recovery could not be saved')
   }
 }
+
+/**
+ * Drop a saved planning request. Recovery replays a request on the runtime that
+ * owns it, so a request whose runtime is unavailable can never be resolved and
+ * would otherwise pin the planner to it for good.
+ */
+export function deleteKontextPlan(storage: Storage, requestId: string): void {
+  const key = `${prefix}${requestId}`
+  storage.removeItem(key)
+  if (storage.getItem(key) !== null) {
+    throw new Error('Planning request could not be discarded')
+  }
+}

@@ -132,6 +132,7 @@
       "refinementConsent": "Use the parent draft’s subscription to read this feedback, proposal, current code and permitted sources. Generate a new draft without approving it or starting implementation.",
       "provider": "Planning runtime",
       "recover": "Recover original planning request",
+      "discard": "Discard this saved request",
       "title": "Plan a new task",
       "intro": "Describe the goal. The main coordinator proposes symbol-scoped work; you review it before a Task is registered.",
       "goal": "What should change?",

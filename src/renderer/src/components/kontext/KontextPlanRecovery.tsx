@@ -8,11 +8,13 @@ import { getKontextPlanningCopy } from './kontext-planning-copy'
 export function KontextPlanRecovery({
   entry,
   busy,
-  onRecover
+  onRecover,
+  onDiscard
 }: {
   entry: KontextPlanEntry
   busy: boolean
   onRecover: () => void
+  onDiscard: () => void
 }): React.JSX.Element | null {
   const copy = getKontextPlanningCopy()
   const [consent, setConsent] = useState(false)
@@ -41,16 +43,30 @@ export function KontextPlanRecovery({
           {entry.refinementRequest ? copy.refinementConsent : copy.consent}
         </Label>
       </div>
-      <Button
-        variant="outline"
-        disabled={busy || !consent}
-        onClick={() => {
-          setConsent(false)
-          onRecover()
-        }}
-      >
-        {copy.recover}
-      </Button>
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          variant="outline"
+          disabled={busy || !consent}
+          onClick={() => {
+            setConsent(false)
+            onRecover()
+          }}
+        >
+          {copy.recover}
+        </Button>
+        {/* Recovery replays the request on the runtime that owns it, so a request
+            whose runtime is gone can only be cleared by discarding it. */}
+        <Button
+          variant="ghost"
+          disabled={busy}
+          onClick={() => {
+            setConsent(false)
+            onDiscard()
+          }}
+        >
+          {copy.discard}
+        </Button>
+      </div>
     </div>
   )
 }
