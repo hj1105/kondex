@@ -363,6 +363,10 @@ module.exports = {
       NSDownloadsFolderUsageDescription:
         "Application requests access to the user's Downloads folder."
     },
+    // Why: with no identity electron-builder skips sealing the bundle entirely, so the app
+    // ships without _CodeSignature and Gatekeeper calls it damaged instead of unidentified.
+    // "-" is app-builder-lib's ad-hoc identity; the signing path keeps auto-discovery.
+    ...(shouldSignMac ? {} : { identity: '-' }),
     // Why: local macOS validation builds should launch without Apple signing
     // credentials. Hardened runtime + notarization stay enabled only on the
     // explicit signing path so signed artifacts remain strict while ordinary
