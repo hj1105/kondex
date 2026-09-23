@@ -11,6 +11,10 @@ export function getKontextInventoryCopy() {
       'kondex.sourceInventory.empty',
       'No matching sources loaded. Register a source above, or load another page.'
     ),
+    unlisted: translate(
+      'kondex.sourceInventory.unlisted',
+      'Only sources registered above appear here; Ontology sources are not included. You can plan without a source.'
+    ),
     reload: translate('kondex.sourceInventory.reload', 'Reload source list'),
     more: translate('kondex.sourceInventory.more', 'Load more sources'),
     busy: translate('kondex.sourceInventory.busy', 'Reading source metadata…'),

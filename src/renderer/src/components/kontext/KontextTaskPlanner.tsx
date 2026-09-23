@@ -19,6 +19,11 @@ import { KontextPlanReview } from './KontextPlanReview'
 import { KontextSourcePicker } from './KontextSourcePicker'
 import { KontextPlanFeedback } from './KontextPlanFeedback'
 import { KontextPlanRecovery } from './KontextPlanRecovery'
+import { kontextPlanDiagnosticKey } from './kontext-plan-failure'
+import {
+  kontextWorkspaceSelector,
+  useKontextWorkspaceOptions
+} from './use-kontext-workspace-options'
 
 export function KontextTaskPlanner({
   owner,
@@ -36,6 +41,11 @@ export function KontextTaskPlanner({
   const [provider, setProvider] = useState<'codex' | 'claude'>('codex')
   const [consent, setConsent] = useState(false)
   const [approval, setApproval] = useState<string | null>(null)
+  const workspaceOptions = useKontextWorkspaceOptions(owner)
+  const pickedWorkspace = kontextWorkspaceSelector(workspace, workspaceOptions)
+  const diagnosticKey = work.plan?.diagnostic
+    ? kontextPlanDiagnosticKey(work.plan.diagnostic)
+    : null
   const plan = work.plan
   const refinement = plan?.refinement ?? work.entry?.refinementRequest
   const { busy, inspect } = work
@@ -68,7 +78,7 @@ export function KontextTaskPlanner({
               setConsent(false)
               void work.start({
                 goal,
-                workspace,
+                workspace: pickedWorkspace,
                 provider,
                 sourceResourceIds: sources
                   .split('\n')
@@ -92,6 +102,29 @@ export function KontextTaskPlanner({
           </div>
           <div className="space-y-2">
             <Label htmlFor="kontext-plan-workspace">{copy.workspace}</Label>
+            <Select
+              value={
+                workspaceOptions.some((option) => option.id === pickedWorkspace)
+                  ? pickedWorkspace
+                  : ''
+              }
+              disabled={disabled || workspaceOptions.length === 0}
+              onValueChange={(value) => {
+                setWorkspace(value)
+                setConsent(false)
+              }}
+            >
+              <SelectTrigger aria-label={copy.workspacePicker}>
+                <SelectValue placeholder={copy.workspacePicker} />
+              </SelectTrigger>
+              <SelectContent>
+                {workspaceOptions.map((option) => (
+                  <SelectItem key={option.id} value={option.id}>
+                    {option.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Input
               id="kontext-plan-workspace"
               value={workspace}
@@ -228,7 +261,9 @@ export function KontextTaskPlanner({
             </p>
           )}
           {plan?.diagnostic && (
-            <p className="break-words text-xs text-muted-foreground">{plan.diagnostic}</p>
+            <p className="break-words text-xs text-muted-foreground">
+              {diagnosticKey ? copy[diagnosticKey] : plan.diagnostic}
+            </p>
           )}
           {plan && <KontextPlanReview plan={plan} />}
           <div className="flex flex-wrap gap-2">

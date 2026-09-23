@@ -69,7 +69,11 @@ function SourcePicker({ owner, provider, selected, onChange, disabled }: Props):
         <Command shouldFilter={false} className="h-auto min-h-0">
           <CommandInput placeholder={copy.search} value={query} onValueChange={setQuery} />
           <CommandList>
-            {!inventory.busy && !inventory.failed && <CommandEmpty>{copy.empty}</CommandEmpty>}
+            {!inventory.busy && !inventory.failed && (
+              <CommandEmpty>
+                {inventory.page?.sources.length === 0 ? copy.unlisted : copy.empty}
+              </CommandEmpty>
+            )}
             {sources.map((source) => {
               const checked = selectedIds.has(source.resourceId)
               const permitted =

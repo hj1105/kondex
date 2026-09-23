@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useAppStore } from '../../store'
 import { KontextEmbeddingSettings } from './KontextEmbeddingSettings'
 import { KontextKnowledgeSearchPanel } from './KontextKnowledgeSearchPanel'
 import { KontextOntologyAddSource } from './KontextOntologyAddSource'
@@ -13,6 +12,7 @@ import { getKontextOntologyCopy } from './kontext-ontology-copy'
 import { KontextOntologySourceList } from './KontextOntologySourceList'
 import type { KontextRequestOwner } from './kontext-request-journal'
 import { type OntologyAction, useKontextOntology } from './use-kontext-ontology'
+import { useKontextWorkspaceOptions } from './use-kontext-workspace-options'
 import type { KontextOntologyProgress } from '../../../../shared/kontext-ontology-contract'
 
 function parseTargetNodes(raw: string): number | 'empty' | 'invalid' {
@@ -50,43 +50,7 @@ function Step({
 export function KontextOntologySetup({ owner }: { owner: KontextRequestOwner }): React.JSX.Element {
   useTranslation()
   const copy = getKontextOntologyCopy()
-  const worktreesByRepo = useAppStore((s) => s.worktreesByRepo)
-  const folderWorkspaces = useAppStore((s) => s.folderWorkspaces)
-  const workspaces = useMemo(() => {
-    // Why: the slice is absent until the store hydrates, and a panel that throws
-    // there takes the whole Kontext page down with it.
-    const worktreeRows = Object.values(worktreesByRepo ?? {})
-      .flat()
-      .filter((worktree) => worktree !== null && worktree !== undefined)
-      .map((worktree) => ({
-        id: worktree.id,
-        title: worktree.displayName,
-        directory: worktree.id.split('::').slice(1).join('::')
-      }))
-    // Why: a folder workspace is a workspace too — its kontext.yaml lives in the
-    // folder — and the host resolves it through the `folder:` selector.
-    const folderRows = (folderWorkspaces ?? [])
-      .filter((workspace) => !workspace.isArchived)
-      .map((workspace) => ({
-        id: `folder:${workspace.id}`,
-        title: workspace.name,
-        directory: workspace.folderPath
-      }))
-    const rows = [...worktreeRows, ...folderRows]
-    // Why: two workspaces can share a display name, and identical options are
-    // unpickable — the directory is what tells them apart.
-    const seen = new Map<string, number>()
-    for (const row of rows) {
-      seen.set(row.title, (seen.get(row.title) ?? 0) + 1)
-    }
-    return rows.map((row) => {
-      if ((seen.get(row.title) ?? 0) < 2) {
-        return { id: row.id, title: row.title }
-      }
-      const directory = row.directory.split(/[\\/]/).findLast((segment) => segment !== '')
-      return { id: row.id, title: directory ? `${row.title} — ${directory}` : row.title }
-    })
-  }, [worktreesByRepo, folderWorkspaces])
+  const workspaces = useKontextWorkspaceOptions(owner)
 
   const [workspace, setWorkspace] = useState('')
   const [includeMarkdown, setIncludeMarkdown] = useState(true)

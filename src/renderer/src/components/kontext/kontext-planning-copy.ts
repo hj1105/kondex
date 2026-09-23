@@ -23,6 +23,27 @@ export function getKontextPlanningCopy() {
     ),
     goal: translate('kondex.planning.goal', 'What should change?'),
     workspace: translate('kondex.planning.workspace', 'Coding workspace path or selector'),
+    workspacePicker: translate('kondex.planning.workspacePicker', 'Choose a known workspace'),
+    workspaceNotFound: translate(
+      'kondex.planning.workspaceNotFound',
+      'No workspace matches this path or selector, so nothing was sent to a model. Choose the workspace from the list; a folder workspace is found by its folder selector, not its path.'
+    ),
+    workspaceAmbiguous: translate(
+      'kondex.planning.workspaceAmbiguous',
+      'More than one workspace matches this path or selector, so nothing was sent to a model. Choose one from the list.'
+    ),
+    workspaceMissing: translate(
+      'kondex.planning.workspaceMissing',
+      'The workspace folder is missing from its registered path, so nothing was sent to a model. Restore the folder or choose another workspace.'
+    ),
+    workspaceHost: translate(
+      'kondex.planning.workspaceHost',
+      'This workspace lives on another host, so nothing was sent to a model. Plan it from a runtime paired on that host.'
+    ),
+    usageLimit: translate(
+      'kondex.planning.usageLimit',
+      'The selected runtime’s subscription usage limit is reached, so nothing was planned. Wait for the limit to reset or choose the other runtime.'
+    ),
     sources: translate('kondex.planning.sources', 'Required source Resource IDs (one per line)'),
     scope: translate(
       'kondex.planning.scope',

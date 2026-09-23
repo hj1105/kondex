@@ -12,6 +12,7 @@ import {
   type KontextPlanView
 } from '../../../../shared/kontext-planning-contract'
 import type { KontextRequestOwner } from './kontext-request-journal'
+import { kontextPlanFailure, type KontextPlanFailure } from './kontext-plan-failure'
 import {
   deleteKontextPlan,
   readKontextPlans,
@@ -33,9 +34,9 @@ export function useKontextPlanner(
   const [entries, setEntries] = useState(initial.entries)
   const [selected, setSelected] = useState<string | null>(initial.entries[0]?.requestId ?? null)
   const [plan, setPlan] = useState<KontextPlanView | null>(null)
-  const [error, setError] = useState<'failed' | 'ownerChanged' | 'storage' | null>(
-    initial.storage ? null : 'storage'
-  )
+  const [error, setError] = useState<
+    'failed' | 'ownerChanged' | 'storage' | KontextPlanFailure | null
+  >(initial.storage ? null : 'storage')
   const [busy, setBusy] = useState(false)
   const inFlight = useRef(false)
   const alive = useRef(true)
@@ -78,7 +79,9 @@ export function useKontextPlanner(
     } catch (error) {
       if (alive.current) {
         setError(
-          error instanceof Error && error.message === 'ownerChanged' ? 'ownerChanged' : 'failed'
+          error instanceof Error && error.message === 'ownerChanged'
+            ? 'ownerChanged'
+            : (kontextPlanFailure(error) ?? 'failed')
         )
         setPlan(null)
       }
