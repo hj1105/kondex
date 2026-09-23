@@ -144,6 +144,8 @@
       "workspaceMissing": "The workspace folder is missing from its registered path, so nothing was sent to a model. Restore the folder or choose another workspace.",
       "workspaceHost": "This workspace lives on another host, so nothing was sent to a model. Plan it from a runtime paired on that host.",
       "usageLimit": "The selected runtime’s subscription usage limit is reached, so nothing was planned. Wait for the limit to reset or choose the other runtime.",
+      "invalidProposal": "The planner returned a proposal that does not match the plan format, so no Task was registered. Generate the plan again.",
+      "stateInvalid": "Saved planning state could not be validated, so no Task was registered. Check the saved requests before retrying; generating again may fail the same way.",
       "sources": "Required source Resource IDs (one per line)",
       "scope": "Personal context with approved local rules. Uncommitted, new Git and folder workspaces use a private baseline of tracked and non-ignored files; originals stay unchanged. Register sources and grant model access above first.",
       "consent": "Use my selected subscription to read this code and the permitted sources to generate a plan. Do not start implementation.",

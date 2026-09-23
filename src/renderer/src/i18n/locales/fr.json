@@ -144,6 +144,8 @@
       "workspaceMissing": "Le dossier de l’espace de travail est introuvable à son chemin enregistré ; rien n’a donc été envoyé à un modèle. Restaurez le dossier ou choisissez un autre espace de travail.",
       "workspaceHost": "Cet espace de travail se trouve sur un autre hôte ; rien n’a donc été envoyé à un modèle. Planifiez-le depuis un runtime appairé sur cet hôte.",
       "usageLimit": "La limite d’utilisation de l’abonnement du runtime sélectionné est atteinte ; aucun plan n’a donc été généré. Attendez la réinitialisation de la limite ou choisissez l’autre runtime.",
+      "invalidProposal": "Le planificateur a renvoyé une proposition qui ne respecte pas le format du plan ; aucune tâche n’a donc été enregistrée. Générez à nouveau le plan.",
+      "stateInvalid": "L’état de planification enregistré n’a pas pu être validé ; aucune tâche n’a donc été enregistrée. Vérifiez les demandes enregistrées avant de réessayer ; une nouvelle génération risque d’échouer de la même façon.",
       "sources": "Resource ID des sources requises (un par ligne)",
       "scope": "Contexte personnel et règles locales approuvées. Les espaces non validés, Git neufs et dossiers utilisent une base privée des fichiers suivis et non ignorés, sans modifier les originaux. Enregistrez les sources et autorisez le modèle ci-dessus.",
       "consent": "J’autorise mon abonnement sélectionné à lire ce code et les sources permises pour générer un plan. Ne pas démarrer l’implémentation.",

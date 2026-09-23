@@ -28,7 +28,30 @@ export function kontextPlanFailure(error: unknown): KontextPlanFailure | null {
   return null
 }
 
+/** The sidecar's `PLANNING_INVALID_PROPOSAL_DIAGNOSTIC`; a contract test keeps the two equal. */
+export const KONTEXT_PLAN_INVALID_PROPOSAL_DIAGNOSTIC = 'Planner returned an invalid proposal'
+
+/** The sidecar's `PLANNING_STATE_INVALID_DIAGNOSTIC`; a contract test keeps the two equal. */
+export const KONTEXT_PLAN_STATE_INVALID_DIAGNOSTIC = 'Planning state could not be validated'
+
 /** Sidecar diagnostics that have a translated explanation. */
-export function kontextPlanDiagnosticKey(diagnostic: string): 'usageLimit' | null {
-  return diagnostic.startsWith(KONTEXT_PLAN_USAGE_LIMIT_DIAGNOSTIC) ? 'usageLimit' : null
+export function kontextPlanDiagnosticKey(
+  diagnostic: string
+): 'usageLimit' | 'invalidProposal' | 'stateInvalid' | null {
+  if (diagnostic.startsWith(KONTEXT_PLAN_USAGE_LIMIT_DIAGNOSTIC)) {
+    return 'usageLimit'
+  }
+  if (diagnostic.startsWith(KONTEXT_PLAN_STATE_INVALID_DIAGNOSTIC)) {
+    return 'stateInvalid'
+  }
+  return diagnostic.startsWith(KONTEXT_PLAN_INVALID_PROPOSAL_DIAGNOSTIC) ? 'invalidProposal' : null
+}
+
+/** The sidecar's "(schema path: code, …)" reason; it names no model text, so it is shown untranslated. */
+export function kontextInvalidProposalReason(diagnostic: string): string | null {
+  if (!diagnostic.startsWith(KONTEXT_PLAN_INVALID_PROPOSAL_DIAGNOSTIC)) {
+    return null
+  }
+  const rest = diagnostic.slice(KONTEXT_PLAN_INVALID_PROPOSAL_DIAGNOSTIC.length)
+  return /^ (\(.+\)); no Task was approved\.$/.exec(rest)?.[1] ?? null
 }

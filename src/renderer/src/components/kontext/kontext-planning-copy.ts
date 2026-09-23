@@ -44,6 +44,14 @@ export function getKontextPlanningCopy() {
       'kondex.planning.usageLimit',
       'The selected runtime’s subscription usage limit is reached, so nothing was planned. Wait for the limit to reset or choose the other runtime.'
     ),
+    invalidProposal: translate(
+      'kondex.planning.invalidProposal',
+      'The planner returned a proposal that does not match the plan format, so no Task was registered. Generate the plan again.'
+    ),
+    stateInvalid: translate(
+      'kondex.planning.stateInvalid',
+      'Saved planning state could not be validated, so no Task was registered. Check the saved requests before retrying; generating again may fail the same way.'
+    ),
     sources: translate('kondex.planning.sources', 'Required source Resource IDs (one per line)'),
     scope: translate(
       'kondex.planning.scope',

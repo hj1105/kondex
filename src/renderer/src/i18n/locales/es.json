@@ -144,6 +144,8 @@
       "workspaceMissing": "Falta la carpeta del espacio de trabajo en su ruta registrada, así que no se envió nada a un modelo. Restaura la carpeta o elige otro espacio de trabajo.",
       "workspaceHost": "Este espacio de trabajo está en otro host, así que no se envió nada a un modelo. Planifícalo desde un runtime emparejado en ese host.",
       "usageLimit": "Se alcanzó el límite de uso de la suscripción del runtime seleccionado, así que no se generó ningún plan. Espera a que se restablezca el límite o elige el otro runtime.",
+      "invalidProposal": "El planificador devolvió una propuesta que no coincide con el formato del plan, así que no se registró ninguna tarea. Vuelve a generar el plan.",
+      "stateInvalid": "No se pudo validar el estado guardado de la planificación, así que no se registró ninguna tarea. Revisa las solicitudes guardadas antes de reintentar; volver a generar puede fallar igual.",
       "sources": "Resource ID de fuentes obligatorias (uno por línea)",
       "scope": "Contexto personal con reglas locales aprobadas. Los espacios sin confirmar, Git nuevos y carpetas usan una base privada de archivos rastreados y no ignorados, sin modificar los originales. Registra las fuentes y autoriza el modelo arriba primero.",
       "consent": "Autorizo usar mi suscripción seleccionada para leer este código y las fuentes permitidas y generar un plan. No iniciar la implementación.",

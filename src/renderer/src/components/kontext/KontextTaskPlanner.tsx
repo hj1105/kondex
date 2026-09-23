@@ -19,7 +19,7 @@ import { KontextPlanReview } from './KontextPlanReview'
 import { KontextSourcePicker } from './KontextSourcePicker'
 import { KontextPlanFeedback } from './KontextPlanFeedback'
 import { KontextPlanRecovery } from './KontextPlanRecovery'
-import { kontextPlanDiagnosticKey } from './kontext-plan-failure'
+import { kontextInvalidProposalReason, kontextPlanDiagnosticKey } from './kontext-plan-failure'
 import {
   kontextWorkspaceSelector,
   useKontextWorkspaceOptions
@@ -45,6 +45,9 @@ export function KontextTaskPlanner({
   const pickedWorkspace = kontextWorkspaceSelector(workspace, workspaceOptions)
   const diagnosticKey = work.plan?.diagnostic
     ? kontextPlanDiagnosticKey(work.plan.diagnostic)
+    : null
+  const invalidProposalReason = work.plan?.diagnostic
+    ? kontextInvalidProposalReason(work.plan.diagnostic)
     : null
   const plan = work.plan
   const refinement = plan?.refinement ?? work.entry?.refinementRequest
@@ -263,6 +266,7 @@ export function KontextTaskPlanner({
           {plan?.diagnostic && (
             <p className="break-words text-xs text-muted-foreground">
               {diagnosticKey ? copy[diagnosticKey] : plan.diagnostic}
+              {invalidProposalReason && ` ${invalidProposalReason}`}
             </p>
           )}
           {plan && <KontextPlanReview plan={plan} />}

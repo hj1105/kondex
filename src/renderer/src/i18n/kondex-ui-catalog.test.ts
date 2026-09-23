@@ -41,7 +41,7 @@ describe('Kondex UI catalog', () => {
   )
 
   it('pins the full new-surface key inventory', () => {
-    expect(Object.keys(english)).toHaveLength(430)
+    expect(Object.keys(english)).toHaveLength(432)
     expect(Object.keys(en.kondex.planning)).toEqual(
       expect.arrayContaining([
         'refine',
