@@ -6315,6 +6315,16 @@
       "unassignedInstruction": "Assign a dictation shortcut before starting voice dictation in a focused pane."
     }
   },
+  "kondex": {
+    "ontology": {
+      "nodeDocuments": "{{count}} documents",
+      "nodeDocuments_one": "{{count}} document",
+      "nodeDocuments_other": "{{count}} documents",
+      "resourceCount": "{{count}} documents",
+      "resourceCount_one": "{{count}} document",
+      "resourceCount_other": "{{count}} documents"
+    }
+  },
   "runtimeRpc": {
     "startupFailure": {
       "guidance": {

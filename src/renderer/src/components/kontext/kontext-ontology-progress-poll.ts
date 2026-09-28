@@ -18,6 +18,7 @@ export function pollOntologyProgress(
   onProgress: (progress: KontextOntologyProgress) => void
 ): () => void {
   const startedAt = Date.now()
+  let stopped = false
   const poll = setInterval(() => {
     void callRuntimeRpc<unknown>(
       owner,
@@ -31,12 +32,22 @@ export function pollOntologyProgress(
     )
       .then((value) => {
         const progress = value === null ? null : kontextOntologyProgressSchema.parse(value)
-        // Why the time check: a record left by an earlier build is not this one's progress.
-        if (progress && Date.parse(progress.startedAt) >= startedAt - 5_000) {
+        // Why: an answer landing after stop, or a finished record (it keeps the last
+        // event, often a download line), would put a done build's progress back on screen.
+        // The time check: a record left by an earlier build is not this one's progress.
+        if (
+          !stopped &&
+          progress &&
+          !progress.finished &&
+          Date.parse(progress.startedAt) >= startedAt - 5_000
+        ) {
           onProgress(progress)
         }
       })
       .catch(() => undefined)
   }, PROGRESS_POLL_MS)
-  return () => clearInterval(poll)
+  return () => {
+    stopped = true
+    clearInterval(poll)
+  }
 }

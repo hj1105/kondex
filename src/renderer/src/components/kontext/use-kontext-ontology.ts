@@ -1,8 +1,8 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { translate } from '@/i18n/i18n'
-import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
 import { useKontextEmbeddingActions } from './use-kontext-embedding-actions'
+import { useKontextOntologyCall } from './use-kontext-ontology-call'
 import { pollOntologyProgress } from './kontext-ontology-progress-poll'
 import {
   kontextOntologyAddResultSchema,
@@ -35,65 +35,17 @@ export {
 import {
   type AddSourceInput,
   EMPTY_ONTOLOGY_STATE as EMPTY,
-  type OntologyAction,
   type OntologyState
 } from './kontext-ontology-state'
 
 export function useKontextOntology(owner: KontextRequestOwner, workspace: string) {
   const [state, setState] = useState<OntologyState>(EMPTY)
-  // Why: a slow setup must not have a later action's result overwrite it, and a
-  // workspace change must not show one workspace's sources under another's name.
-  const token = useRef(0)
   // Why: the caller rebuilds `owner` on every render, so depending on its identity
   // would rerun the load effect each time and spawn a CLI process per parent render.
   // Rebuilding it from its own serialization keys the actions to the owner's value.
   const ownerKey = JSON.stringify(owner)
   const stableOwner = useMemo(() => JSON.parse(ownerKey) as KontextRequestOwner, [ownerKey])
-
-  const call = useCallback(
-    async <T>(
-      action: OntologyAction,
-      method: string,
-      params: Record<string, unknown>,
-      parse: (value: unknown) => T,
-      timeoutMs: number
-    ): Promise<T | null> => {
-      const current = (token.current += 1)
-      setState((previous) => ({
-        ...previous,
-        busy: action,
-        error: null,
-        errorAction: null,
-        notice: null
-      }))
-      try {
-        const response = await callRuntimeRpc<unknown>(stableOwner, method, params, {
-          expectedEnvironmentPairingRevision:
-            stableOwner.kind === 'environment' ? stableOwner.pairingRevision : undefined,
-          timeoutMs
-        })
-        if (current !== token.current) {
-          return null
-        }
-        return parse(response)
-      } catch (caught) {
-        if (current !== token.current) {
-          return null
-        }
-        setState((previous) => ({
-          ...previous,
-          error: caught instanceof Error ? caught.message : String(caught),
-          errorAction: action
-        }))
-        return null
-      } finally {
-        if (current === token.current) {
-          setState((previous) => ({ ...previous, busy: null }))
-        }
-      }
-    },
-    [stableOwner]
-  )
+  const { call, invalidate } = useKontextOntologyCall(stableOwner, workspace, setState)
 
   const refresh = useCallback(async (): Promise<void> => {
     const result = await call(
@@ -296,9 +248,9 @@ export function useKontextOntology(owner: KontextRequestOwner, workspace: string
   )
 
   const reset = useCallback(() => {
-    token.current += 1
+    invalidate()
     setState(EMPTY)
-  }, [])
+  }, [invalidate])
 
   return {
     state,

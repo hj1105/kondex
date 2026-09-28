@@ -86,6 +86,7 @@ export function useKontextEmbeddingActions({
       }
     } finally {
       stopPolling()
+      setState((previous) => ({ ...previous, progress: null }))
     }
   }, [call, setState, stableOwner, workspace])
 

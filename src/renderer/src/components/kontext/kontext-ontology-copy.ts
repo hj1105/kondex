@@ -179,20 +179,6 @@ export function getKontextOntologyCopy() {
       'Search matches words only. A question phrased differently from the document will miss it.'
     ),
     embeddingSave: translate('kondex.ontology.embeddingSave', 'Save embedding'),
-    progressEmbed: (done: number, total: number): string =>
-      translate('kondex.ontology.progressEmbed', 'Embedding chunks {{done}}/{{total}}', {
-        done,
-        total
-      }),
-    progressDownload: (done: number, total: number): string =>
-      translate(
-        'kondex.ontology.progressDownload',
-        'Downloading the embedding model {{done}}/{{total}} MB',
-        {
-          done,
-          total
-        }
-      ),
     setupEmbedded: (count: number): string =>
       translate('kondex.ontology.setupEmbedded', '{{count}} chunks embedded', { count }),
     setupEmbeddingFailed: (error: string): string =>
@@ -206,43 +192,14 @@ export function getKontextOntologyCopy() {
     searchModeHybrid: translate('kondex.ontology.searchModeHybrid', 'words + meaning'),
     searchModeLexical: translate('kondex.ontology.searchModeLexical', 'words only'),
     rebuildAction: translate('kondex.ontology.rebuildAction', 'Reclassify and save'),
-    progressCollect: (done: number): string =>
-      translate('kondex.ontology.progressCollect', 'Collecting documents… {{done}}', { done }),
-    progressDiscover: (done: number, total: number): string =>
-      translate(
-        'kondex.ontology.progressDiscover',
-        'Discovering topics: batch {{done}} of {{total}}',
-        {
-          done,
-          total
-        }
-      ),
-    progressDesign: translate('kondex.ontology.progressDesign', 'Designing nodes…'),
-    progressClassify: (done: number, total: number): string =>
-      translate(
-        'kondex.ontology.progressClassify',
-        'Classifying documents: batch {{done}} of {{total}}',
-        { done, total }
-      ),
-    progressSync: (done: number, total: number): string =>
-      translate(
-        'kondex.ontology.progressSync',
-        'Writing knowledge: {{done}} of {{total}} documents',
-        {
-          done,
-          total
-        }
-      ),
-    progressCode: (done: number, total: number, source: string): string =>
-      translate(
-        'kondex.ontology.progressCode',
-        'Projecting code symbols: {{done}} of {{total}} files ({{source}})',
-        { done, total, source }
-      ),
     stepNodes: translate('kondex.ontology.stepNodes', 'Read what each node holds'),
     loadNodes: translate('kondex.ontology.loadNodes', 'Show nodes and their documents'),
     nodeDocuments: (count: number): string =>
-      translate('kondex.ontology.nodeDocuments', '{{count}} documents', { count }),
+      translate(
+        'kondex.ontology.nodeDocuments',
+        count === 1 ? '{{count}} document' : '{{count}} documents',
+        { count }
+      ),
     nodeDocumentsUnknown: translate(
       'kondex.ontology.nodeDocumentsUnknown',
       'membership unknown (no knowledge store)'
@@ -280,7 +237,11 @@ export function getKontextOntologyCopy() {
     ),
     checkFailed: translate('kondex.ontology.checkFailed', 'Did not answer'),
     resourceCount: (count: number): string =>
-      translate('kondex.ontology.resourceCount', '{{count}} documents', { count }),
+      translate(
+        'kondex.ontology.resourceCount',
+        count === 1 ? '{{count}} document' : '{{count}} documents',
+        { count }
+      ),
 
     targetNodes: translate('kondex.ontology.targetNodes', 'Node count (optional)'),
     previewAction: translate('kondex.ontology.previewAction', 'Preview'),
