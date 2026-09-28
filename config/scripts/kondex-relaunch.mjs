@@ -12,6 +12,7 @@ import { spawn, spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
+import { resolvePnpmCliInvocation } from './pnpm-cli-invocation.mjs'
 
 export const KONDEX_BUNDLE_ID = 'app.kondex.desktop'
 
@@ -101,11 +102,13 @@ async function main() {
   const repoRoot = path.resolve(import.meta.dirname, '..', '..')
   const build = !process.argv.includes('--no-build')
   if (build) {
-    // Why: npm_execpath is the pnpm that invoked this script, which needs no shell on Windows.
-    const runner = process.env.npm_execpath
-      ? { command: process.execPath, args: [process.env.npm_execpath, 'run', 'build:unpack'] }
-      : { command: 'pnpm', args: ['run', 'build:unpack'] }
-    const result = spawnSync(runner.command, runner.args, { cwd: repoRoot, stdio: 'inherit' })
+    // Why: npm_execpath can be pnpm's native binary, which `node <path>` cannot parse.
+    const pnpm = resolvePnpmCliInvocation()
+    const result = spawnSync(pnpm.command, [...pnpm.prefixArgs, 'run', 'build:unpack'], {
+      cwd: repoRoot,
+      stdio: 'inherit',
+      shell: pnpm.shell
+    })
     if (result.status !== 0) {
       console.error('[kondex-relaunch] build:unpack failed; the running app was left alone.')
       process.exit(result.status ?? 1)
